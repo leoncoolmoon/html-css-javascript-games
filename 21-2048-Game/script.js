@@ -1,10 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const gridDisplay = document.querySelector(".grid");
-  const scoreDisplay = document.getElementById("score");
-  const resultDisplay = document.getElementById("result");
-  let squares = [];
-  const width = 4;
-  let score = 0;
 
   //create the playing board
   function createBoard() {
@@ -17,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
     generate();
     generate();
   }
-  createBoard();
 
   //generate a new number
   function generate() {
@@ -263,7 +255,5 @@ document.addEventListener("DOMContentLoaded", () => {
         squares[i].style.backgroundColor = "#d7d4f0";
     }
   }
-  addColours();
 
-  var myTimer = setInterval(addColours, 50);
-});
+

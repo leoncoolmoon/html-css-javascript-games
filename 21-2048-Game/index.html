@@ -1,31 +1,83 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Talha - 2048 Game</title>
+<head>
+  <meta charset="utf-8" />
+  <title>Talha - 2048 Game</title>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" charset="utf-8"></script>
-    <link rel="icon" href="https://i.ibb.co/M6KTWnf/pic.jpg" />
+  <link rel="icon" href="https://i.ibb.co/M6KTWnf/pic.jpg" />
 
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
+  <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
+  <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
+  <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
 
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-  </head>
-  <body>
-    <div class="container">
-      <div class="info">
-        <h1>2048</h1>
-        <div class="score-container">
-          <div class="score-title">score</div>
-          <span id="score">0</span>
-        </div>
+  <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
+  <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
+  <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
+</head>
+<body>
+  <div class="container">
+    <div class="info">
+      <h1>2048</h1>
+      <div class="score-container">
+        <div class="score-title">score</div>
+        <span id="score">0</span>
       </div>
-      <span id="result">Join the numbers and get to the <b>2048</b> tile!</span>
-      <div class="grid"></div>
     </div>
-  </body>
+    <span id="result">Join the numbers and get to the <b>2048</b> tile!</span>
+    <div class="grid"></div>
+  </div>
+  <div class="virtual_keybroad">
+    <div class="first_line_virtual_keybroad">
+      <div class="arrow_button" id="up_arrow" onclick="keyUp()">
+
+        <svg width="60" height="60" viewBox="0 0 10 10">
+          <g transform="rotate(0, 5,5)">
+            <path d="M5,4 L7,6 L3,6 L5,4" />
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="second_line_virtual_keybroad">
+      <div class="arrow_button" id="left_arrow" onclick="keyLeft()">
+        <svg width="60" height="60" viewBox="0 0 10 10">
+          <g transform="rotate(-90, 5,5)">
+            <path d="M5,4 L7,6 L3,6 L5,4" />
+          </g>
+        </svg>
+
+      </div>
+      <div class="arrow_button" id="down_arrow" onclick="keyDown()">
+        <svg width="60" height="60" viewBox="0 0 10 10">
+          <g transform="rotate(180, 5,5)">
+            <path d="M5,4 L7,6 L3,6 L5,4" />
+          </g>
+        </svg>
+
+      </div>
+      <div class="arrow_button" id="right_arrow" onclick="keyRight()">
+        <svg width="60" height="60" viewBox="0 0 10 10">
+          <g transform="rotate(90, 5,5)">
+            <path d="M5,4 L7,6 L3,6 L5,4" />
+          </g>
+        </svg>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    const gridDisplay = document.querySelector(".grid");
+    const scoreDisplay = document.getElementById("score");
+    const resultDisplay = document.getElementById("result");
+
+    let squares = [];
+    const width = 4;
+    let score = 0;
+    createBoard();
+     //generate a new number
+     //create the playing board
+     addColours();
+     var myTimer = setInterval(addColours, 50);
+ </script>
+</body>
 </html>

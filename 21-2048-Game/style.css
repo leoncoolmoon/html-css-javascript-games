@@ -1,6 +1,7 @@
 body {
   background-color: #faf8ef;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   font-family: "Clear Sans", "Helvetica Neue";
 }
@@ -62,4 +63,35 @@ h1 {
 
 .score-title {
   font-size: 16px;
+}
+
+.arrow_button {
+  background-color: #8f7a663b;
+  color: #ffffff;
+  border-radius: 3px;
+  border: 1px solid #8f7a66;
+  outline: 1px solid #8f7a66;
+  box-shadow: 1px 1px 5px #8f7a66;
+  width: 10%;
+  text-align: center;
+  padding: 2%
+}
+
+.first_line_virtual_keybroad {
+  display: flex;
+  justify-content: space-evenly;
+  margin-bottom: 20px;
+}
+
+.second_line_virtual_keybroad {
+  display: flex;
+  justify-content: space-between;
+}
+
+.virtual_keybroad {
+  color: #ffffff;
+  position: absolute;
+  width: 85%;
+  top: 60%;
+  height: 20%;
 }
