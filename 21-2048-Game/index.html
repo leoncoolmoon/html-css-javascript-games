@@ -27,7 +27,7 @@
     <span id="result">Join the numbers and get to the <b>2048</b> tile!</span>
     <div class="grid"></div>
   </div>
-  <div class="virtual_keybroad">
+  <div class="virtual_keybroad" id="virtual_keybroad">
     <div class="first_line_virtual_keybroad">
       <div class="arrow_button" id="up_arrow" onclick="keyUp()">
 
@@ -78,6 +78,15 @@
      //create the playing board
      addColours();
      var myTimer = setInterval(addColours, 50);
+     if (hasPhysicalKeyboard()) {
+        console.log("Physical keyboard likely present");
+        // Hide virtual keyboard
+        document.getElementById("virtual_keybroad").style.display = "none";
+    } else {
+        console.log("Physical keyboard likely not present");
+        // Show virtual keyboard
+        document.getElementById("virtual_keybroad").style.display = "block";
+    }
  </script>
 </body>
 </html>

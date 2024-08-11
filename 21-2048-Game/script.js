@@ -256,4 +256,8 @@
     }
   }
 
-
+  function hasPhysicalKeyboard() {
+    return !('ontouchstart' in window) || // works on most browsers 
+           (navigator.maxTouchPoints === 0) || // works on IE10/11 and Surface
+           (navigator.msMaxTouchPoints === 0); // works on IE10/11 and Surface
+}
