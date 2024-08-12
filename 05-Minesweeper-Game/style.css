@@ -2,6 +2,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
   text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
 }
 
 #board {
@@ -69,4 +76,32 @@ body {
   font-size: 30px;
   background-color: lightgray;
   border: none;
+}
+
+#timer {
+  font-size: 24px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+#settings-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  padding: 5px 10px;
+  background-color: lightgray;
+  border: 1px solid black;
+}
+
+#settings-div {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border: 2px solid black;
+  z-index: 1000;
 }

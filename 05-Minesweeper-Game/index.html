@@ -19,6 +19,24 @@
 
   <body>
     <h1>Mines: <span id="mines-count">0</span></h1>
+    <div id="timer">Time: 0s</div>
+    <div id="settings-button">Settings</div>
+    <div id="settings-div">
+        <div>
+            <label for="rows-input">Rows: </label>
+            <input type="number" id="rows-input" value="8" min="2" max="20">
+        </div>
+        <div>
+            <label for="columns-input">Columns: </label>
+            <input type="number" id="columns-input" value="8" min="2" max="20">
+        </div>
+        <div>
+            <label for="mines-input">Mines: </label>
+            <input type="number" id="mines-input" value="10" min="1">
+        </div>
+        <button id="apply-settings">Apply</button>
+        <button id="cancel-settings">Cancel</button>
+    </div>
     <div id="board"></div>
     <br />
     <button id="flag-button">🚩</button>
