@@ -69,11 +69,13 @@ function draw(e) {
 	});
 	window.addEventListener("mousemove", aim);
 	window.addEventListener("mouseup", loose);
+	window.addEventListener("touchmove", aim);
+	window.addEventListener("touchend", loose);
 	aim(e);
 }
 
  // 禁止下拉刷新
- document.addEventListener('touchmove', function(event) {
+ document.addEventListener('touchdown', function(event) {
 	event.preventDefault(); // 阻止默认行为
 	draw(event);
 }, { passive: false });
