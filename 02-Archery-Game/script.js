@@ -71,11 +71,13 @@ function draw(e) {
 	aim(e);
 }
 
-
+ // 禁止下拉刷新
+ document.addEventListener('touchmove', function(event) {
+	event.preventDefault(); // 阻止默认行为
+}, { passive: false });
 
 function aim(e) {
-	e.preventDefault();
-
+	
 	// get mouse position in relation to svg position and scale
 	var point = getMouseSVG(e);
 	point.x = Math.min(point.x, pivot.x - 7);
