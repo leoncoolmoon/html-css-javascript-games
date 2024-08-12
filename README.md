@@ -1,6 +1,6 @@
 # HTML/CSS and JavaScript Games 🎮
 
-This repository contains a collection of HTML, CSS, and JavaScript games. 🎯🕹
+This repository contains a collection of HTML, CSS, and JavaScript games. 🎯🕹</br>
 fork from https://github.com/he-is-talha/html-css-javascript-games
 
 |  #  | Game                                           | Live Demo |
