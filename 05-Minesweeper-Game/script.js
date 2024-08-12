@@ -138,6 +138,12 @@ function checkMine(r, c) {
   if (board[r][c].classList.contains("tile-clicked")) {
     return;
   }
+ // 如果方块被标记为旗帜，则移除旗帜并减少flagCount
+  if (tile.innerText == "🚩") {
+    tile.innerText = "";
+    flagCount -= 1;
+    document.getElementById("flag-button").innerText = "🚩" + (flagCount == 0 ? "" : flagCount);
+  }
 
   board[r][c].classList.add("tile-clicked");
   tilesClicked += 1;
