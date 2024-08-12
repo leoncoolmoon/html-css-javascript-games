@@ -4,7 +4,7 @@ let columns = 8;
 let flagCount = 0;
 let minesCount = 10;
 let minesLocation = []; // "2-2", "3-4", "2-1"
-let tileSize = 50; 
+let tileSize = 50;
 let tilesClicked = 0; //goal to click all tiles except the ones containing mines
 let flagEnabled = false;
 
@@ -41,6 +41,11 @@ function setMines() {
 }
 
 function startGame() {
+  // 从URL中获取参数
+  rows = parseInt(getParameterByName('rows')) || 8;
+  columns = parseInt(getParameterByName('columns')) || 8;
+  minesCount = parseInt(getParameterByName('mines')) || 10;
+
   board = [];
   minesLocation = [];  // 清空地雷位置
   flagCount = 0;
@@ -71,7 +76,7 @@ function startGame() {
       let tile = document.createElement("div");
       tile.id = r.toString() + "-" + c.toString();
       tile.addEventListener("click", clickTile);
-      tile.addEventListener("dblclick",groupClick);
+      tile.addEventListener("dblclick", groupClick);
       tile.addEventListener("contextmenu", addFlag);
       document.getElementById("board").append(tile);
       row.push(tile);
@@ -110,11 +115,11 @@ function setFlag() {
   }
 }
 function groupClick() {
-let r = parseInt(this.id.split("-")[0]);
-let c = parseInt(this.id.split("-")[1]);
-  for(let i=r-1;i<=r+1;i++){
-    for(let j=c-1;j<=c+1;j++){
-      if(i>=0 && i<rows && j>=0 && j<columns){
+  let r = parseInt(this.id.split("-")[0]);
+  let c = parseInt(this.id.split("-")[1]);
+  for (let i = r - 1; i <= r + 1; i++) {
+    for (let j = c - 1; j <= c + 1; j++) {
+      if (i >= 0 && i < rows && j >= 0 && j < columns) {
         board[i][j].click();
       }
     }
@@ -251,6 +256,14 @@ function startTimer() {
 
 function showSettings() {
   document.getElementById("settings-div").style.display = "block";
+  // 从URL中获取参数
+  rows = parseInt(getParameterByName('rows')) || 8;
+  columns = parseInt(getParameterByName('columns')) || 8;
+  minesCount = parseInt(getParameterByName('mines')) || 10;
+
+  document.getElementById("rows-input").value = rows;
+  document.getElementById("columns-input").value = columns;
+  document.getElementById("mines-input").value = minesCount;
 }
 function hideSettings() {
   document.getElementById("settings-div").style.display = "none";
@@ -269,5 +282,16 @@ function applySettings() {
   let boardElement = document.getElementById("board");
   boardElement.innerHTML = ""; // 清空现有的所有子元素
   hideSettings();
-  startGame();
+  //startGame();
+  // 更新URL并重定向
+  let newUrl = `${window.location.pathname}?rows=${rows}&columns=${columns}&mines=${minesCount}`;
+  window.location.href = newUrl;
+}
+function getParameterByName(name, url = window.location.href) {
+  name = name.replace(/[\[\]]/g, '\\$&');
+  let regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
+    results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
