@@ -1,7 +1,7 @@
 let board = [];
 let rows = 8;
 let columns = 8;
-
+let flagCount = 0;
 let minesCount = 10;
 let minesLocation = []; // "2-2", "3-4", "2-1"
 
@@ -65,11 +65,14 @@ function addFlag(e){
 
   let tile = this;
  
-    if (tile.innerText == "") {
+     if (tile.innerText == "") {
       tile.innerText = "🚩";
+flagCount = flagCount + 1;
     } else if (tile.innerText == "🚩") {
       tile.innerText = "";
+flagCount = flagCount - 1;
     }
+document.getElementById("flag-button").innerText = "🚩"+ (flagCount ==0? "":flagCount);
     return;
 }
 function setFlag() {
@@ -91,9 +94,12 @@ function clickTile() {
   if (flagEnabled) {
     if (tile.innerText == "") {
       tile.innerText = "🚩";
+flagCount = flagCount + 1;
     } else if (tile.innerText == "🚩") {
       tile.innerText = "";
+flagCount = flagCount - 1;
     }
+document.getElementById("flag-button").innerText = "🚩"+ (flagCount ==0? "":flagCount);
     return;
   }
   if(tile.innerText == "🚩"){
