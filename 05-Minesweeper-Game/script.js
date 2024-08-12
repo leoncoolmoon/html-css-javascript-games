@@ -139,8 +139,8 @@ function checkMine(r, c) {
     return;
   }
  // 如果方块被标记为旗帜，则移除旗帜并减少flagCount
-  if (tile.innerText == "🚩") {
-    tile.innerText = "";
+  if (board[r][c].innerText == "🚩") {
+    board[r][c].innerText = "";
     flagCount -= 1;
     document.getElementById("flag-button").innerText = "🚩" + (flagCount == 0 ? "" : flagCount);
   }
