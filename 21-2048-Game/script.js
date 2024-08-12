@@ -347,6 +347,7 @@ function resetOrientation() {
         }
     });
 }
+var lockout = false;
 
 function handleOrientation(event) {
     let relativeAlpha = event.alpha - baseAlpha;
@@ -362,6 +363,7 @@ function handleOrientation(event) {
 
     // Here you can add code to control your game based on these values
     // For example:
+    if(!lockout){
     if (Math.abs(relativeGamma) > ori_threashold) {
         if (relativeGamma > 0) {
             keyRight(); // Assuming keyRight is your function to move right in the game
@@ -377,4 +379,12 @@ function handleOrientation(event) {
             keyUp(); // Assuming keyUp is your function to move up in the game
         }
     }
+    lockout = true;
+    // Lock out for 2 second to prevent accidental movement,reset the lockout after 1 second
+    setTimeout(() => lockout = false, 2000);
+  }
+  //reset the lockout when return to initial position
+  if(Math.abs(relativeGamma) < ori_threashold && Math.abs(relativeBeta) < ori_threashold){
+    lockout = false;
+  }
 }
