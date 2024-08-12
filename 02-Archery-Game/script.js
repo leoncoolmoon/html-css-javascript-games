@@ -18,10 +18,10 @@ var lineSegment = {
 };
 
 // bow rotation point
-// var pivot = {
-// 	x: 100,
-// 	y: 250
-// };
+var pivot = {
+	x: 100,
+	y: 250
+};
 
 // 判断当前设备是否为触摸屏
 function isTouchDevice() {
@@ -36,19 +36,20 @@ function getScreenCenter() {
     };
 }
 
-// 设置 pivot 点
-var pivot;
+// // 设置 pivot 点
+// var pivot;
 
-if (isTouchDevice()) {
-    // 如果是触摸屏，使用屏幕中心作为 pivot 点
-    pivot = getScreenCenter();
-} else {
-    // 如果不是触摸屏，使用固定的 pivot 点
-    pivot = {
-        x: 100,
-        y: 250
-    };
-}
+// if (isTouchDevice()) {
+//     // 如果是触摸屏，使用屏幕中心作为 pivot 点
+//     pivot = getScreenCenter();
+// } else {
+//     // 如果不是触摸屏，使用固定的 pivot 点
+//     pivot = {
+//         x: 100,
+//         y: 250
+//     };
+// }
+
 
 aim({
 	clientX: 320,
@@ -74,10 +75,11 @@ function draw(e) {
  // 禁止下拉刷新
  document.addEventListener('touchmove', function(event) {
 	event.preventDefault(); // 阻止默认行为
+	draw(event);
 }, { passive: false });
 
 function aim(e) {
-	
+
 	// get mouse position in relation to svg position and scale
 	var point = getMouseSVG(e);
 	point.x = Math.min(point.x, pivot.x - 7);
