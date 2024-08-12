@@ -47,6 +47,7 @@ function startGame() {
       let tile = document.createElement("div");
       tile.id = r.toString() + "-" + c.toString();
       tile.addEventListener("click", clickTile);
+      tile.addEventListener("contextmenu", addFlag);
       document.getElementById("board").append(tile);
       row.push(tile);
     }
@@ -55,7 +56,22 @@ function startGame() {
 
   console.log(board);
 }
+function addFlag(e){
+  e.preventDefault();
 
+  if (gameOver || this.classList.contains("tile-clicked")) {
+    return;
+  }
+
+  let tile = this;
+ 
+    if (tile.innerText == "") {
+      tile.innerText = "🚩";
+    } else if (tile.innerText == "🚩") {
+      tile.innerText = "";
+    }
+    return;
+}
 function setFlag() {
   if (flagEnabled) {
     flagEnabled = false;
@@ -78,6 +94,9 @@ function clickTile() {
     } else if (tile.innerText == "🚩") {
       tile.innerText = "";
     }
+    return;
+  }
+  if(tile.innerText == "🚩"){
     return;
   }
 
