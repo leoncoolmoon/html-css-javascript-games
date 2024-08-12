@@ -81,7 +81,7 @@ function draw(e) {
 }, { passive: false });
 
 function aim(e) {
-
+	try{e.preventDefault();}catch(e){}
 	// get mouse position in relation to svg position and scale
 	var point = getMouseSVG(e);
 	point.x = Math.min(point.x, pivot.x - 7);
