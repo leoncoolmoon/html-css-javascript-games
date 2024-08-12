@@ -18,10 +18,38 @@ var lineSegment = {
 };
 
 // bow rotation point
-var pivot = {
-	x: 100,
-	y: 250
-};
+// var pivot = {
+// 	x: 100,
+// 	y: 250
+// };
+
+// 判断当前设备是否为触摸屏
+function isTouchDevice() {
+    return window.matchMedia("(pointer: coarse)").matches;
+}
+
+// 计算屏幕中心
+function getScreenCenter() {
+    return {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+    };
+}
+
+// 设置 pivot 点
+var pivot;
+
+if (isTouchDevice()) {
+    // 如果是触摸屏，使用屏幕中心作为 pivot 点
+    pivot = getScreenCenter();
+} else {
+    // 如果不是触摸屏，使用固定的 pivot 点
+    pivot = {
+        x: 100,
+        y: 250
+    };
+}
+
 aim({
 	clientX: 320,
 	clientY: 300
@@ -46,12 +74,15 @@ function draw(e) {
 
 
 function aim(e) {
+	e.preventDefault();
+
 	// get mouse position in relation to svg position and scale
 	var point = getMouseSVG(e);
 	point.x = Math.min(point.x, pivot.x - 7);
 	point.y = Math.max(point.y, pivot.y + 7);
 	var dx = point.x - pivot.x;
 	var dy = point.y - pivot.y;
+	
 	// Make it more difficult by adding random angle each time
 	var angle = Math.atan2(dy, dx) + randomAngle;
 	var bowAngle = angle - Math.PI;
