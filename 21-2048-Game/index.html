@@ -27,7 +27,15 @@
     <span id="result">Join the numbers and get to the <b>2048</b> tile!</span>
     <div class="grid"></div>
   </div>
-  <div class="virtual_keybroad" id="virtual_keybroad">
+  <div id = "oriantationCtl" class="ctrl second_line_virtual_keybroad" >
+    <div id = "reset_orientation" class = "arrow_button" onclick = "resetOriantation()">
+      Reset Oriantation
+    </div>
+    <div id = "show_virtual_keybroad" class = "arrow_button" onclick = "showKeybroad()">
+      Use virtual keybroad
+    </div>
+  </div>
+  <div class="virtual_keybroad ctrl" id="virtual_keybroad">
     <div class="first_line_virtual_keybroad">
       <div class="arrow_button" id="up_arrow" onclick="keyUp()">
 
@@ -82,11 +90,29 @@
         console.log("Physical keyboard likely present");
         // Hide virtual keyboard
         document.getElementById("virtual_keybroad").style.display = "none";
+        toggleOrientationListener(false);
     } else {
         console.log("Physical keyboard likely not present");
-        // Show virtual keyboard
-        document.getElementById("virtual_keybroad").style.display = "block";
+        
+        
+      if (hasOrientationSensor()) {
+          console.log("Device has an orientation sensor");
+          document.getElementById("oriantationCtl").style.display = "flex";
+          document.getElementById("virtual_keybroad").style.display = "none";
+          toggleOrientationListener(true);
+      } else {
+          console.log("Device does not have an orientation sensor");
+          // You can add code here for devices without an orientation sensor
+          document.getElementById("virtual_keybroad").style.display = "block";
+          document.getElementById("oriantationCtl").style.display = "none";
+          toggleOrientationListener(false);
+      }
+  
+
+        
     }
+
+    
  </script>
 </body>
 </html>
