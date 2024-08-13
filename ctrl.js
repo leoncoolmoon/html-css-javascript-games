@@ -1,6 +1,98 @@
+// 创建样式
+const style = document.createElement('style');
+style.textContent = `
+  .ctrl {
+    display: none;
+  }
+
+  .arrow_button {
+    background-color: #8f7a663b;
+    color: black;
+    border-radius: 3px;
+    border: 1px solid #8f7a66;
+    outline: 1px solid #8f7a66;
+    box-shadow: 1px 1px 5px #8f7a66;
+    width: 10%;
+    text-align: center;
+    padding: 2%;
+    font-size: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 0 5px;
+    width: auto;
+  }
+
+  .arrow_button:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .first_line_virtual_keybroad {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
+  }
+
+  .second_line_virtual_keybroad {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .virtual_keybroad {
+    color: #ffffff;
+    position: absolute;
+    width: 85%;
+    top: 60%;
+    height: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #oriantationCtl {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    justify-content: space-around;
+    top: 60%;
+    width: 100%;
+  }
+
+  #virtual_keybroad {
+    flex-direction: column;
+  }
+`;
+
+// 将样式添加到文档头部
+document.head.appendChild(style);
+
 var ori_threashold = 15;
 function createVirtualKeyboard() {
-    // 创建主容器
+    // 创建感应控制主容器
+    const oriantationCtl = document.createElement('div');
+    oriantationCtl.id = 'oriantationCtl';
+    oriantationCtl.className = 'ctrl second_line_virtual_keybroad';
+
+    // 创建Reset Orientation按钮
+    const resetOriantation = document.createElement('div');
+    resetOriantation.id = 'reset_oriantation';
+    resetOriantation.className = 'arrow_button';
+    resetOriantation.onclick = resetOriantation;
+    resetOriantation.textContent = 'Reset Oriantation';
+    oriantationCtl.appendChild(resetOriantation);
+
+    // 创建Use virtual keybroad按钮
+    const showVirtualKeybroad = document.createElement('div');
+    showVirtualKeybroad.id = 'show_virtual_keybroad';
+    showVirtualKeybroad.className = 'arrow_button';
+    showVirtualKeybroad.onclick = showKeybroad;
+    showVirtualKeybroad.textContent = 'Use virtual keybroad';
+    oriantationCtl.appendChild(showVirtualKeybroad);
+    // 将虚拟键盘添加到文档中
+    document.body.appendChild(oriantationCtl);
+
+    // 创建虚拟键盘主容器
     const virtualKeyboard = document.createElement('div');
     virtualKeyboard.className = 'virtual_keybroad ctrl';
     virtualKeyboard.id = 'virtual_keybroad';
@@ -126,7 +218,7 @@ function toggleOrientationListener(switchOn) {
         isOrientationListenerActive = false;
         console.log("Orientation listener turned off");
     } else {
-        resetOrientation().then(() => {
+        resetOriantation().then(() => {
             window.addEventListener('deviceorientation', handleOrientation);
             isOrientationListenerActive = true;
             console.log("Orientation listener turned on");
@@ -143,7 +235,7 @@ let baseBeta = 0;
 let baseGamma = 0;
 let isOrientationListenerActive = false;
 
-function resetOrientation() {
+function resetOriantation() {
     return new Promise((resolve) => {
         if (window.DeviceOrientationEvent) {
             const orientationHandler = function (event) {
@@ -220,11 +312,11 @@ function handleOrientation(event) {
         }
     }
 }
-function stopVirtualKeyboard(){
+function stopVirtualKeyboard() {
     lockout = true;
     lockoutInterval = null;
 }
-function resumeVirtualKeyboard(){
+function resumeVirtualKeyboard() {
     lockout = false;
 }
 createVirtualKeyboard();
