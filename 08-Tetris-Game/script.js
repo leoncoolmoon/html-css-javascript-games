@@ -318,6 +318,8 @@
       this.clearTimers();
       isStart = false;
       this.canvas.innerHTML = "<h1>GAME OVER</h1>";
+      stopVirtualKeyboard();
+      btn.style.display = "none";
     },
     play: function () {
       var me = this;
@@ -342,6 +344,7 @@
       };
       this.pTimer = setTimeout(gameLoop, me.speed);
       this.isActive = 1;
+      resumeVirtualKeyboard();
     },
     togglePause: function () {
       if (this.isActive === 1) {
@@ -584,10 +587,14 @@
   };
   const btn = document.querySelector("#start");
   btn.addEventListener("click", function () {
-    btn.style.display = "none";
+    //btn.style.display = "none";
     if (!isStart) {
       tetris.init();
+      btn.innerHTML = "⏯️";
+    } else {
+      tetris.togglePause();
     }
+
   });
 })();
 
@@ -614,4 +621,88 @@ if (!Array.prototype.remDup) {
     }
     return temp;
   };
+}
+function keyUp(e) {// pressed up arrow key
+  var event = new KeyboardEvent('keyup', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowUp', // or any other key you want to simulate
+    keyCode: 38, // or any other key code you want to simulate
+    which: 38, // or any other key code you want to simulate
+  });
+
+  document.dispatchEvent(event);
+  event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowUp', // or any other key you want to simulate
+    keyCode: 38, // or any other key code you want to simulate
+    which: 38, // or any other key code you want to simulate
+  });
+
+  document.dispatchEvent(event);
+}
+var downLock = false;
+function keyDown(e) {// pressed down arrow key
+  if (downLock) {
+    event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = false;
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = true;
+  }
+
+}
+
+function keyLeft(e) {// pressed left arrow key
+  var event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowLeft', // or any other key you want to simulate
+    keyCode: 37, // or any other key code you want to simulate
+    which: 37, // or any other key code you want to simulate
+  });
+  document.dispatchEvent(event);
+
+  event = new KeyboardEvent('keyup', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowLeft', // or any other key you want to simulate
+    keyCode: 37, // or any other key code you want to simulate
+    which: 37, // or any other key code you want to simulate
+  });
+  document.dispatchEvent(event);
+}
+
+function keyRight(e) {// pressed right arrow key
+  var event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowRight', // or any other key you want to simulate
+    keyCode: 39, // or any other key code you want to simulate
+    which: 39, // or any other key code you want to simulate
+  });
+  document.dispatchEvent(event);
+  event = new KeyboardEvent('keyup', {
+    bubbles: true,
+    cancelable: true,
+    key: 'ArrowRight', // or any other key you want to simulate
+    keyCode: 39, // or any other key code you want to simulate
+    which: 39, // or any other key code you want to simulate
+  });
+  document.dispatchEvent(event);
 }
