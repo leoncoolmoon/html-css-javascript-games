@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Talha - 2048 Game</title>
+  <title>2048 Game</title>
   <link rel="stylesheet" href="style.css" />
   <script src="script.js" charset="utf-8"></script>
   <link rel="icon" href="https://leoncoolmoon.github.io/icon.png" />
@@ -29,20 +29,6 @@
     <span id="result">Join the numbers and get to the <b>2048</b> tile!</span>
     <div class="grid"></div>
   </div>
-  <script>
-
-    const gridDisplay = document.querySelector(".grid");
-    const scoreDisplay = document.getElementById("score");
-    const resultDisplay = document.getElementById("result");
-    let squares = [];
-    const width = 4;
-    let score = 0;
-    createBoard();
-    //generate a new number
-    //create the playing board
-    addColours();
-    var myTimer = setInterval(addColours, 50);
-  </script>
   <script src="../ctrl.js" charset="utf-8"></script>
 </body>
 </html>

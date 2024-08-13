@@ -1,8 +1,15 @@
+let squares = [];
+const width = 4;
+let score = 0;
+var myTimer;
+var gridDisplay;
+var scoreDisplay;
+var resultDisplay;
 
 //create the playing board
 function createBoard() {
   for (let i = 0; i < width * width; i++) {
-    square = document.createElement("div");
+    var square = document.createElement("div");
     square.innerHTML = 0;
     gridDisplay.appendChild(square);
     squares.push(square);
@@ -13,10 +20,10 @@ function createBoard() {
 
 //generate a new number
 function generate() {
+  checkForGameOver();
   randomNumber = Math.floor(Math.random() * squares.length);
   if (squares[randomNumber].innerHTML == 0) {
     squares[randomNumber].innerHTML = 2;
-    checkForGameOver();
   } else generate();
 }
 
@@ -259,3 +266,11 @@ function addColours() {
       squares[i].style.backgroundColor = "#d7d4f0";
   }
 }
+window.addEventListener("load", () => {
+   gridDisplay = document.querySelector(".grid");
+   scoreDisplay = document.getElementById("score");
+   resultDisplay = document.getElementById("result");
+  createBoard();
+  addColours();
+  myTimer = setInterval(addColours, 50);
+});

@@ -28,32 +28,56 @@ const handleGameOver = () => {
     location.reload();
 }
 
-const changeDirection = e => {
-    // Changing velocity value based on key press
-    if(e.key === "ArrowUp" && velocityY != 1) {
+function keyUp() {
+    console.log("key up");
+    if (velocityY != 1) {
         velocityX = 0;
         velocityY = -1;
-    } else if(e.key === "ArrowDown" && velocityY != -1) {
+    }
+};
+function keyDown() {
+    console.log("key down");
+    if (velocityY != -1) {
         velocityX = 0;
         velocityY = 1;
-    } else if(e.key === "ArrowLeft" && velocityX != 1) {
+    }
+};
+function keyLeft() {
+    console.log("key left");
+    if (velocityX != 1) {
         velocityX = -1;
         velocityY = 0;
-    } else if(e.key === "ArrowRight" && velocityX != -1) {
+    }
+};
+function keyRight() {
+    console.log("key right");
+    if (velocityX != -1) {
         velocityX = 1;
         velocityY = 0;
     }
-}
+};
 
+const changeDirection = e => {
+    // Changing velocity value based on key press
+    if (e.key === "ArrowUp" ) {
+       keyUp();
+    } else if (e.key === "ArrowDown" ){
+        keyDown();
+    } else if (e.key === "ArrowLeft" ){
+        keyLeft();
+    } else if (e.key === "ArrowRight" ){
+        keyRight();
+    }
+}
 // Calling changeDirection on each key click and passing key dataset value as an object
 controls.forEach(button => button.addEventListener("click", () => changeDirection({ key: button.dataset.key })));
 
 const initGame = () => {
-    if(gameOver) return handleGameOver();
+    if (gameOver) return handleGameOver();
     let html = `<div class="food" style="grid-area: ${foodY} / ${foodX}"></div>`;
 
     // Checking if the snake hit the food
-    if(snakeX === foodX && snakeY === foodY) {
+    if (snakeX === foodX && snakeY === foodY) {
         updateFoodPosition();
         snakeBody.push([foodY, foodX]); // Pushing food position to snake body array
         score++; // increment score by 1
@@ -65,7 +89,7 @@ const initGame = () => {
     // Updating the snake's head position based on the current velocity
     snakeX += velocityX;
     snakeY += velocityY;
-    
+
     // Shifting forward the values of the elements in the snake body by one
     for (let i = snakeBody.length - 1; i > 0; i--) {
         snakeBody[i] = snakeBody[i - 1];
@@ -73,7 +97,7 @@ const initGame = () => {
     snakeBody[0] = [snakeX, snakeY]; // Setting first element of snake body to current snake position
 
     // Checking if the snake's head is out of wall, if so setting gameOver to true
-    if(snakeX <= 0 || snakeX > 30 || snakeY <= 0 || snakeY > 30) {
+    if (snakeX <= 0 || snakeX > 30 || snakeY <= 0 || snakeY > 30) {
         return gameOver = true;
     }
 

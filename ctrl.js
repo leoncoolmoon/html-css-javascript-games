@@ -101,16 +101,16 @@ function createVirtualKeyboard() {
     const firstLine = document.createElement('div');
     firstLine.className = 'first_line_virtual_keybroad';
 
-    const upArrow = createArrowButton('up_arrow', 0, 'keyUp');
+    const upArrow = createArrowButton('up_arrow', 0, 'keyUp()');
     firstLine.appendChild(upArrow);
 
     // 创建第二行（左、下、右箭头）
     const secondLine = document.createElement('div');
     secondLine.className = 'second_line_virtual_keybroad';
 
-    const leftArrow = createArrowButton('left_arrow', -90, 'keyLeft');
-    const downArrow = createArrowButton('down_arrow', 180, 'keyDown');
-    const rightArrow = createArrowButton('right_arrow', 90, 'keyRight');
+    const leftArrow = createArrowButton('left_arrow', -90, 'keyLeft()');
+    const downArrow = createArrowButton('down_arrow', 180, 'keyDown()');
+    const rightArrow = createArrowButton('right_arrow', 90, 'keyRight()');
 
     secondLine.appendChild(leftArrow);
     secondLine.appendChild(downArrow);
@@ -128,7 +128,7 @@ function createArrowButton(id, rotation, onclickFunction) {
     const button = document.createElement('div');
     button.className = 'arrow_button';
     button.id = id;
-    button.onclick = window[onclickFunction];
+    button.setAttribute('onclick', onclickFunction);
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '60');
@@ -152,6 +152,7 @@ function displayCtrl() {
         console.log("Physical keyboard likely present");
         // Hide virtual keyboard
         document.getElementById("virtual_keybroad").style.display = "none";
+        document.getElementById("oriantationCtl").style.display = "none";
         toggleOrientationListener(false);
     } else {
         console.log("Physical keyboard likely not present");
