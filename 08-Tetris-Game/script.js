@@ -622,7 +622,9 @@ if (!Array.prototype.remDup) {
     return temp;
   };
 }
-function keyUp(e) {// pressed up arrow key
+function keyUp() {// pressed up arrow key
+  document.getElementById("up_arrow").style.transform = "scale(0.85)";
+
   var event = new KeyboardEvent('keyup', {
     bubbles: true,
     cancelable: true,
@@ -641,11 +643,13 @@ function keyUp(e) {// pressed up arrow key
   });
 
   document.dispatchEvent(event);
+  document.getElementById("up_arrow").style.transform = "scale(1)";
 }
-var downLock = false;
-function keyDown(e) {// pressed down arrow key
-  if (downLock) {
-    event = new KeyboardEvent('keyup', {
+var downLock;
+function keyDown() {// pressed down arrow key
+  if (downLock !== undefined && downLock !== null) {
+    clearInterval(downLock);
+    var event = new KeyboardEvent('keyup', {
       bubbles: true,
       cancelable: true,
       key: 'ArrowDown', // or any other key you want to simulate
@@ -653,22 +657,27 @@ function keyDown(e) {// pressed down arrow key
       which: 40, // or any other key code you want to simulate
     });
     document.dispatchEvent(event);
-    downLock = false;
+    downLock = null;
+    document.getElementById("down_arrow").style.transform = "scale(1)";
   } else {
-    var event = new KeyboardEvent('keydown', {
-      bubbles: true,
-      cancelable: true,
-      key: 'ArrowDown', // or any other key you want to simulate
-      keyCode: 40, // or any other key code you want to simulate
-      which: 40, // or any other key code you want to simulate
-    });
-    document.dispatchEvent(event);
-    downLock = true;
+    downLock = setInterval(function () {
+      var event = new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'ArrowDown', // or any other key you want to simulate
+        keyCode: 40, // or any other key code you want to simulate
+        which: 40, // or any other key code you want to simulate
+      });
+      document.dispatchEvent(event);
+    }, 200)
+    document.getElementById("down_arrow").style.transform = "scale(0.9)";
+
   }
 
 }
 
-function keyLeft(e) {// pressed left arrow key
+function keyLeft(){// pressed left arrow key
+  document.getElementById("left_arrow").style.transform = "scale(0.85)";
   var event = new KeyboardEvent('keydown', {
     bubbles: true,
     cancelable: true,
@@ -686,9 +695,11 @@ function keyLeft(e) {// pressed left arrow key
     which: 37, // or any other key code you want to simulate
   });
   document.dispatchEvent(event);
+  document.getElementById("left_arrow").style.transform = "scale(1)";
 }
 
-function keyRight(e) {// pressed right arrow key
+function keyRight() {// pressed right arrow key
+  document.getElementById("right_arrow").style.transform = "scale(0.85)";
   var event = new KeyboardEvent('keydown', {
     bubbles: true,
     cancelable: true,
@@ -705,4 +716,5 @@ function keyRight(e) {// pressed right arrow key
     which: 39, // or any other key code you want to simulate
   });
   document.dispatchEvent(event);
+  document.getElementById("right_arrow").style.transform = "scale(1)";
 }
