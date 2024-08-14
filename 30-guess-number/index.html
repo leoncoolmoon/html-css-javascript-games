@@ -1,1 +1,117 @@
-()
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Number Guessing Game</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #007BFF;
+        }
+        p {
+            margin: 10px 0;
+        }
+        #records {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+    <script>
+        let answer = "", records;
+        const generateNumber = () => Array.from({length: 10}, (_, i) => i)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 4)
+            .join('');
+
+        const checkGuess = (guess) => {
+            if (!answer) newGame();
+            let a = 0, b = 0;
+            for (let i = 0; i < 4; i++) {
+                if (guess[i] == answer[i]) a++;
+                else if (answer.includes(guess[i])) b++;
+            }
+            return `${a}A${b}B`;
+        }
+
+        const renderRecords = () => {
+            let list = "<h2>Guessing Records:</h2>";
+            for (let {guess, result} of records) {
+                list += `<p>${guess}: ${result}</p>`;
+            }
+            document.getElementById("records").innerHTML = list;
+        }
+
+        const newGame = () => {
+            answer = generateNumber();
+            records = [];
+            renderRecords();
+            document.getElementById("result").textContent = "";
+        }
+
+        const submitGuess = (guess) => {
+            if (!/^\d{4}$/.test(guess)) {
+                alert("Please enter a 4-digit number.");
+                return;
+            } 
+            const result = checkGuess(guess);
+            records.push({guess, result});
+            renderRecords();
+            document.getElementById("result").textContent = result;
+            if (result === "4A0B") {
+                alert("Congratulations, you won!");
+                answer = "";
+                return;
+            }
+            if (records.length >= 8) {
+                alert("Sorry, you lost.");
+                answer = "";
+            }
+            document.getElementById('guess').value = "";
+        }
+    </script>
+</head>
+<body>
+<h1>Number Guessing Game</h1>
+<p>Enter a 4-digit number in the form below, with no repeated digits, and click the "Guess" button.</p>
+<p>If both the position and the number are correct, you get an "A". If only the number is correct but in the wrong position, you get a "B".</p>
+<p>You can click the "New Game" button to start a new game.</p>
+<button onclick="newGame()">New Game</button>
+<div id="records"></div>
+<label for="guess">Your Guess:</label>
+<input type="text" id="guess" name="guess" pattern="\d{4}">
+<button onclick="submitGuess(document.getElementById('guess').value)">Guess</button>
+<div id="result"></div>
+</body>
+</html>
