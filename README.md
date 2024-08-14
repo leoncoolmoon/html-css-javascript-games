@@ -65,7 +65,8 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 26. **Fruit Slicer Game**: Swipe across the screen to slice falling fruits while avoiding bombs in this fast-paced fruit-slicing game. 🍉🔪
 27. **Quiz Game**: Test your knowledge on various topics by answering trivia questions and aiming for a high score in this quiz game. 🧠📚
 28. **Emoji Catcher Game**: Catch falling emojis with a basket or container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄
-29. **Whack-a-Mole Game**: Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️
+29. **Whack a Mole Game**: Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️
+30. **Guess Number Game**: Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖
 
 ## License
 
