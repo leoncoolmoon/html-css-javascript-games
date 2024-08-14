@@ -168,12 +168,12 @@ function showAllBricks() {
 }
 
 // Handle Key Events
-function keyDown(e) {
+function keyPressDown(e) {
   if (e.key === "Right" || e.key === "ArrowRight") paddle.dx = paddle.speed;
   else if (e.key === "Left" || e.key === "ArrowLeft") paddle.dx = -paddle.speed;
 }
 
-function keyUp(e) {
+function keyPressUp(e) {
   if (
     e.key === "Right" ||
     e.key === "ArrowRight" ||
@@ -195,10 +195,119 @@ function update() {
 }
 
 // Event Listeners
-document.addEventListener("keydown", keyDown);
-document.addEventListener("keyup", keyUp);
+document.addEventListener("keydown", keyPressDown);
+document.addEventListener("keyup", keyPressUp);
 rulesButton.addEventListener("click", () => rules.classList.add("show"));
 closeButton.addEventListener("click", () => rules.classList.remove("show"));
 
 // Init
 update();
+
+var downLock = false;
+function keyDown() {// pressed down arrow key
+  if (downLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = false;
+    document.getElementById("down_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = true;
+    document.getElementById("down_arrow").style.transform = "scale(0.9)";
+  }
+}
+
+var upLock = false;
+function keyUp() {// pressed up arrow key
+  if (upLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowUp', // or any other key you want to simulate
+      keyCode: 38, // or any other key code you want to simulate
+      which: 38, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    upLock = false;
+    document.getElementById("up_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowUp', // or any other key you want to simulate
+      keyCode: 38, // or any other key code you want to simulate
+      which: 38, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    upLock = true;
+    document.getElementById("up_arrow").style.transform = "scale(0.9)";
+  }
+}
+
+var leftLock = false;
+function keyLeft() {// pressed left arrow key
+  if (leftLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowLeft', // or any other key you want to simulate
+      keyCode: 37, // or any other key code you want to simulate
+      which: 37, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    leftLock = false;
+    document.getElementById("left_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowLeft', // or any other key you want to simulate
+      keyCode: 37, // or any other key code you want to simulate  
+      which: 37, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    leftLock = true;
+    document.getElementById("left_arrow").style.transform = "scale(0.9)";
+  }
+}
+
+var rightLock = false;
+function keyRight() {// pressed right arrow key
+  if (rightLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowRight', // or any other key you want to simulate
+      keyCode: 39, // or any other key code you want to simulate
+      which: 39, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    rightLock = false;
+    document.getElementById("right_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowRight', // or any other key you want to simulate
+      keyCode: 39, // or any other key code you want to simulate
+      which: 39, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    rightLock = true;
+    document.getElementById("right_arrow").style.transform = "scale(0.9)";
+  }
+} 
+
