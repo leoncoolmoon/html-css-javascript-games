@@ -94,24 +94,25 @@ const initGame = () => {
     for (let i = snakeBody.length - 1; i > 0; i--) {
         snakeBody[i] = snakeBody[i - 1];
     }
-    snakeBody[0] = [snakeX, snakeY]; // Setting first element of snake body to current snake position
 
     // Checking if the snake's head is out of wall, if so setting gameOver to true
     // if (snakeX <= 0 || snakeX > 30 || snakeY <= 0 || snakeY > 30) {
     //     return gameOver = true;
     // }
     if (snakeX <= 0) {
-        snakeX = 30;
+        snakeX = 30
     }
     if (snakeX > 30) {
-        snakeX = 0;
+        snakeX = 1;
     }
     if (snakeY <= 0) {
         snakeY = 30;
     }
     if (snakeY > 30) {
-        snakeY = 0;
+        snakeY = 1;
     }
+    snakeBody[0] = [snakeX, snakeY]; // Setting first element of snake body to current snake position
+
     for (let i = 0; i < snakeBody.length; i++) {
         // Adding a div for each part of the snake's body
         html += `<div class="head" style="grid-area: ${snakeBody[i][1]} / ${snakeBody[i][0]}"></div>`;
