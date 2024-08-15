@@ -316,21 +316,20 @@ function keyRight() {// pressed right arrow key
 } 
 //增加一个触摸屏幕事件，让Paddle水平移动距离和触摸点水平移动距离一致
 var touchXstart = null;
+var previousPosition = canvas.width/2-paddle.w/2;
 function actionStart(e){
   e.preventDefault();
     //判断是鼠标左键点击还是触摸
-
   if(e.touches && touchXstart == null){//如果是触摸 touchXstart等于第一个touch点的x坐标
      touchXstart = e.touches[0].pageX;
   }else{//如果是鼠标 touchXstart等于鼠标的x坐标
      touchXstart = e.pageX;
   }
-  
-
 }
 function actionEnd(e){
   e.preventDefault();
   touchXstart = null;
+  previousPosition = paddle.x;
 }
 function actionMove(e){
   //e.preventDefault();
@@ -343,10 +342,9 @@ function actionMove(e){
         dist = e.pageX - touchXstart;
      }
      // dist 按照画布的放大比例缩放
-     var canvasS = document.getElementById("canvas");
-      dist = dist /  canvas.width *canvasS.clientWidth /2;
+   
     
-      paddle.x = paddle.x + dist;
+      paddle.x = previousPosition + dist;
       if (paddle.x + paddle.w > canvas.width) paddle.x = canvas.width - paddle.w;
       if (paddle.x < 0) paddle.x = 0;
     }
