@@ -29,6 +29,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
+  overscroll-behavior: contain;
 }
 
 h1 {
@@ -40,9 +41,8 @@ canvas {
   background-color: var(--canvas-color);
   display: block;
   border-radius: 5px;
-  width: 800px;
-  max-width: 70vw;
-  max-height: 70vh;
+  max-width: 90vw;
+  max-height: 60vh;
 }
 
 .btn {
