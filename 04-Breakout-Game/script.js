@@ -202,63 +202,66 @@ closeButton.addEventListener("click", () => rules.classList.remove("show"));
 
 // Init
 update();
+function keyDown() {}
+function keyUp() {}
 
-var downLock = false;
-function keyDown() {// pressed down arrow key
-  if (downLock) {
-    var event = new KeyboardEvent('keyup', {
-      bubbles: true,
-      cancelable: true,
-      key: 'ArrowDown', // or any other key you want to simulate
-      keyCode: 40, // or any other key code you want to simulate
-      which: 40, // or any other key code you want to simulate
-    });
-    document.dispatchEvent(event);
-    downLock = false;
-    document.getElementById("down_arrow").style.transform = "scale(1)";
-  } else {
-    var event = new KeyboardEvent('keydown', {
-      bubbles: true,
-      cancelable: true,
-      key: 'ArrowDown', // or any other key you want to simulate
-      keyCode: 40, // or any other key code you want to simulate
-      which: 40, // or any other key code you want to simulate
-    });
-    document.dispatchEvent(event);
-    downLock = true;
-    document.getElementById("down_arrow").style.transform = "scale(0.9)";
-  }
-}
+// var downLock = false;
+// function keyDown() {// pressed down arrow key
+//   if (downLock) {
+//     var event = new KeyboardEvent('keyup', {
+//       bubbles: true,
+//       cancelable: true,
+//       key: 'ArrowDown', // or any other key you want to simulate
+//       keyCode: 40, // or any other key code you want to simulate
+//       which: 40, // or any other key code you want to simulate
+//     });
+//     document.dispatchEvent(event);
+//     downLock = false;
+//     document.getElementById("down_arrow").style.transform = "scale(1)";
+//   } else {
+//     var event = new KeyboardEvent('keydown', {
+//       bubbles: true,
+//       cancelable: true,
+//       key: 'ArrowDown', // or any other key you want to simulate
+//       keyCode: 40, // or any other key code you want to simulate
+//       which: 40, // or any other key code you want to simulate
+//     });
+//     document.dispatchEvent(event);
+//     downLock = true;
+//     document.getElementById("down_arrow").style.transform = "scale(0.9)";
+//   }
+// }
 
-var upLock = false;
-function keyUp() {// pressed up arrow key
-  if (upLock) {
-    var event = new KeyboardEvent('keyup', {
-      bubbles: true,
-      cancelable: true,
-      key: 'ArrowUp', // or any other key you want to simulate
-      keyCode: 38, // or any other key code you want to simulate
-      which: 38, // or any other key code you want to simulate
-    });
-    document.dispatchEvent(event);
-    upLock = false;
-    document.getElementById("up_arrow").style.transform = "scale(1)";
-  } else {
-    var event = new KeyboardEvent('keydown', {
-      bubbles: true,
-      cancelable: true,
-      key: 'ArrowUp', // or any other key you want to simulate
-      keyCode: 38, // or any other key code you want to simulate
-      which: 38, // or any other key code you want to simulate
-    });
-    document.dispatchEvent(event);
-    upLock = true;
-    document.getElementById("up_arrow").style.transform = "scale(0.9)";
-  }
-}
+// var upLock = false;
+// function keyUp() {// pressed up arrow key
+//   if (upLock) {
+//     var event = new KeyboardEvent('keyup', {
+//       bubbles: true,
+//       cancelable: true,
+//       key: 'ArrowUp', // or any other key you want to simulate
+//       keyCode: 38, // or any other key code you want to simulate
+//       which: 38, // or any other key code you want to simulate
+//     });
+//     document.dispatchEvent(event);
+//     upLock = false;
+//     document.getElementById("up_arrow").style.transform = "scale(1)";
+//   } else {
+//     var event = new KeyboardEvent('keydown', {
+//       bubbles: true,
+//       cancelable: true,
+//       key: 'ArrowUp', // or any other key you want to simulate
+//       keyCode: 38, // or any other key code you want to simulate
+//       which: 38, // or any other key code you want to simulate
+//     });
+//     document.dispatchEvent(event);
+//     upLock = true;
+//     document.getElementById("up_arrow").style.transform = "scale(0.9)";
+//   }
+// }
 
 var leftLock = false;
 function keyLeft() {// pressed left arrow key
+  if(rightLock) keyRight();
   if (leftLock) {
     var event = new KeyboardEvent('keyup', {
       bubbles: true,
@@ -286,6 +289,7 @@ function keyLeft() {// pressed left arrow key
 
 var rightLock = false;
 function keyRight() {// pressed right arrow key
+  if(leftLock) keyLeft();
   if (rightLock) {
     var event = new KeyboardEvent('keyup', {
       bubbles: true,

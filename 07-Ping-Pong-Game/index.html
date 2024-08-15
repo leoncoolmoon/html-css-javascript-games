@@ -1,65 +1,98 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Ping Pong Game</title>
-    <!-- Add the Bootstrap CSS file -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    />
 
-    <link rel="icon" href="https://leoncoolmoon.github.io/icon.png" />
+<head>
+  <title>Ping Pong Game</title>
+  <meta name="viewport" content="user-scalable=no">
+  <!-- Add the Bootstrap CSS file -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
 
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
+  <link rel="icon" href="https://leoncoolmoon.github.io/icon.png" />
 
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
+  <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
+  <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
+  <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
 
-    <!-- Add the Bootstrap JavaScript file -->
+  <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
+  <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
+  <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
 
-    <link rel="stylesheet" href="style.css" />
-    <style>
-      canvas {
-        border: 1px solid black;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <canvas id="canvas" width="600" height="400"></canvas>
-    </div>
-    <div class="button">
-      <button id="start-btn" class="btn">Start</button>
-      <button id="pause-btn" class="btn">Pause</button>
-      <button id="restart-btn" class="btn">Restart</button>
-    </div>
-    <p class="control">Control: Player Left(W and S) | Player Right(↑ and ↓)</p>
-    <!-- Add a modal element with an ID -->
-    <div class="modal" tabindex="-1" role="dialog" id="message-modal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-body">
-            <h5 id="message"></h5>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              id="message-modal-close"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+  <!-- Add the Bootstrap JavaScript file -->
+
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <canvas id="canvas" width="600" height="400"></canvas>
+  </div>
+  <div class="button">
+    <button id="start-btn" class="btn">Start</button>
+    <button id="pause-btn" class="btn">Pause</button>
+    <button id="restart-btn" class="btn">Restart</button>
+  </div>
+  <p class="control">Control: Player Left(W and S) | Player Right(↑ and ↓)</p>
+  <!-- Add a modal element with an ID -->
+  <div class="modal" tabindex="-1" role="dialog" id="message-modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h5 id="message"></h5>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="message-modal-close" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script src="script.js"></script>
-  </body>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="script.js"></script>
+  <script src="../ctrl.js"></script>
+  <script>
+    var upbt = document.getElementById("up_arrow");
+    var downbt = document.getElementById("down_arrow");
+    var leftbt = document.getElementById("left_arrow");
+    var rightbt = document.getElementById("right_arrow");
+    // 将upbt放在页面的右上角
+    upbt.style.position = "absolute";
+    upbt.style.right = "0px";
+    upbt.style.top = "0px";
+
+    // 将downbt放在页面的右下角
+    downbt.style.position = "absolute";
+    downbt.style.right = "0px";
+    downbt.style.bottom = "0px";
+
+    // 将leftbt放在页面的左上角
+    leftbt.style.position = "absolute";
+    leftbt.style.left = "0px";
+    leftbt.style.top = "0px";
+
+    // 将rightbt放在页面的左下角
+    rightbt.style.position = "absolute";
+    rightbt.style.left = "0px";
+    rightbt.style.bottom = "0px";
+
+    //left right button rotate 90 degree clockwise
+    leftbt.style.transform = "rotate(90deg)";
+    rightbt.style.transform = "rotate(90deg)";
+    
+    vkbd = document.getElementById("virtual_keybroad");
+    vkbd.style.position = "absolute";
+    vkbd.style.top = "0px";
+    vkbd.style.width = "100vw";
+    vkbd.style.height = "100vh";
+
+  </script>
+</body>
+
 </html>

@@ -212,3 +212,124 @@ function loop() {
 $("#message-modal-close").on("click", function () {
   document.location.reload();
 });
+
+var downLock = false;
+function keyDown() {// pressed down arrow key
+  if(upLock) { keyUp(); }
+  if (downLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = false;
+    document.getElementById("down_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowDown', // or any other key you want to simulate
+      keyCode: 40, // or any other key code you want to simulate
+      which: 40, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    downLock = true;
+    document.getElementById("down_arrow").style.transform = "scale(0.9)";
+  }
+}
+
+var upLock = false;
+function keyUp() {// pressed up arrow key
+  if (downLock) { keyDown(); }
+  if (upLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowUp', // or any other key you want to simulate
+      keyCode: 38, // or any other key code you want to simulate
+      which: 38, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    upLock = false;
+    document.getElementById("up_arrow").style.transform = "scale(1)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowUp', // or any other key you want to simulate
+      keyCode: 38, // or any other key code you want to simulate
+      which: 38, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    upLock = true;
+    document.getElementById("up_arrow").style.transform = "scale(0.9)";
+  }
+}
+
+function keyLeft() {
+  keyW();
+}
+
+function keyRight() {// pressed right arrow key
+  keyS();
+}
+
+var wLock = false;
+function keyW() {// pressed w key
+  if (sLock) {keyS();}
+  if (wLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 'w', // or any other key you want to simulate
+      keyCode: 87, // or any other key code you want to simulate
+      which: 87, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    wLock = false;
+    document.getElementById("left_arrow").style.transform = "scale(1)rotate(90deg)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'w', // or any other key you want to simulate
+      keyCode: 87, // or any other key code you want to simulate
+      which: 87, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    wLock = true;
+    document.getElementById("left_arrow").style.transform = "scale(0.9)rotate(90deg)";
+  }
+
+}
+
+var sLock = false;
+function keyS() {// pressed s key
+  if (wLock) {keyW();}
+  if (sLock) {
+    var event = new KeyboardEvent('keyup', {
+      bubbles: true,
+      cancelable: true,
+      key: 's', // or any other key you want to simulate
+      keyCode: 83, // or any other key code you want to simulate
+      which: 83, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    sLock = false;
+    document.getElementById("right_arrow").style.transform = "scale(1)rotate(90deg)";
+  } else {
+    var event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 's', // or any other key you want to simulate
+      keyCode: 83, // or any other key code you want to simulate
+      which: 83, // or any other key code you want to simulate
+    });
+    document.dispatchEvent(event);
+    sLock = true;
+    document.getElementById("right_arrow").style.transform = "scale(0.9)rotate(90deg)";
+  }
+}
