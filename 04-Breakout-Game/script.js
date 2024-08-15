@@ -314,4 +314,50 @@ function keyRight() {// pressed right arrow key
     document.getElementById("right_arrow").style.transform = "scale(0.9)";
   }
 } 
+//增加一个触摸屏幕事件，让Paddle水平移动距离和触摸点水平移动距离一致
+var touchXstart = null;
+function actionStart(e){
+  e.preventDefault();
+    //判断是鼠标左键点击还是触摸
+
+  if(e.touches && touchXstart == null){//如果是触摸 touchXstart等于第一个touch点的x坐标
+     touchXstart = e.touches[0].pageX;
+  }else{//如果是鼠标 touchXstart等于鼠标的x坐标
+     touchXstart = e.pageX;
+  }
+  
+
+}
+function actionEnd(e){
+  e.preventDefault();
+  touchXstart = null;
+}
+function actionMove(e){
+  //e.preventDefault();
+  var dist;
+    //判断是鼠标左键点击还是触摸
+    if(touchXstart != null){
+      if(e.touches ){//如果是触摸 dist等于第一个touch点的x坐标x相对touchXstart的移动距离
+        dist = e.touches[0].pageX - touchXstart;
+     }else{//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
+        dist = e.pageX - touchXstart;
+     }
+     // dist 按照画布的放大比例缩放
+     var canvasS = document.getElementById("canvas");
+      dist = dist /  canvas.width *canvasS.clientWidth /2;
+    
+      paddle.x = paddle.x + dist;
+      if (paddle.x + paddle.w > canvas.width) paddle.x = canvas.width - paddle.w;
+      if (paddle.x < 0) paddle.x = 0;
+    }
+    }
+ 
+
+document.addEventListener('touchstart', actionStart);
+document.addEventListener('touchend', actionEnd);
+document.addEventListener('touchmove', actionMove);
+//相应鼠标点击后移动的事件
+document.addEventListener('mousedown', actionStart);
+document.addEventListener('mouseup', actionEnd);
+document.addEventListener('mousemove', actionMove);
 
