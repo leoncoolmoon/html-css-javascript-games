@@ -318,7 +318,7 @@ function keyRight() {// pressed right arrow key
 var touchXstart = null;
 var previousPosition = canvas.width/2-paddle.w/2;
 function actionStart(e){
-  e.preventDefault();
+ // e.preventDefault();
     //判断是鼠标左键点击还是触摸
   if(e.touches && touchXstart == null){//如果是触摸 touchXstart等于第一个touch点的x坐标
      touchXstart = e.touches[0].pageX;
@@ -327,7 +327,7 @@ function actionStart(e){
   }
 }
 function actionEnd(e){
-  e.preventDefault();
+  //e.preventDefault();
   touchXstart = null;
   previousPosition = paddle.x;
 }
@@ -337,7 +337,7 @@ function actionMove(e){
     //判断是鼠标左键点击还是触摸
     if(touchXstart != null){
       if(e.touches ){//如果是触摸 dist等于第一个touch点的x坐标x相对touchXstart的移动距离
-        dist = e.touches[0].pageX - touchXstart;
+        dist =( e.touches[0].pageX - touchXstart)*2;
      }else{//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
         dist = e.pageX - touchXstart;
      }
