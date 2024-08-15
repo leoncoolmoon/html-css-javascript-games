@@ -41,7 +41,8 @@ canvas {
   display: block;
   border-radius: 5px;
   width: 800px;
-  max-width: 96%;
+  max-width: 70vw;
+  max-height: 70vh;
 }
 
 .btn {
