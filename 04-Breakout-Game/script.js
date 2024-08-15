@@ -337,7 +337,7 @@ function actionMove(e){
     //判断是鼠标左键点击还是触摸
     if(touchXstart != null){
       if(e.touches ){//如果是触摸 dist等于第一个touch点的x坐标x相对touchXstart的移动距离
-        dist =( e.touches[0].pageX - touchXstart)*2;
+        dist =( e.touches[0].pageX - touchXstart)*4;
      }else{//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
         dist = e.pageX - touchXstart;
      }
