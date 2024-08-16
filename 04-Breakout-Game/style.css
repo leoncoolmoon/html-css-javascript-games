@@ -27,9 +27,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  /*min-height: 100vh;*/
   margin: 0;
   overscroll-behavior-y: contain;
+  max-height: 80vh;
 }
 
 h1 {
