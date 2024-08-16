@@ -387,76 +387,71 @@ function actionEnd(e) {
   }
 }
 function actionMove(e) {
-  //e.preventDefault();
-  var distLeft, distRight, leftPt, rightPt;
-  //判断是鼠标左键点击还是触摸
-  if (e.touches && e.touches.length > 1) {//如果是触摸
-    e.touches.forEach(element => {
-      if (element.pageX - canvas.offsetLeft < canvas.width / 2) {
-        leftPt = element.pageX < leftPt.pageX ? element : leftPt;
-      } else {//记录右半边，最右边的点
-        rightPt = element.pageX > rightPt.pageX ? element : rightPt;
+  e.preventDefault(); // 防止页面滚动
+
+  var distLeft, distRight;
+
+  if (e.touches && e.touches.length > 1) { // 多点触摸
+    let leftPt = e.touches[0];
+    let rightPt = e.touches[0];
+
+    for (let i = 1; i < e.touches.length; i++) {
+      if (e.touches[i].pageX < leftPt.pageX) {
+        leftPt = e.touches[i];
       }
-    });
-    if (touchYstartLeft != null) {
-      distLeft = leftPt.pageY - touchYstartLeft;
-      leftPaddleY = previousPositionLeft + distLeft;
-      if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
-      if (leftPaddleY < 0) leftPaddleY = 0;
-    }
-    if (touchYstartRight != null) {
-      distRight = rightPt.pageY - touchYstartRight;
-      rightPaddleY = previousPositionRight + distRight;
-      if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
-      if (rightPaddleY < 0) rightPaddleY = 0;
+      if (e.touches[i].pageX > rightPt.pageX) {
+        rightPt = e.touches[i];
+      }
     }
 
-  } else if(e.touches && e.touches.length == 1) {//如果是单点触摸
-    if (e.touches[0].pageX  - canvas.offsetLeft < canvas.width / 2) {
-      if (touchYstartLeft != null) {
-        distLeft = e.touches[0].pageY - touchYstartLeft;
+    if (touchYstartLeft !== null && leftPt.pageX - canvas.offsetLeft < canvas.width / 2) {
+      distLeft = leftPt.pageY - touchYstartLeft;
+      leftPaddleY = previousPositionLeft + distLeft;
+      leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
+    }
+
+    if (touchYstartRight !== null && rightPt.pageX - canvas.offsetLeft > canvas.width / 2) {
+      distRight = rightPt.pageY - touchYstartRight;
+      rightPaddleY = previousPositionRight + distRight;
+      rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
+    }
+
+  } else if (e.touches && e.touches.length == 1) { // 单点触摸
+    let touch = e.touches[0];
+    if (touch.pageX - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft !== null) {
+        distLeft = touch.pageY - touchYstartLeft;
         leftPaddleY = previousPositionLeft + distLeft;
-        if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
-        if (leftPaddleY < 0) leftPaddleY = 0;
+        leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
       }
     } else {
-      if (touchYstartRight != null) {
-        distRight = e.touches[0].pageY - touchYstartRight;
+      if (touchYstartRight !== null) {
+        distRight = touch.pageY - touchYstartRight;
         rightPaddleY = previousPositionRight + distRight;
-        if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
-        if (rightPaddleY < 0) rightPaddleY = 0;
+        rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
       }
     }
-  
-}else {//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
-    if (e.pageX  - canvas.offsetLeft < canvas.width / 2) {
-      if (touchYstartLeft != null) {
+  } else { // 鼠标移动
+    if (e.pageX - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft !== null) {
         distLeft = e.pageY - touchYstartLeft;
         leftPaddleY = previousPositionLeft + distLeft;
-        if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
-        if (leftPaddleY < 0) leftPaddleY = 0;
+        leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
       }
     } else {
-      if (touchYstartRight != null) {
+      if (touchYstartRight !== null) {
         distRight = e.pageY - touchYstartRight;
         rightPaddleY = previousPositionRight + distRight;
-        if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
-        if (rightPaddleY < 0) rightPaddleY = 0;
+        rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
       }
     }
   }
-
-
-
-
-
 }
 
-
-document.addEventListener('touchstart', actionStart);
+// 事件监听器
+document.addEventListener('touchstart', actionStart, { passive: false });
 document.addEventListener('touchend', actionEnd);
-document.addEventListener('touchmove', actionMove);
-//相应鼠标点击后移动的事件
+document.addEventListener('touchmove', actionMove, { passive: false });
 document.addEventListener('mousedown', actionStart);
 document.addEventListener('mouseup', actionEnd);
 document.addEventListener('mousemove', actionMove);
