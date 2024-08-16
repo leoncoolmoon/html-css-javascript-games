@@ -1,6 +1,7 @@
 const wordElement = document.getElementById("word");
 const wrongLettersElement = document.getElementById("wrong-letters");
 const playAgainButton = document.getElementById("play-button");
+const definitionButton = document.getElementById("def-button");
 const popup = document.getElementById("popup-container");
 const notification = document.getElementById("notification-container");
 const finalMessage = document.getElementById("final-message");
@@ -34,12 +35,15 @@ const words = [
   "node",
 ];
 let selectedWord = words[Math.floor(Math.random() * words.length)];
-
 let playable = true;
 
 const correctLetters = [];
 const wrongLetters = [];
-
+async function fetchRandomWord() {
+  const response = await fetch('https://random-word-api.herokuapp.com/word');
+  const randomWord = await response.json();
+  return randomWord[0]; // 返回随机单词
+}
 function displayWord() {
   wordElement.innerHTML = `
     ${selectedWord
@@ -113,16 +117,57 @@ window.addEventListener("keypress", (e) => {
  press (e.key.toLowerCase());
 });
 
-playAgainButton.addEventListener("click", () => {
+playAgainButton.addEventListener("click", async () => {
   playable = true;
   correctLetters.splice(0);
   wrongLetters.splice(0);
-  selectedWord = words[Math.floor(Math.random() * words.length)];
+  //selectedWord = words[Math.floor(Math.random() * words.length)];
+   selectedWord = await fetchRandomWord();
   displayWord();
   updateWrongLettersElement();
   popup.style.display = "none";
 });
+definitionButton.addEventListener("click", async () => {
+  const word = selectedWord;
+  if (!word) return;
 
+  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+  const data = await response.json();
+
+  const resultContent = document.getElementById('resultContent');
+  resultContent.innerHTML = formatResult(data);
+  
+  document.getElementById('resultContainer').classList.remove('hidden');
+  document.body.classList.remove('hidden-result');
+});
+function formatResult(data) {
+  if (!data || data.length === 0 || data.title === 'No Definitions Found') return 'No results found.';
+  
+  const wordData = data[0];
+  let resultHTML = `<h2>${wordData.word}</h2>`;
+  resultHTML += `<p><strong>Phonetic:</strong> ${wordData.phonetic || 'N/A'}</p>`;
+
+  if (wordData.origin) {
+      resultHTML += `<p><strong>Origin:</strong> ${wordData.origin}</p>`;
+  }
+
+  resultHTML += '<h3>Meanings:</h3>';
+  wordData.meanings.forEach(meaning => {
+      resultHTML += `<p><strong>${meaning.partOfSpeech}</strong></p>`;
+      meaning.definitions.forEach(def => {
+          resultHTML += `<p> - ${def.definition}</p>`;
+          if (def.example) {
+              resultHTML += `<p><em>Example:</em> ${def.example}</p>`;
+          }
+      });
+  });
+
+  return resultHTML;
+}
+document.getElementById('closeButton').addEventListener('click', () => {
+  document.getElementById('resultContainer').classList.add('hidden');
+  document.body.classList.add('hidden-result');
+});
 // Init
 displayWord();
 function hasPhysicalKeyboard() {
@@ -145,8 +190,8 @@ function createVirtualKeyboard(divElement) {
     keyboard.style.justifyContent = 'center';
     keyboard.style.padding = '10px';
     keyboard.style.position = 'absolute';
-    keyboard.style.top = '75%';
-    keyboard.style.width = '100%';
+    keyboard.style.top = '60vh';
+    keyboard.style.width = '100vw';
     keyboard.style.left = '0';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     letters.split('').forEach(letter => {
