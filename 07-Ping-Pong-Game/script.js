@@ -346,7 +346,7 @@ function actionStart(e) {
   //判断是鼠标左键点击还是触摸
   var leftPt = { pageX: canvas.width, pageY: 0 }, rightPt = { pageX: 0, pageY: 0 };
 
-  if (e.touches) {//如果是触摸
+  if (e.touches && e.touches.length >1) {//如果是触摸
     e.touches.forEach(element => {//记录左半边，最左边的点
       if (element.pageX  - canvas.offsetLeft < canvas.width / 2) {
         leftPt = element.pageX < leftPt.pageX ? element : leftPt;
@@ -357,7 +357,13 @@ function actionStart(e) {
     if (touchYstartLeft == null) { touchYstartLeft = leftPt.pageY; }
     if (touchYstartRight == null) { touchYstartRight = rightPt.pageY; }
     return;
-  } else {//如果是鼠标 touchXstart等于鼠标的x坐标
+  } else if(e.touches && e.touches.length == 1) {//如果是单点触摸
+    if (e.touches[0].pageX - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft == null) { touchYstartLeft = e.touches[0].pageY; }
+    } else {
+      if (touchYstartRight == null) { touchYstartRight = e.touches[0].pageY; }
+    }
+  }else {//如果是鼠标 touchXstart等于鼠标的x坐标
     if (e.pageX  - canvas.offsetLeft < canvas.width / 2) {
       if (touchYstartLeft == null) { touchYstartLeft = e.pageY; }
     } else {
@@ -384,7 +390,7 @@ function actionMove(e) {
   //e.preventDefault();
   var distLeft, distRight, leftPt, rightPt;
   //判断是鼠标左键点击还是触摸
-  if (e.touches) {
+  if (e.touches && e.touches.length > 1) {//如果是触摸
     e.touches.forEach(element => {
       if (element.pageX - canvas.offsetLeft < canvas.width / 2) {
         leftPt = element.pageX < leftPt.pageX ? element : leftPt;
@@ -405,7 +411,24 @@ function actionMove(e) {
       if (rightPaddleY < 0) rightPaddleY = 0;
     }
 
-  } else {//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
+  } else if(e.touches && e.touches.length == 1) {//如果是单点触摸
+    if (e.touches[0].pageX  - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft != null) {
+        distLeft = e.touches[0].pageY - touchYstartLeft;
+        leftPaddleY = previousPositionLeft + distLeft;
+        if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
+        if (leftPaddleY < 0) leftPaddleY = 0;
+      }
+    } else {
+      if (touchYstartRight != null) {
+        distRight = e.touches[0].pageY - touchYstartRight;
+        rightPaddleY = previousPositionRight + distRight;
+        if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
+        if (rightPaddleY < 0) rightPaddleY = 0;
+      }
+    }
+  
+}else {//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
     if (e.pageX  - canvas.offsetLeft < canvas.width / 2) {
       if (touchYstartLeft != null) {
         distLeft = e.pageY - touchYstartLeft;
