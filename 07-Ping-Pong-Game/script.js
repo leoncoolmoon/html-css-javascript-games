@@ -148,9 +148,11 @@ function update() {
   } else if (rightPlayerScore === maxScore) {
     playerWin("Right player");
   }
+
 }
 
 function playerWin(player) {
+  gameRunning = false;
   var message = "Congratulations! " + player + " win!";
   $("#message").text(message); // Set the message text
   $("#message-modal").modal("show"); // Display the message modal
@@ -215,7 +217,7 @@ $("#message-modal-close").on("click", function () {
 
 var downLock = false;
 function keyDown() {// pressed down arrow key
-  if(upLock) { keyUp(); }
+  if (upLock) { keyUp(); }
   if (downLock) {
     var event = new KeyboardEvent('keyup', {
       bubbles: true,
@@ -279,7 +281,7 @@ function keyRight() {// pressed right arrow key
 
 var wLock = false;
 function keyW() {// pressed w key
-  if (sLock) {keyS();}
+  if (sLock) { keyS(); }
   if (wLock) {
     var event = new KeyboardEvent('keyup', {
       bubbles: true,
@@ -308,7 +310,7 @@ function keyW() {// pressed w key
 
 var sLock = false;
 function keyS() {// pressed s key
-  if (wLock) {keyW();}
+  if (wLock) { keyW(); }
   if (sLock) {
     var event = new KeyboardEvent('keyup', {
       bubbles: true,
@@ -333,3 +335,105 @@ function keyS() {// pressed s key
     document.getElementById("right_arrow").style.transform = "scale(0.9)rotate(90deg)";
   }
 }
+
+//增加一个触摸屏幕事件，让Paddle水平移动距离和触摸点水平移动距离一致
+var touchYstartLeft = null;
+var previousPositionLeft = canvas.height / 2 - paddleHeight;
+var touchYstartRight = null;
+var previousPositionRight = canvas.height / 2 - paddleHeight;
+function actionStart(e) {
+  //e.preventDefault();
+  //判断是鼠标左键点击还是触摸
+  var leftPt = { pageX: canvas.width, pageY: 0 }, rightPt = { pageX: 0, pageY: 0 };
+
+  if (e.touches) {//如果是触摸
+    e.touches.forEach(element => {//记录左半边，最左边的点
+      if (element.pageX  - canvas.offsetLeft < canvas.width / 2) {
+        leftPt = element.pageX < leftPt.pageX ? element : leftPt;
+      } else {//记录右半边，最右边的点
+        rightPt = element.pageX > rightPt.pageX ? element : rightPt;
+      }
+    });
+    if (touchYstartLeft == null) { touchYstartLeft = leftPt.pageY; }
+    if (touchYstartRight == null) { touchYstartRight = rightPt.pageY; }
+    return;
+  } else {//如果是鼠标 touchXstart等于鼠标的x坐标
+    if (e.pageX  - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft == null) { touchYstartLeft = e.pageY; }
+    } else {
+      if (touchYstartRight == null) { touchYstartRight = e.pageY; }
+    }
+  }
+
+
+
+
+}
+function actionEnd(e) {
+  //e.preventDefault();
+  if (touchYstartRight != null) {
+    touchYstartRight = null;
+    previousPositionRight = rightPaddleY;
+  }
+  if (touchYstartLeft != null) {
+    touchYstartLeft = null;
+    previousPositionLeft = leftPaddleY;
+  }
+}
+function actionMove(e) {
+  //e.preventDefault();
+  var distLeft, distRight, leftPt, rightPt;
+  //判断是鼠标左键点击还是触摸
+  if (e.touches) {
+    e.touches.forEach(element => {
+      if (element.pageX - canvas.offsetLeft < canvas.width / 2) {
+        leftPt = element.pageX < leftPt.pageX ? element : leftPt;
+      } else {//记录右半边，最右边的点
+        rightPt = element.pageX > rightPt.pageX ? element : rightPt;
+      }
+    });
+    if (touchYstartLeft != null) {
+      distLeft = leftPt.pageY - touchYstartLeft;
+      leftPaddleY = previousPositionLeft + distLeft;
+      if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
+      if (leftPaddleY < 0) leftPaddleY = 0;
+    }
+    if (touchYstartRight != null) {
+      distRight = rightPt.pageY - touchYstartRight;
+      rightPaddleY = previousPositionRight + distRight;
+      if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
+      if (rightPaddleY < 0) rightPaddleY = 0;
+    }
+
+  } else {//如果是鼠标 dist等于鼠标的x坐标x相对touchXstart的移动距离
+    if (e.pageX  - canvas.offsetLeft < canvas.width / 2) {
+      if (touchYstartLeft != null) {
+        distLeft = e.pageY - touchYstartLeft;
+        leftPaddleY = previousPositionLeft + distLeft;
+        if (leftPaddleY + paddleHeight > canvas.height) leftPaddleY = canvas.height - paddleHeight;
+        if (leftPaddleY < 0) leftPaddleY = 0;
+      }
+    } else {
+      if (touchYstartRight != null) {
+        distRight = e.pageY - touchYstartRight;
+        rightPaddleY = previousPositionRight + distRight;
+        if (rightPaddleY + paddleHeight > canvas.height) rightPaddleY = canvas.height - paddleHeight;
+        if (rightPaddleY < 0) rightPaddleY = 0;
+      }
+    }
+  }
+
+
+
+
+
+}
+
+
+document.addEventListener('touchstart', actionStart);
+document.addEventListener('touchend', actionEnd);
+document.addEventListener('touchmove', actionMove);
+//相应鼠标点击后移动的事件
+document.addEventListener('mousedown', actionStart);
+document.addEventListener('mouseup', actionEnd);
+document.addEventListener('mousemove', actionMove);
