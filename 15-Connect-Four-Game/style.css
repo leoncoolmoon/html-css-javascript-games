@@ -1,239 +1,201 @@
 body {
-	background-color: #e9e7fd;
+    background-color: #e9e7fd;
 }
 
 /* Main Container */
-
 #main-container {
-
-	align-items: center;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	min-height: 100vh;
-
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
 }
 
 /* Player Details */
-
 #player {
-
-	background-color: #d5deff;
-	border: 8px solid #4f3ff0;
-	border-radius: 10px;
-	margin-top: 50px;
-	padding: 20px;
-	width: 550px;
-
+    background-color: #d5deff;
+    border: 8px solid #4f3ff0;
+    border-radius: 10px;
+    margin-top: 50px;
+    padding: 20px;
+    width: 80%;
+    max-width: 550px;
 }
 
 #player-type {
-
-	color: #4f3ff0;
-	font-family: "Poppins";
-	letter-spacing: 5px;
-	text-align: center;
-	text-transform: uppercase;
-
+    color: #4f3ff0;
+    font-family: "Poppins", sans-serif;
+    letter-spacing: 5px;
+    text-align: center;
+    text-transform: uppercase;
 }
-
-/* Grid */
-
-#grid {
-
-	background-color: #4f3ff0;
-	border: 3.5px solid #d5deff;
+#grid-config {
+	background-color: #d5deff;
+	border: 3px solid #4f3ff0;
 	border-radius: 8px;
-	box-shadow: 2px 3px 7px grey;
-	margin-top: 50px;
-	max-width: 600px;
-	padding: 3px;
-
+	padding: 20px;
+	margin-top: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	width: 80%;
+	max-width: 550px;
+	position: absolute;
+  }
+  .input-group {
+	display: flex;
+	flex-direction: column;
+	margin: 10px;
+  }
+  
+  .input-group label {
+	margin-bottom: 5px;
+	color: #4f3ff0;
+	font-family: "Poppins", sans-serif;
+  }
+  
+  .input-group input {
+	width: 60px;
+	padding: 5px;
+	border: 1px solid #4f3ff0;
+	border-radius: 4px;
+  }
+  
+  #update-grid {
+	background-color: #4f3ff0;
+	color: #d5deff;
+	border: none;
+	border-radius: 5px;
+	padding: 10px 20px;
+	font-family: "Poppins", sans-serif;
+	cursor: pointer;
+	transition: 0.3s;
+  }
+  
+  #update-grid:hover {
+	background-color: #3f2fd0;
+  }
+/* Grid */
+#grid {
+    background-color: #4f3ff0;
+    border: 3.5px solid #d5deff;
+    border-radius: 8px;
+    box-shadow: 2px 3px 7px grey;
+    margin-top: 20px;
+    padding: 3px;
+    width: 80vmin;
+    height: 80vmin;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Grid Row */
-
 .row {
-
-	display: flex;
-
+    display: flex;
+    justify-content: space-between;
+    height: calc((80vmin - 6px - 12px) / 6); /* Subtracting padding and gaps */
 }
 
 /* Grid Column */
-
 .col {
-
-	align-items: center;
-	background-color: #d5deff;
-	border: 1px solid  #4f3ff0;
-	border-radius: 5px;
-	display: flex;
-	justify-content: center;
-	height: 75px;
-	margin: 5px;
-	width:  75px;
-
+    align-items: center;
+    background-color: #d5deff;
+    border: 1px solid #4f3ff0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    width: calc((80vmin - 6px - 12px) / 7); /* Subtracting padding and gaps */
+    margin: 1px;
 }
 
 /* Buttons */
-
 .btn {
-
-	background-color: transparent;
-	border: none;
-	color: transparent;
-	height: 100%;
-	padding: 0;
-	width: 100%;
-
+    background-color: transparent;
+    border: none;
+    color: transparent;
+    height: 100%;
+    padding: 0;
+    width: 100%;
 }
 
 #reset-btn {
-
-	background-color: transparent;
-	border: 2px solid #4f3ff0;
-	border-radius: 5px;
-	color: #4f3ff0;
-	font-family: "Poppins";
-	font-size: 1.5rem;
-	margin: 50px 0;
-	padding: 10px 40px;
-	text-transform: uppercase;
-	transition: 0.7s;
-
+    background-color: transparent;
+    border: 2px solid #4f3ff0;
+    border-radius: 5px;
+    color: #4f3ff0;
+    font-family: "Poppins", sans-serif;
+    font-size: 1.5rem;
+    margin: 50px 0;
+    padding: 10px 40px;
+    text-transform: uppercase;
+    transition: 0.7s;
 }
 
 #reset-btn:hover {
-
-	background-color: #4f3ff0;
-	color: #d5deff;
-	cursor: pointer;
-	transition: 0.7s;
-
+    background-color: #4f3ff0;
+    color: #d5deff;
+    cursor: pointer;
+    transition: 0.7s;
 }
 
 /* Player - 1 Buttons */
-
 .btn-player-1 {
-
-	background-color: #34c471;
-	border: 2px solid #34c471;
-	border-radius: 50%;
-	color: red;
-	height:  50px;
-	width: 50px;
-
+    background-color: #34c471;
+    border: 2px solid #34c471;
+    border-radius: 50%;
+    color: red;
+    height: 80%;
+    width: 80%;
 }
 
 /* Player - 2 Buttons */
-
 .btn-player-2 {
-
-	background-color: #df3670;
-	border: 2px solid #df3670;
-	border-radius: 50%;
-	color: red;
-	height:  50px;
-	width: 50px;
-
+    background-color: #df3670;
+    border: 2px solid #df3670;
+    border-radius: 50%;
+    color: red;
+    height: 80%;
+    width: 80%;
 }
 
 /* Media Queries */
-
 @media (max-width: 800px) {
-	#grid {
-		width: 500px;
-	}
+    #player {
+        max-width: 450px;
+    }
 
-	.col {
-		height: 62px;
-		margin: 4px;
-		width: 62px;
-	}
-
-	#player {
-		width: 450px;
-	}
-
-	#reset-btn {
-		font-size: 1.2rem;
-	}
-
-	.btn-player-1 {
-		height: 40px;
-		width: 40px;
-	}
-
-	.btn-player-2 {
-		height: 40px;
-		width: 40px;
-	}
+    #reset-btn {
+        font-size: 1.2rem;
+    }
 }
 
 @media (max-width: 550px) {
-	#grid {
-		width: 400px;
-	}
+    #player {
+        max-width: 350px;
+    }
 
-	.col {
-		height: 50px;
-		margin: 3px;
-		width: 50px;
-	}
-
-	#player {
-		width: 350px;
-	}
-
-	#reset-btn {
-		font-size: 1rem;
-	}
-
-	.btn-player-1 {
-		height: 30px;
-		width: 30px;
-	}
-
-	.btn-player-2 {
-		height: 30px;
-		width: 30px;
-	}
+    #reset-btn {
+        font-size: 1rem;
+    }
 }
 
-@media (max-width:  450px) {
-	#grid {
-		width: 90%;
-	}
+@media (max-width: 450px) {
+    #player {
+        align-items: center;
+        display: flex;
+        border-width: 5px;
+        justify-content: center;
+        height: 30px;
+        width: 78%;
+    }
 
-	.col {
-		height: 40px;
-		margin: 2px;
-	}
+    #player-type {
+        font-size: 1.2rem;
+    }
 
-	#player {
-		align-items: center;
-		display: flex;
-		border-width: 5px;
-		justify-content: center;
-		height: 30px;
-		width: 78%;
-	}
-
-	#player-type {
-		font-size: 1.2rem;
-	}
-
-	#reset-btn {
-		font-size: 0.8rem;
-	}
-
-	.btn-player-1 {
-		height: 20px;
-		width: 20px;
-	}
-
-	.btn-player-2 {
-		height: 20px;
-		width: 20px;
-	}
+    #reset-btn {
+        font-size: 0.8rem;
+    }
 }
