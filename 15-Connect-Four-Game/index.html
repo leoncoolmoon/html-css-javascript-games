@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Connect Four</title>
-	
+
 	<!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
 	<!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
 	<!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
 
 	<!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-	<!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha --> 
+	<!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
 	<!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
 
-	 <link rel="icon" href="https://leoncoolmoon.github.io/icon.png">
+	<link rel="icon" href="https://leoncoolmoon.github.io/icon.png">
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.gstatic.com">
@@ -23,22 +24,42 @@
 	<link rel="stylesheet" href="style.css">
 
 </head>
+
 <body>
 	<div id="grid-config">
-		<div class="input-group">
-		  <label for="grid-width">Columns:</label>
-		  <input type="number" id="grid-width" min="3" max="20" value="10">
-		</div>
-		<div class="input-group">
-		  <label for="grid-height">Rows:</label>
-		  <input type="number" id="grid-height" min="3" max="20" value="10">
-		</div>
-		<div class="input-group">
-		  <label for="win-condition">Win Condition:</label>
-		  <input type="number" id="win-condition" min="3" max="8" value="5">
-		</div>
+		<fieldset>
+			<legend>Game Settings:</legend>
+			<div class="input-group">
+				<label for="grid-width">Columns:</label>
+				<input type="number" id="grid-width" min="3" max="20" value="10">
+			</div>
+			<div class="input-group">
+				<label for="grid-height">Rows:</label>
+				<input type="number" id="grid-height" min="3" max="20" value="10">
+			</div>
+			<div class="input-group">
+				<label for="win-condition">Win Condition:</label>
+				<input type="number" id="win-condition" min="3" max="8" value="5">
+			</div>
+		</fieldset>
+		<fieldset>
+			<legend>Player Settings:</legend>
+			<div>
+				<input type="radio" id="hvh" name="player" value="0"  />
+				<label for="hvh">human vs. human</label>
+			  </div>
+			  <div>
+				<input type="radio" id="hvc" name="player" value="1" checked />
+				<label for="hvc">human vs. computer</label>
+			  </div>
+			  <div>
+				<input type="radio" id="cvh" name="player" value="2"  />
+				<label for="cvh">computer vs. human</label>
+			  </div>
+									
+		</fieldset>
 		<button id="update-grid">OK</button>
-	  </div>
+	</div>
 	<div id="main-container">
 		<div id="player">
 			<h1 id="player-type">Player - 1</h1>
@@ -50,4 +71,5 @@
 	<script src="script.js"></script>
 
 </body>
+
 </html>

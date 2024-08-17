@@ -7,7 +7,7 @@ var updateGridBTN = document.getElementById("update-grid");
 var widthInput = document.getElementById("grid-width");
 var heightInput = document.getElementById("grid-height");
 var winConditionInput = document.getElementById("win-condition");
-
+var player = 1;
 // Game Flow Variables
 
 var columns = 10;
@@ -27,6 +27,7 @@ function initGame(column, row, winCounts) {
 	countMove = 0;
 	lastMove = [];
 	buttons = document.getElementsByClassName("btn");
+	player = document.querySelector('input[name="player"]:checked').value;
 	for (var i = 0; i < buttons.length; i++) {
 		// Handing the Event when button was clicked
 		buttons[i].addEventListener("click", function () {
@@ -84,6 +85,7 @@ function updateGrid() {
 
 
 	document.getElementById("grid-config").style.display = "none";
+	pcStart();
 }
 
 // Event Listener for Buttons
@@ -121,8 +123,7 @@ function makeMove(button, buttonNo) {
 		// Update the player
 		playerNumber = 2;
 		playerType.textContent = "Player - 2";
-		//getBestMove(filledGrid,winCount,playerNumber);
-		PCMove();
+		if(player == 1){PCMove();}		
 	} else {
 		button.classList.add("btn-player-2");
 		filledGrid[row][col] = 2;
@@ -137,6 +138,7 @@ function makeMove(button, buttonNo) {
 		// Update the player
 		playerNumber = 1;
 		playerType.textContent = "Player - 1";
+		if(player == 2){PCMove();}
 	}
 
 	// If all the cells has been filled
@@ -156,7 +158,7 @@ function makeMove(button, buttonNo) {
 
 }
 function colorButton(points) {
-	var i = [];
+/*	var i = [];
 	points.forEach(function (point) {
 		i.push([toBtNo(point[0], point[1] - 1), point[2]]);
 	})
@@ -173,7 +175,7 @@ function colorButton(points) {
 			buttons[j].innerHTML = "";
 			buttons[j].style.color = "transparent";
 		}
-	}
+	}*/
 
 }
 var winMethod = 0;
@@ -308,7 +310,16 @@ function resetBoard() {
 			filledGrid[i][j] = -1;
 		}
 	}
+	pcStart();
+}
 
+function pcStart() {
+	if(player == 2){
+		var r = Math.floor( rows/2);
+		var c = Math.floor( columns/2);
+		var i = toBtNo(r, c);
+		makeMove(buttons[i], i);
+	}
 }
 
 function PCMove() {
