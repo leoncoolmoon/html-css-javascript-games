@@ -158,24 +158,24 @@ function makeMove(button, buttonNo) {
 
 }
 function colorButton(points) {
-	var i = [];
-	points.forEach(function (point) {
-		i.push([toBtNo(point[0], point[1] - 1), point[2]]);
-	})
-	for (var j = 0; j < buttons.length; j++) {
-		var mark = false;
-		i.forEach(element => {
-			if (element[0] === j) {
-				buttons[j].innerHTML = element[1];
-				buttons[j].style.color = "red";
-				mark = true;
-			}
-		});
-		if (!mark) {
-			buttons[j].innerHTML = "";
-			buttons[j].style.color = "transparent";
-		}
-	}
+	// var i = [];
+	// points.forEach(function (point) {
+	// 	i.push([toBtNo(point[0], point[1] - 1), point[2]]);
+	// })
+	// for (var j = 0; j < buttons.length; j++) {
+	// 	var mark = false;
+	// 	i.forEach(element => {
+	// 		if (element[0] === j) {
+	// 			buttons[j].innerHTML = element[1];
+	// 			buttons[j].style.color = "red";
+	// 			mark = true;
+	// 		}
+	// 	});
+	// 	if (!mark) {
+	// 		buttons[j].innerHTML = "";
+	// 		buttons[j].style.color = "transparent";
+	// 	}
+	// }
 
 }
 var winMethod = 0;
@@ -517,6 +517,16 @@ function PCMove() {
 		makeMove(buttons[r * columns + c], r * columns + c + 1);
 		availableMoves = [];
 		return;
+	}else{
+		for (var r = 0; r < rows; r++) {
+			for (var c = 0; c < columns; c++) {
+				if(filledGrid[r][c] === -1){
+					makeMove(buttons[r * columns + c], r * columns + c + 1);
+					availableMoves = [];
+					return;
+				}
+			}
+		}
 	}
 	availableMoves = [];
 }
