@@ -250,7 +250,7 @@ function playerWon(row, col, player, w_count, next = false) {
 		var i = row - col;
 		var j = 0;
 
-		for (; i <= rows - 1; i++, j++) {
+		for (; i <= rows - 1 && j <= columns - 1; i++, j++) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
 				if (count === w_count) {
@@ -286,7 +286,7 @@ function playerWon(row, col, player, w_count, next = false) {
 		var i = 0;
 		var j = col - row;
 
-		for (; j <= columns - 1; i++, j++) {
+		for (; j <= columns - 1 && i <= rows - 1; i++, j++) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
 				if (count === w_count) {
@@ -363,7 +363,7 @@ function playerWon(row, col, player, w_count, next = false) {
 		var i = rows - 1;
 		var j = row + col - rows + 1;
 
-		for (; j <= columns - 1; j++, i--) {
+		for (; j <= columns - 1 && i >= 0; j++, i--) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
 				if (count === w_count) {
@@ -435,7 +435,7 @@ function resetBoard() {
 function pcStart() {
 	if (player == 2) {
 		var r = Math.floor(rows / 2);
-		var c = Math.floor(columns / 2);
+		var c = Math.floor(columns / 2-1);
 		var i = toBtNo(r, c);
 		makeMove(buttons[i], i);
 	}
