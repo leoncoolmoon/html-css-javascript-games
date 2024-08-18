@@ -123,7 +123,7 @@ function makeMove(button, buttonNo) {
 		// Update the player
 		playerNumber = 2;
 		playerType.textContent = "Player - 2";
-		if(player == 1){PCMove();}		
+		if (player == 1) { PCMove(); }
 	} else {
 		button.classList.add("btn-player-2");
 		filledGrid[row][col] = 2;
@@ -138,7 +138,7 @@ function makeMove(button, buttonNo) {
 		// Update the player
 		playerNumber = 1;
 		playerType.textContent = "Player - 1";
-		if(player == 2){PCMove();}
+		if (player == 2) { PCMove(); }
 	}
 
 	// If all the cells has been filled
@@ -158,7 +158,7 @@ function makeMove(button, buttonNo) {
 
 }
 function colorButton(points) {
-/*	var i = [];
+	var i = [];
 	points.forEach(function (point) {
 		i.push([toBtNo(point[0], point[1] - 1), point[2]]);
 	})
@@ -175,20 +175,36 @@ function colorButton(points) {
 			buttons[j].innerHTML = "";
 			buttons[j].style.color = "transparent";
 		}
-	}*/
+	}
 
 }
 var winMethod = 0;
-function playerWon(row, col, player, w_count) {
-
+function playerWon(row, col, player, w_count, next = false) {
+	var returnValue = false;
 	var count = 0;
-
 	// Check for columns
-
 	for (var i = 0; i < columns; i++) {
 		if (player.includes(filledGrid[row][i])) {
 			count++;
-			if (count === w_count) { winMethod = 1; return true; }
+			if (count === w_count) {
+				winMethod = 1;
+				if (!next) { returnValue = true; }
+				else if (w_count === winCount - 1) {
+					if (i + 1 < columns
+						&& filledGrid[row][i + 1] == -1
+						&& i - count >= 0
+						&& filledGrid[row][i - count] == -1) {//前后两端都是空
+						returnValue = true;
+					}
+				} else if (w_count === winCount) {
+					if ((i + 1 < columns
+						&& filledGrid[row][i + 1] == -1)
+						|| (i - count >= 0
+							&& filledGrid[row][i - count] == -1)) {//前后两端有空
+						returnValue = true;
+					}
+				}
+			}
 		} else {
 			count = 0;
 		}
@@ -196,18 +212,34 @@ function playerWon(row, col, player, w_count) {
 	}
 
 	count = 0;
-
 	// Check for Rows
-
 	for (var i = 0; i < rows; i++) {
 		if (player.includes(filledGrid[i][col])) {
 			count++;
-			if (count === w_count) { winMethod = 2; return true; }
+			if (count === w_count) {
+				winMethod = 2;
+				if (!next) { returnValue = true; }
+				else if (w_count === winCount - 1) {
+					if (i + 1 < rows
+						&& filledGrid[i + 1][col] == -1
+						&& i - count >= 0
+						&& filledGrid[i - count][col] == -1) {//前后两端都是空
+						returnValue = true;
+					}
+				} else if (w_count === winCount) {
+					if ((i + 1 < rows
+						&& filledGrid[i + 1][col] == -1)
+						|| (i - count >= 0
+							&& filledGrid[i - count][col] == -1)) {//前后两端有空
+						returnValue = true;
+					}
+				}
+
+			}
 		} else {
 			count = 0;
 		}
 	}
-
 
 	count = 0;
 
@@ -221,11 +253,34 @@ function playerWon(row, col, player, w_count) {
 		for (; i <= rows - 1; i++, j++) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
-				if (count == w_count) { winMethod = 3; return true; }
+				if (count === w_count) {
+					winMethod = 3;
+					if (!next) { returnValue = true; }
+					else if (w_count === winCount - 1) {
+						if (i + 1 < rows 
+							&& j + 1 < columns
+							&& filledGrid[i + 1][j + 1] == -1
+							&& i - count >= 0
+							&& j - count >= 0
+							&& filledGrid[i - count][j - count] == -1) {//前后两端都是空
+							returnValue = true;
+						}
+					} else if (w_count === winCount) {
+						if ((i + 1 < rows 
+							&& j + 1 < columns 
+							&& filledGrid[i + 1][j + 1] == -1)
+							|| (i - count >= 0
+								&& j - count >= 0
+								&& filledGrid[i - count][j - count] == -1)) {//前后两端有空	
+							returnValue = true;
+						}
+					}
+				}
 			} else {
 				count = 0;
 			}
 		}
+
 	} else {
 
 		var i = 0;
@@ -234,12 +289,34 @@ function playerWon(row, col, player, w_count) {
 		for (; j <= columns - 1; i++, j++) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
-				if (count == w_count) { winMethod = 3; return true; }
+				if (count === w_count) {
+					winMethod = 3;
+					if (!next) { returnValue = true; }
+					else if (w_count === winCount - 1) {
+						if (i + 1 < rows
+							&& j + 1 < columns
+							&& filledGrid[i + 1][j + 1] == -1
+							&& i - count >= 0
+							&& j - count >= 0
+							&& filledGrid[i - count][j - count] == -1) {//前后两端都是空
+							returnValue = true;
+						}
+					} else if (w_count === winCount) {
+						if ((i + 1 < rows
+							&& j + 1 < columns
+							&& filledGrid[i + 1][j + 1] == -1)
+							|| (i - count >= 0
+								&& j - count >= 0
+								&& filledGrid[i - count][j - count] == -1)) {//前后两端有空
+							returnValue = true;
+						}
+					}
+				}
 			} else {
 				count = 0;
 			}
-		}
 
+		}
 	}
 
 	count = 0;
@@ -254,12 +331,33 @@ function playerWon(row, col, player, w_count) {
 		for (; i >= 0 && j <= row + col; i--, j++) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
-				if (count == w_count) { winMethod = 4; return true; }
+				if (count == w_count) {
+					winMethod = 4;
+					if (!next) { returnValue = true; }
+					else if (w_count === winCount - 1) {
+						if (i - 1 >= 0
+							&& j + 1 < columns
+							&& filledGrid[i - 1][j + 1] == -1
+							&& i + count <= rows - 1
+							&& j - count >= 0
+							&& filledGrid[i + count][j - count] == -1) {//前后两端都是空
+							returnValue = true;
+						}
+					} else if (w_count === winCount) {
+						if ((i - 1 >= 0
+							&& j + 1 < columns
+							&& filledGrid[i - 1][j + 1] == -1)
+							|| (i + count <= rows
+								&& j - count >= 0
+								&& filledGrid[i + count][j - count] == -1)) {//前后两端有空
+							returnValue = true;
+						}
+					}
+				}
 			} else {
 				count = 0;
 			}
 		}
-
 	} else {
 
 		var i = rows - 1;
@@ -268,15 +366,36 @@ function playerWon(row, col, player, w_count) {
 		for (; j <= columns - 1; j++, i--) {
 			if (player.includes(filledGrid[i][j])) {
 				count++;
-				if (count == w_count) { winMethod = 4; return true; }
+				if (count === w_count) {
+					winMethod = 4;
+					if (!next) { returnValue = true; }
+					else if (w_count === winCount - 1) {
+						if (i - 1 >= 0
+							&& j + 1 < columns
+							&& filledGrid[i - 1][j + 1] == -1
+							&& i + count <= rows - 1
+							&& j - count >= 0
+							&& filledGrid[i + count][j - count] == -1) {//前后两端都是空
+							returnValue = true;
+						}
+					} else if (w_count === winCount) {
+						if ((i - 1 >= 0
+							&& j + 1 < columns
+							&& filledGrid[i - 1][j + 1] == -1)
+							|| (i + count <= rows - 1
+								&& j - count >= 0
+								&& filledGrid[i + count][j - count] == -1)) {//前后两端有空
+							returnValue = true;
+						}
+					}
+				}
 			} else {
 				count = 0;
 			}
 		}
 
 	}
-	return false;
-
+	return returnValue;
 }
 
 // Function to reset the Board completely
@@ -314,9 +433,9 @@ function resetBoard() {
 }
 
 function pcStart() {
-	if(player == 2){
-		var r = Math.floor( rows/2);
-		var c = Math.floor( columns/2);
+	if (player == 2) {
+		var r = Math.floor(rows / 2);
+		var c = Math.floor(columns / 2);
 		var i = toBtNo(r, c);
 		makeMove(buttons[i], i);
 	}
@@ -359,21 +478,21 @@ function PCMove() {
 		var bestMoves = [];
 		var bestMovesShortlist = [];
 		var highestPriority = -Infinity;
-	
+
 		// 找出最高优先级
 		for (var i = 0; i < availableMoves.length; i++) {
 			if (availableMoves[i][2] > highestPriority) {
 				highestPriority = availableMoves[i][2];
 			}
 		}
-	
+
 		// 选择所有具有最高优先级的移动
 		for (var i = 0; i < availableMoves.length; i++) {
 			if (availableMoves[i][2] === highestPriority) {
 				bestMoves.push(availableMoves[i]);
 			}
 		}
-	
+
 		// 评估每个最佳移动的周围情况
 		bestMoves.forEach(element => {
 			var moveScore = 0;
@@ -386,15 +505,15 @@ function PCMove() {
 			}
 			element.push(moveScore);  // 将分数添加到移动数组中
 		});
-	
+
 		// 根据周围棋子数量排序，选择周围棋子最多的移动
 		bestMovesShortlist = bestMoves.sort((a, b) => b[3] - a[3]);
-	
+
 		// 选择第一个（最佳）移动
 		var bestMove = bestMovesShortlist[0];
 		var r = bestMove[0];
 		var c = bestMove[1];
-	
+
 		makeMove(buttons[r * columns + c], r * columns + c + 1);
 		availableMoves = [];
 		return;
@@ -442,38 +561,38 @@ function checkAdd(r, c, p) {//检查加入availableMoves
 	return 0;
 }
 function oneStepToWin(player, p) {
-    var listF = [];
-    for (var r = 0; r < rows; r++) {
-        for (var c = 0; c < columns; c++) {
-            if (filledGrid[r][c] === -1) {
-                filledGrid[r][c] = player;
-                if (playerWon(r, c, [player], winCount)) {
-                    filledGrid[r][c] = -1;
-                    addToAvailableMoves(r, c, 4 + p);
-                    listF.push([r, c]);
-                } else if (playerWon(r, c, [player], winCount - 1)) {
-                    filledGrid[r][c] = -1;
-                    if (!listF.some(coord => coord[0] === r && coord[1] === c)) {
-                        addToAvailableMoves(r, c, 2 + p);
-                    } else {
-                        addToAvailableMoves(r, c, -1);
-                    }
-                } else {
-                    filledGrid[r][c] = -1;
-                }
-            }
-        }
-    }
+	var listF = [];
+	for (var r = 0; r < rows; r++) {
+		for (var c = 0; c < columns; c++) {
+			if (filledGrid[r][c] === -1) {
+				filledGrid[r][c] = player;
+				if (playerWon(r, c, [player], winCount)) {
+					filledGrid[r][c] = -1;
+					addToAvailableMoves(r, c, 4 + p);
+					listF.push([r, c]);
+				} else if (playerWon(r, c, [player], winCount - 1, true)) {
+					filledGrid[r][c] = -1;
+					if (!listF.some(coord => coord[0] === r && coord[1] === c)) {
+						addToAvailableMoves(r, c, 2 + p);
+					} else {
+						addToAvailableMoves(r, c, -1);
+					}
+				} else {
+					filledGrid[r][c] = -1;
+				}
+			}
+		}
+	}
 }
 function addToAvailableMoves(r, c, p) {
-    for (let i = 0; i < availableMoves.length; i++) {
-        if (availableMoves[i][0] === r && availableMoves[i][1] === c) {
-            availableMoves[i][2] += p;
-            return;  // 找到匹配的坐标后立即返回
-        }
-    }
-    // 如果循环结束没有找到匹配的坐标，添加新的
-    availableMoves.push([r, c, p]);
+	for (let i = 0; i < availableMoves.length; i++) {
+		if (availableMoves[i][0] === r && availableMoves[i][1] === c) {
+			availableMoves[i][2] += p;
+			return;  // 找到匹配的坐标后立即返回
+		}
+	}
+	// 如果循环结束没有找到匹配的坐标，添加新的
+	availableMoves.push([r, c, p]);
 }
 
 function isBlocked(r, c, player) {
@@ -485,13 +604,13 @@ function isBlocked(r, c, player) {
 					if (c - 1 >= 0) {
 						if (filledGrid[r][c - 1] === (player === 1 ? 2 : 1)) {
 							//up
-							if (filledGrid[r][c - 4] === (player)) {
+							if (c-4 >= 0 && filledGrid[r][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//down
-							if (filledGrid[r][c + 4] === (player)) {
+							if (c+4 < columns && filledGrid[r][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -499,13 +618,13 @@ function isBlocked(r, c, player) {
 					} else if (c + 1 < columns) {
 						if (filledGrid[r][c + 1] === (player === 1 ? 2 : 1)) {
 							//down
-							if (filledGrid[r][c + 4] === (player)) {
+							if (c+4 < columns && filledGrid[r][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//up
-							if (filledGrid[r][c - 4] === (player)) {
+							if (c-4 >= 0 && filledGrid[r][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -518,13 +637,13 @@ function isBlocked(r, c, player) {
 					if (r - 1 >= 0) {
 						if (filledGrid[r - 1][c] === (player === 1 ? 2 : 1)) {
 							//left
-							if (filledGrid[r - 4][c] === (player)) {
+							if (r-4>0 && filledGrid[r - 4][c] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//right
-							if (filledGrid[r + 4][c] === (player)) {
+							if (r+4< rows && filledGrid[r + 4][c] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -532,13 +651,13 @@ function isBlocked(r, c, player) {
 					} else if (r + 1 < rows) {
 						if (filledGrid[r + 1][c] === (player === 1 ? 2 : 1)) {
 							//right
-							if (filledGrid[r + 4][c] === (player)) {
+							if (r+4< rows && filledGrid[r + 4][c] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//left
-							if (filledGrid[r - 4][c] === (player)) {
+							if (r-4>0 && filledGrid[r - 4][c] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -550,13 +669,13 @@ function isBlocked(r, c, player) {
 					if (r - 1 >= 0 && c - 1 >= 0) {
 						if (filledGrid[r - 1][c - 1] === (player === 1 ? 2 : 1)) {
 							//up
-							if (filledGrid[r - 4][c - 4] === (player)) {
+							if (r-4 >= 0 && c-4 >= 0 && filledGrid[r - 4][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//down
-							if (filledGrid[r + 4][c + 4] === (player)) {
+							if (r+4 < rows && c+4 < columns && filledGrid[r + 4][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -564,13 +683,13 @@ function isBlocked(r, c, player) {
 					} else if (r + 1 < rows && c + 1 < columns) {
 						if (filledGrid[r + 1][c + 1] === (player === 1 ? 2 : 1)) {
 							//down
-							if (filledGrid[r + 4][c + 4] === (player)) {
+							if (r+4 < rows && c+4 < columns && filledGrid[r + 4][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//up
-							if (filledGrid[r - 4][c - 4] === (player)) {
+							if (r-4 >= 0 && c-4 >= 0 && filledGrid[r - 4][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -583,13 +702,13 @@ function isBlocked(r, c, player) {
 					if (r - 1 >= 0 && c + 1 < columns) {
 						if (filledGrid[r - 1][c + 1] === (player === 1 ? 2 : 1)) {
 							//up
-							if (filledGrid[r - 4][c + 4] === (player)) {
+							if (r-4 >= 0 && c+4 < columns && filledGrid[r - 4][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//down
-							if (filledGrid[r + 4][c - 4] === (player)) {
+							if (r+4 < rows && c-4 >= 0 && filledGrid[r + 4][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
@@ -597,13 +716,13 @@ function isBlocked(r, c, player) {
 					} else if (r + 1 < rows && c - 1 >= 0) {
 						if (filledGrid[r + 1][c - 1] === (player === 1 ? 2 : 1)) {
 							//down
-							if (filledGrid[r + 4][c - 4] === (player)) {
+							if (r+4 < rows && c-4 >= 0 && filledGrid[r + 4][c - 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
 						} else {
 							//up
-							if (filledGrid[r - 4][c + 4] === (player)) {
+							if (r-4 >= 0 && c+4 < columns && filledGrid[r - 4][c + 4] === (player)) {
 								addToAvailableMoves(r, c, d);
 								break;
 							}
