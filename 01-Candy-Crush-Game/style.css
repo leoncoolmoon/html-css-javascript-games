@@ -15,6 +15,7 @@
   .grid div {
     height: 70px;
     width: 70px;
+    transition: transform 0.2s ease-in-out;
   }
   
   h3 {
