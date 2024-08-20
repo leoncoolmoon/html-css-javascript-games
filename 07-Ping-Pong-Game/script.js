@@ -398,11 +398,11 @@ function actionMove(e) {
       let rightPt = {pageX:canvas.offsetLeft + canvas.width / 2,pageY:0};
       ballColor = 'red';
       for (let i = 1; i < e.touches.length; i++) {
-        if (e.touches[i].pageX < leftPt.pageX) {
+        if (e.touches[i].pageX < leftPt.pageX- canvas.offsetLeft) {
           leftPt = e.touches[i];
 
         }
-        if (e.touches[i].pageX > rightPt.pageX) {
+        if (e.touches[i].pageX > rightPt.pageX- canvas.offsetLeft) {
           rightPt = e.touches[i];
 
         }
