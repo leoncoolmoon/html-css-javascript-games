@@ -1,6 +1,7 @@
 body{
 	background:#222;
 	margin:20px;
+	overscroll-behavior-y: contain;
 }
 svg{
 	width:100%;
