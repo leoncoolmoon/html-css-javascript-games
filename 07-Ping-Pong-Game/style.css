@@ -36,6 +36,7 @@
 
 canvas {
   background: #000;
+  width: 80vmin;
 }
 body {
   overscroll-behavior-y: contain;
