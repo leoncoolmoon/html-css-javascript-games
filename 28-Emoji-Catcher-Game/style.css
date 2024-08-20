@@ -47,9 +47,9 @@ body {
 }
 
 .square {
-  height: 200px;
-  width: 200px;
-  margin: 10px;
+  height: 10vmax;
+  width: 10vmax;
+  margin: 1vmax;
   background: rgb(61, 61, 61);
 }
 
