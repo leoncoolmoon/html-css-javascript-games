@@ -74,12 +74,6 @@ function draw(e) {
 	aim(e);
 }
 
- // 禁止下拉刷新
- document.addEventListener('touchdown', function(event) {
-	event.preventDefault(); // 阻止默认行为
-	draw(event);
-}, { passive: false });
-
 function aim(e) {
 	try{e.preventDefault();}catch(e){}
 	// get mouse position in relation to svg position and scale
