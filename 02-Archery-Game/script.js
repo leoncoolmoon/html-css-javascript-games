@@ -25,15 +25,15 @@ var pivot = {
 
 // 判断当前设备是否为触摸屏
 function isTouchDevice() {
-    return window.matchMedia("(pointer: coarse)").matches;
+	return window.matchMedia("(pointer: coarse)").matches;
 }
 
 // 计算屏幕中心
 function getScreenCenter() {
-    return {
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-    };
+	return {
+		x: window.innerWidth / 2,
+		y: window.innerHeight / 2
+	};
 }
 
 // // 设置 pivot 点
@@ -56,7 +56,8 @@ aim({
 	clientY: 300
 });
 
-
+//set up start touch
+window.addEventListener("touchstart", draw)
 
 // set up start drag event
 window.addEventListener("mousedown", draw);
@@ -75,14 +76,14 @@ function draw(e) {
 }
 
 function aim(e) {
-	try{e.preventDefault();}catch(e){}
+	try { e.preventDefault(); } catch (e) { }
 	// get mouse position in relation to svg position and scale
 	var point = getMouseSVG(e);
 	point.x = Math.min(point.x, pivot.x - 7);
 	point.y = Math.max(point.y, pivot.y + 7);
 	var dx = point.x - pivot.x;
 	var dy = point.y - pivot.y;
-	
+
 	// Make it more difficult by adding random angle each time
 	var angle = Math.atan2(dy, dx) + randomAngle;
 	var bowAngle = angle - Math.PI;
@@ -118,7 +119,7 @@ function aim(e) {
 		attr: {
 			d: "M100,250c" + offset.x + "," + offset.y + "," + (arcWidth - offset.x) + "," + (offset.y + 50) + "," + arcWidth + ",50"
 		},
-			autoAlpha: distance/60
+		autoAlpha: distance / 60
 	});
 
 }
@@ -226,8 +227,15 @@ function showMessage(selector) {
 
 function getMouseSVG(e) {
 	// normalize mouse position within svg coordinates
-	cursor.x = e.clientX;
-	cursor.y = e.clientY;
+	if (e.touches) {//如果是触摸 
+		cursor.x = e.touches[0].pageX;
+		cursor.y = e.touches[0].pageY;
+	} else {//如果是鼠标 
+		cursor.x = e.clientX;
+		cursor.y = e.clientY;
+	}
+
+
 	return cursor.matrixTransform(svg.getScreenCTM().inverse());
 }
 
