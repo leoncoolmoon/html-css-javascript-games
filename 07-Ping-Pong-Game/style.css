@@ -41,4 +41,7 @@ canvas {
 body {
   overscroll-behavior-y: contain;
   max-height: 80vh;
+  user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
 }
