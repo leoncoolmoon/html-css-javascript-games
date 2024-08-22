@@ -135,8 +135,8 @@
     // Define paddle properties
     var paddleHeight = 80;
     var paddleWidth = paddleHeight/2;
-    var leftPaddleY = canvas.height / 2 - paddleHeight / 2;
-    var rightPaddleY = canvas.height / 2 - paddleHeight / 2;
+    var leftPaddleY = canvas.height / 2 ;
+    var rightPaddleY = canvas.height / 2 ;
     var leftPaddleX = 0;
     var rightPaddleX = canvas.width;
     var paddleSpeed = 10;
@@ -147,9 +147,13 @@
     var rightPlayerScore = 0;
     var maxScore = 100;
     var touchYstartLeft = null;
-    var previousPositionLeft = canvas.height / 2 - paddleHeight;
+    var touchXstartLeft = null;
+    var previousYPositionLeft = canvas.height / 2 ;
+    var previousXPositionLeft = 0+edgeWidth;
     var touchYstartRight = null;
-    var previousPositionRight = canvas.height / 2 - paddleHeight;
+    var touchXstartRight = null;
+    var previousYPositionRight = canvas.height / 2 ;
+    var previousXPositionRight = canvas.width - edgeWidth;
     const canvasBounds = canvas.getBoundingClientRect();
     const canvasMiddle = canvasBounds.width / 2 + canvasBounds.left;
     var effectiveBounds = {
@@ -397,14 +401,14 @@
             rightPt = e.touches[i].pageX > rightPt.pageX ? e.touches[i] : rightPt;
           }
         }
-        if (touchYstartLeft == null && leftPt.pageY != -1) { touchYstartLeft = leftPt.pageY; }
-        if (touchYstartRight == null && rightPt.pageY != -1) { touchYstartRight = rightPt.pageY; }
+        if (touchYstartLeft == null && leftPt.pageY != -1) { touchYstartLeft = leftPt.pageY; touchXstartLeft = leftPt.pageX; }
+        if (touchYstartRight == null && rightPt.pageY != -1) { touchYstartRight = rightPt.pageY;touchXstartRight = rightPt.pageX; }
         return;
       } else {//如果是鼠标 touchXstart等于鼠标的x坐标
         if (e.pageX < canvasMiddle) {
-          if (touchYstartLeft == null) { touchYstartLeft = e.pageY; }
+          if (touchYstartLeft == null) { touchYstartLeft = e.pageY;touchXstartLeft = e.pageX; }
         } else {
-          if (touchYstartRight == null) { touchYstartRight = e.pageY; }
+          if (touchYstartRight == null) { touchYstartRight = e.pageY; touchXstartRight = e.pageX; }
         }
       }
 
@@ -414,11 +418,15 @@
       //e.preventDefault();
       if (touchYstartRight != null) {
         touchYstartRight = null;
-        previousPositionRight = rightPaddleY;
+        touchXstartRight = null;
+        previousYPositionRight = rightPaddleY;
+        previousXPositionRight = rightPaddleX;
       }
       if (touchYstartLeft != null) {
         touchYstartLeft = null;
-        previousPositionLeft = leftPaddleY;
+        touchXstartLeft = null;
+        previousYPositionLeft = leftPaddleY;
+        previousXPositionLeft = leftPaddleX;
       }
     }
 
@@ -459,18 +467,24 @@
       // 更新左侧滑板位置
       try {
         if (leftTouch && touchYstartLeft !== null) {
-          let distLeft = leftTouch.pageY - touchYstartLeft;
-          leftPaddleY = previousPositionLeft + distLeft;
+          let distYLeft = leftTouch.pageY - touchYstartLeft;
+          leftPaddleY = previousYPositionLeft + distYLeft;
           leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
+          let distXLeft = leftTouch.pageX - touchXstartLeft;
+          leftPaddleX = previousXPositionLeft + distXLeft;
+          leftPaddleX = Math.max(0, Math.min(canvas.width/2 , leftPaddleX));
         }
       } catch (e) { }
 
       // 更新右侧滑板位置
       try {
         if (rightTouch && touchYstartRight !== null) {
-          let distRight = rightTouch.pageY - touchYstartRight;
-          rightPaddleY = previousPositionRight + distRight;
+          let distYRight = rightTouch.pageY - touchYstartRight;
+          rightPaddleY = previousYPositionRight + distYRight;
           rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
+          let distXRight = rightTouch.pageX - touchXstartRight;
+          rightPaddleX = previousXPositionRight + distXRight;
+          rightPaddleX = Math.min(canvas.width, Math.max(canvas.width/2  , rightPaddleX));
         }
       } catch (e) { }
     }
@@ -482,15 +496,21 @@
 
       if (mouseX < canvasMiddle) {
         if (touchYstartLeft !== null) {
-          let distLeft = mouseY - touchYstartLeft;
-          leftPaddleY = previousPositionLeft + distLeft;
+          let distYLeft = mouseY - touchYstartLeft;
+          leftPaddleY = previousYPositionLeft + distYLeft;
           leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
+          let distXLeft = mouseX - touchXstartLeft;
+          leftPaddleX = previousXPositionLeft + distXLeft;
+          leftPaddleX = Math.max(0, Math.min(canvas.width - paddleWidth, leftPaddleX));
         }
       } else {
         if (touchYstartRight !== null) {
-          let distRight = mouseY - touchYstartRight;
-          rightPaddleY = previousPositionRight + distRight;
+          let distYRight = mouseY - touchYstartRight;
+          rightPaddleY = previousYPositionRight + distYRight;
           rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
+          let distXRight = mouseX - touchXstartRight;
+          rightPaddleX = previousXPositionRight + distXRight;
+          rightPaddleX = Math.max(0, Math.min(canvas.width - paddleWidth, rightPaddleX));
         }
       }
     }
