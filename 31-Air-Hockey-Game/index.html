@@ -220,6 +220,36 @@
       }
     }
 
+function calculateCollision(sx, sy, px, py, qx, qy, r, R) {
+    // 计算小球到大球的单位法向量
+    const dx = px - qx;
+    const dy = py - qy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // 单位法向量
+    const nx = dx / distance;
+    const ny = dy / distance;
+
+    // 计算小球在法向量方向的速度分量（投影）
+    const vDotN = sx * nx + sy * ny;
+
+    // 计算法向量方向的反射速度分量
+    const reflectedVx = sx - 2 * vDotN * nx;
+    const reflectedVy = sy - 2 * vDotN * ny;
+
+    return { reflectedVx, reflectedVy };
+}
+
+function hasCollided(px, py, qx, qy, r, R) {
+    // 计算两个球中心的距离
+    const dx = px - qx;
+    const dy = py - qy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // 检查是否碰撞
+    return distance <= r + R;
+}
+
     // Update game state
     function update() {
       // Move paddles
@@ -260,23 +290,33 @@
       }
 
       // Check if ball collides with left paddle
-      if (
+      /*if (
         ballX - ballRadius < paddleWidth &&
         ballY > leftPaddleY &&
         ballY < leftPaddleY + paddleHeight
       ) {
         ballSpeedX = -ballSpeedX;
-      }
+      }*/
+
+if(hasCollided(ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight/2)){
+var ballMove = calculateCollision(ballSpeedX,ballSpeedY, ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight/2);
+ballSpeedX = ballMove.reflectedVx;
+ballSpeedY = ballMove.reflectedVy;
+}
 
       // Check if ball collides with right paddle
-      if (
+      /*if (
         ballX + ballRadius > canvas.width - paddleWidth &&
         ballY > rightPaddleY &&
         ballY < rightPaddleY + paddleHeight
       ) {
         ballSpeedX = -ballSpeedX;
-      }
-
+      }*/
+if(hasCollided(ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight/2)){
+var ballMove = calculateCollision(ballSpeedX,ballSpeedY, ballX, ballY, rightPaddleX,rightPaddleY, ballRadius, paddleHeight/2);
+ballSpeedX = ballMove.reflectedVx;
+ballSpeedY = ballMove.reflectedVy;
+}
       // Check if ball goes out of bounds on left or right side of canvas
       if (ballY > canvas.height / 2 - paddleHeight && ballY < canvas.height / 2 + paddleHeight) {
         if (ballX < effectiveBounds) {
