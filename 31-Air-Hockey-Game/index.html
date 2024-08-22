@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Ping Pong Game</title>
+  <title>Air Hockey Game</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="user-scalable=no maximum-scale=1.0">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
@@ -61,6 +61,7 @@
   <style>
     canvas {
       border: 1px solid black;
+      width: 95vmin;
     }
   </style>
 </head>
@@ -74,7 +75,7 @@
     <button id="pause-btn" class="btn">Pause</button>
     <button id="restart-btn" class="btn">Restart</button>
   </div>
-  <p class="control">Control: Player Left(W and S) | Player Right(↑ and ↓)</p>
+  <p class="control">Control: Player Left(W S A D)/mouse/touch | Player Right(↑ ↓ ← ↓)/mouse/touch</p>
   <!-- Add a modal element with an ID -->
   <div class="modal" tabindex="-1" role="dialog" id="message-modal">
     <div class="modal-dialog" role="document">
@@ -133,10 +134,10 @@
     var ballSpeedY = 4;
 
     // Define paddle properties
-    var paddleHeight = 80;
-    var paddleWidth = paddleHeight/2;
-    var leftPaddleY = canvas.height / 2 ;
-    var rightPaddleY = canvas.height / 2 ;
+    var paddleHeight = 40;
+    var paddleWidth = paddleHeight / 2;
+    var leftPaddleY = canvas.height / 2;
+    var rightPaddleY = canvas.height / 2;
     var leftPaddleX = 0;
     var rightPaddleX = canvas.width;
     var paddleSpeed = 10;
@@ -145,25 +146,18 @@
     // Define score properties
     var leftPlayerScore = 0;
     var rightPlayerScore = 0;
-    var maxScore = 100;
+    var maxScore = 10;
     var touchYstartLeft = null;
     var touchXstartLeft = null;
-    var previousYPositionLeft = canvas.height / 2 ;
-    var previousXPositionLeft = 0+edgeWidth;
+    var previousYPositionLeft = canvas.height / 2;
+    var previousXPositionLeft = 0 + edgeWidth;
     var touchYstartRight = null;
     var touchXstartRight = null;
-    var previousYPositionRight = canvas.height / 2 ;
+    var previousYPositionRight = canvas.height / 2;
     var previousXPositionRight = canvas.width - edgeWidth;
     const canvasBounds = canvas.getBoundingClientRect();
     const canvasMiddle = canvasBounds.width / 2 + canvasBounds.left;
-    var effectiveBounds = {
-      left: canvasBounds.left + edgeWidth,
-      right: canvasBounds.right - edgeWidth,
-      top: canvasBounds.top + edgeWidth,
-      bottom: canvasBounds.bottom - edgeWidth,
-      width: canvasBounds.width - 2 * edgeWidth,
-      height: canvasBounds.height - 2 * edgeWidth,
-    };
+
 
     // Listen for keyboard events
     document.addEventListener("keydown", keyDownHandler);
@@ -220,35 +214,49 @@
       }
     }
 
-function calculateCollision(sx, sy, px, py, qx, qy, r, R) {
-    // 计算小球到大球的单位法向量
-    const dx = px - qx;
-    const dy = py - qy;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    function calculateCollision(sx, sy, px, py, qx, qy, r, R) {
+      // 计算小球到大球的单位法向量
+      const dx = px - qx;
+      const dy = py - qy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // 单位法向量
-    const nx = dx / distance;
-    const ny = dy / distance;
+      // 单位法向量
+      const nx = dx / distance;
+      const ny = dy / distance;
 
-    // 计算小球在法向量方向的速度分量（投影）
-    const vDotN = sx * nx + sy * ny;
+      // 计算小球在法向量方向的速度分量（投影）
+      const vDotN = sx * nx + sy * ny;
+      // 如果接近切线方向，避免出现反射到对侧的现象
+      if (Math.abs(vDotN) < 0.5) {
+        // 处理切线碰撞的特例：此时仅改变法线方向的速度分量
+        const tangentialSx = sy * nx;
+        const tangentialSy = -sx * ny;
+        return {
+          reflectedVx: tangentialSx,
+          reflectedVy: tangentialSy,
+          newPx: px,
+          newPy: py
+        };
+      }
+      // 计算法向量方向的反射速度分量
+      const reflectedVx = sx - 2 * vDotN * nx;
+      const reflectedVy = sy - 2 * vDotN * ny;
+      // 位置修正：将小球移出大球的表面
+      const overlap = r + R - distance;
+      const newPx = px + nx * overlap;
+      const newPy = py + ny * overlap;
+      return { reflectedVx, reflectedVy, newPx, newPy };
+    }
 
-    // 计算法向量方向的反射速度分量
-    const reflectedVx = sx - 2 * vDotN * nx;
-    const reflectedVy = sy - 2 * vDotN * ny;
+    function hasCollided(px, py, qx, qy, r, R) {
+      // 计算两个球中心的距离
+      const dx = px - qx;
+      const dy = py - qy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    return { reflectedVx, reflectedVy };
-}
-
-function hasCollided(px, py, qx, qy, r, R) {
-    // 计算两个球中心的距离
-    const dx = px - qx;
-    const dy = py - qy;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    // 检查是否碰撞
-    return distance <= r + R;
-}
+      // 检查是否碰撞
+      return distance <= r + R;
+    }
 
     // Update game state
     function update() {
@@ -298,11 +306,13 @@ function hasCollided(px, py, qx, qy, r, R) {
         ballSpeedX = -ballSpeedX;
       }*/
 
-if(hasCollided(ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight/2)){
-var ballMove = calculateCollision(ballSpeedX,ballSpeedY, ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight/2);
-ballSpeedX = ballMove.reflectedVx;
-ballSpeedY = ballMove.reflectedVy;
-}
+      if (hasCollided(ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight / 2)) {
+        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight / 2);
+        ballSpeedX = ballMove.reflectedVx;
+        ballSpeedY = ballMove.reflectedVy;
+        ballX = ballMove.newPx;
+        ballY = ballMove.newPy;
+      }
 
       // Check if ball collides with right paddle
       /*if (
@@ -312,14 +322,16 @@ ballSpeedY = ballMove.reflectedVy;
       ) {
         ballSpeedX = -ballSpeedX;
       }*/
-if(hasCollided(ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight/2)){
-var ballMove = calculateCollision(ballSpeedX,ballSpeedY, ballX, ballY, rightPaddleX,rightPaddleY, ballRadius, paddleHeight/2);
-ballSpeedX = ballMove.reflectedVx;
-ballSpeedY = ballMove.reflectedVy;
-}
+      if (hasCollided(ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight / 2)) {
+        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight / 2);
+        ballSpeedX = ballMove.reflectedVx;
+        ballSpeedY = ballMove.reflectedVy;
+        ballX = ballMove.newPx;
+        ballY = ballMove.newPy;
+      }
       // Check if ball goes out of bounds on left or right side of canvas
-      if (ballY > canvas.height / 2 - paddleHeight && ballY < canvas.height / 2 + paddleHeight) {
-        if (ballX < effectiveBounds) {
+      if (ballY > canvas.height / 2 - goalWidth / 2 && ballY < canvas.height / 2 + goalWidth / 2) {
+        if (ballX < 0) {
           rightPlayerScore++;
           reset();
         } else if (ballX > canvas.width) {
@@ -362,8 +374,8 @@ ballSpeedY = ballMove.reflectedVy;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       var x = edgeWidth;
       var y = edgeWidth;
-      var width = canvas.width-edgeWidth*2;
-      var height = canvas.height-edgeWidth*2;
+      var width = canvas.width - edgeWidth * 2;
+      var height = canvas.height - edgeWidth * 2;
       var borderWidth = 6;
       ctx.strokeStyle = ballColor; // 边框颜色
       ctx.lineWidth = borderWidth; // 边框宽度
@@ -371,8 +383,8 @@ ballSpeedY = ballMove.reflectedVy;
       ctx.strokeRect(x, y, width, height);
       ctx.fillStyle = 'black'; // 填充颜色为黑色
       var coverX = -edgeWidth;
-      var coverY =canvas.height/2-goalWidth/2;
-      var coverWidth = canvas.width + edgeWidth ;
+      var coverY = canvas.height / 2 - goalWidth / 2;
+      var coverWidth = canvas.width + edgeWidth;
       var coverHeight = goalWidth;
       // 绘制黑色矩形
       ctx.fillRect(coverX, coverY, coverWidth, coverHeight);
@@ -395,14 +407,14 @@ ballSpeedY = ballMove.reflectedVy;
 
       // Draw left paddle
       ctx.beginPath();
-      ctx.arc(leftPaddleX, leftPaddleY, paddleHeight / 2,  Math.PI*3/2, Math.PI * 5/2);
+      ctx.arc(leftPaddleX, leftPaddleY, paddleHeight / 2, 0, Math.PI * 2);//Math.PI * 3 / 2, Math.PI * 5 / 2);
       ctx.fillStyle = ballColor;
       ctx.fill();
       ctx.closePath();
 
       // Draw right paddle
       ctx.beginPath();
-      ctx.arc(rightPaddleX, rightPaddleY, paddleHeight / 2, Math.PI*1/2 , Math.PI * 3/2);
+      ctx.arc(rightPaddleX, rightPaddleY, paddleHeight / 2, 0, Math.PI * 2);//Math.PI * 1 / 2, Math.PI * 3 / 2);
       ctx.fillStyle = ballColor;
       ctx.fill();
       ctx.closePath();
@@ -442,11 +454,11 @@ ballSpeedY = ballMove.reflectedVy;
           }
         }
         if (touchYstartLeft == null && leftPt.pageY != -1) { touchYstartLeft = leftPt.pageY; touchXstartLeft = leftPt.pageX; }
-        if (touchYstartRight == null && rightPt.pageY != -1) { touchYstartRight = rightPt.pageY;touchXstartRight = rightPt.pageX; }
+        if (touchYstartRight == null && rightPt.pageY != -1) { touchYstartRight = rightPt.pageY; touchXstartRight = rightPt.pageX; }
         return;
       } else {//如果是鼠标 touchXstart等于鼠标的x坐标
         if (e.pageX < canvasMiddle) {
-          if (touchYstartLeft == null) { touchYstartLeft = e.pageY;touchXstartLeft = e.pageX; }
+          if (touchYstartLeft == null) { touchYstartLeft = e.pageY; touchXstartLeft = e.pageX; }
         } else {
           if (touchYstartRight == null) { touchYstartRight = e.pageY; touchXstartRight = e.pageX; }
         }
@@ -512,7 +524,7 @@ ballSpeedY = ballMove.reflectedVy;
           leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
           let distXLeft = leftTouch.pageX - touchXstartLeft;
           leftPaddleX = previousXPositionLeft + distXLeft;
-          leftPaddleX = Math.max(0, Math.min(canvas.width/2 , leftPaddleX));
+          leftPaddleX = Math.max(0, Math.min(canvas.width / 2, leftPaddleX));
         }
       } catch (e) { }
 
@@ -524,7 +536,7 @@ ballSpeedY = ballMove.reflectedVy;
           rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
           let distXRight = rightTouch.pageX - touchXstartRight;
           rightPaddleX = previousXPositionRight + distXRight;
-          rightPaddleX = Math.min(canvas.width, Math.max(canvas.width/2  , rightPaddleX));
+          rightPaddleX = Math.min(canvas.width, Math.max(canvas.width / 2, rightPaddleX));
         }
       } catch (e) { }
     }
@@ -541,7 +553,7 @@ ballSpeedY = ballMove.reflectedVy;
           leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
           let distXLeft = mouseX - touchXstartLeft;
           leftPaddleX = previousXPositionLeft + distXLeft;
-          leftPaddleX = Math.max(0, Math.min(canvas.width - paddleWidth, leftPaddleX));
+          leftPaddleX = Math.max(0, Math.min(canvas.width / 2, leftPaddleX));
         }
       } else {
         if (touchYstartRight !== null) {
@@ -550,7 +562,7 @@ ballSpeedY = ballMove.reflectedVy;
           rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
           let distXRight = mouseX - touchXstartRight;
           rightPaddleX = previousXPositionRight + distXRight;
-          rightPaddleX = Math.max(0, Math.min(canvas.width - paddleWidth, rightPaddleX));
+          rightPaddleX = Math.min(canvas.width, Math.max(canvas.width / 2, rightPaddleX));
         }
       }
     }
