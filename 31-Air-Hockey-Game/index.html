@@ -258,7 +258,7 @@
       return distance <= r + R;
     }
 
-    // Update game state
+    // Update game state, keybroad controls
     function update() {
       // Move paddles
       // Move right paddle up down based on "ArrowUp" and "ArrowDown" keys 
@@ -550,7 +550,7 @@
         if (touchYstartLeft !== null) {
           let distYLeft = mouseY - touchYstartLeft;
           leftPaddleY = previousYPositionLeft + distYLeft;
-          leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
+          leftPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight/2, leftPaddleY));
           let distXLeft = mouseX - touchXstartLeft;
           leftPaddleX = previousXPositionLeft + distXLeft;
           leftPaddleX = Math.max(0, Math.min(canvas.width / 2, leftPaddleX));
@@ -559,7 +559,7 @@
         if (touchYstartRight !== null) {
           let distYRight = mouseY - touchYstartRight;
           rightPaddleY = previousYPositionRight + distYRight;
-          rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
+          rightPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight/2, rightPaddleY));
           let distXRight = mouseX - touchXstartRight;
           rightPaddleX = previousXPositionRight + distXRight;
           rightPaddleX = Math.min(canvas.width, Math.max(canvas.width / 2, rightPaddleX));
