@@ -43,6 +43,11 @@
         <button onclick="drawCards()">抽牌</button>
         <button onclick="cal()" style="display: none;">算牌</button>
         <button onclick="showResult(true)">显示结果</button>
+        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethord 0:+,1:-,2:*,3:/-->
+         <button onclick="selectedMethord(0)">+</button>
+         <button onclick="selectedMethod(1)">-</button>
+         <button onclick="selectedMethod(2)">*</button>
+         <button onclick="selectedMethod(3)">/</button>
 
     </div>
 
@@ -60,7 +65,19 @@
         const suits = ['♠', '♥', '♣', '♦'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         const deck = [];
-
+        const method = ['+', '-', '*', '/'];
+        
+        function selectedMethod(i) {
+            selMethord = i;
+            if(selectedCards.length == 2){
+                var cd = calc(cardToNumber(selectedCards[0]), selMethord, cardToNumber(selectedCards[1]));
+                document.getElementById(`card${selectedCards[0]}`).display = "none";
+                document.getElementById(`card${selectedCards[1]}`).display = "none";
+                selectedCards = [];
+                selMethord = -1;
+                addCard(cd+" ", "#007f0e",cards.length); 
+            }
+        }
         // 创建扑克牌数组
         for (let suit of suits) {
             for (let value of values) {
@@ -88,11 +105,37 @@
             // 显示抽出的牌
             const cardContainer = document.getElementById('cardContainer');
             cardContainer.innerHTML = ''; // 清空容器
-
+            var index = 0;
             drawnCards.forEach(card => {
                 const color = getColorForSuit(card.slice(-1)); // 根据花色获取颜色
                 // 使用SVG绘制圆角矩形并显示牌
-                const svg = `
+                addCard(card, color,index);
+                index++;
+                
+            });
+            cards = drawnCards;
+            cal();
+        }
+        var selectedCards = [];
+        function clcikCard(index){
+          if(selectedCards.length  <2){
+            selectedCards.push(index);
+            document.getElementById(`card${index}`).style.border = "2px solid blue";
+          }else if(selectedCards.length == 2){
+            if(selMethord != -1){
+                var cd = calc(cardToNumber(selectedCards[0]), selMethord, cardToNumber(selectedCards[1]));
+                document.getElementById(`card${selectedCards[0]}`).display = "none";
+                document.getElementById(`card${selectedCards[1]}`).display = "none";
+                selMethord = -1;
+                addCard(cd+" ", "#007f0e",cards.length); 
+            }
+            document.getElementById(`card${selectedCards[0]}`).style.border = "";
+            document.getElementById(`card${selectedCards[1]}`).style.border = "";
+            selectedCards = [];
+          }
+        }
+        function addCard(card, color,index) {
+            const svg = `
                     <svg width="100" height="150">
                         <rect width="100" height="150" rx="15" ry="15" style="fill:#f0f0f0;stroke:${color};stroke-width:2" />
                         <text x="50%" y="50%" alignment-baseline="middle" fill="${color}" text-anchor="middle" font-size="24" font-weight="bold">${card}</text>
@@ -100,11 +143,10 @@
                 `;
                 const div = document.createElement('div');
                 div.className = 'card';
+                div.id = `card${index}`;
+                div.setAttribute('onclick', `clcikCard(${index})`);
                 div.innerHTML = svg;
                 cardContainer.appendChild(div);
-            });
-            cards = drawnCards;
-            cal();
         }
         function getColorForSuit(suit) {
             switch (suit) {
@@ -197,6 +239,27 @@
             str1 = input_data.toString().replace(/,/g, " ");
             document.getElementById("inputs").innerHTML = str1 + "<br>";
             // display the inputs
+        }
+        function calc(num1, op1, num2) {
+            var num3 = 0.0;
+            switch (op1) {
+                case 0:
+                    num3 = num1 + num2;
+                    break;
+                case 1:
+                    num3 = num1 - num2;
+                    break;
+                case 2:
+                    num3 = num1 * num2;
+                    break;
+                case 3:
+                    num3 = num1 / num2;
+                    break;
+            }
+            if (Math.abs(num3 - Math.round(num3)) < ep)
+                return (Math.round(num3));
+            else
+                return (num3);
         }
     </script>
 </body>
