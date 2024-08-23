@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24点</title>
+    <style>
+        .card-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 20px;
+            width: 80%;
+            flex-wrap: wrap;
+
+        }
+
+        .card {
+            width: 100px;
+            height: 150px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            margin: 1vmin;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button onclick="drawCards()">抽牌</button>
+        <button onclick="cal()" style="display: none;">算牌</button>
+        <button onclick="showResult(true)">显示结果</button>
+
+    </div>
+
+    <div>
+        <div class="card-container" id="cardContainer"> <!-- 这里将显示抽出的牌 --> </div>
+        <div id="outputs" style="display: none;font-size: 1.5em;"></div>
+        <div id="inputs"></div>
+    </div>
+    <script type="text/javascript" src="str.js"></script>
+
+    <script>
+
+        var cards;
+        // 扑克牌的数组（去掉大小王）
+        const suits = ['♠', '♥', '♣', '♦'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const deck = [];
+
+        // 创建扑克牌数组
+        for (let suit of suits) {
+            for (let value of values) {
+                deck.push(value + suit);
+            }
+        }
+        //显示结果
+        function showResult(show) {
+            document.getElementById("outputs").style.display = show ? "block" : "none";
+        }
+        function drawCards() {
+            // 清空上次输出
+            document.getElementById("outputs").innerHTML = " ";
+            showResult(false);
+            // 随机抽取4张不重复的牌
+            let drawnCards = [];
+            while (drawnCards.length < 4) {
+                const randomIndex = Math.floor(Math.random() * deck.length);
+                const card = deck[randomIndex];
+                if (!drawnCards.includes(card)) {
+                    drawnCards.push(card);
+                }
+            }
+
+            // 显示抽出的牌
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = ''; // 清空容器
+
+            drawnCards.forEach(card => {
+                const color = getColorForSuit(card.slice(-1)); // 根据花色获取颜色
+                // 使用SVG绘制圆角矩形并显示牌
+                const svg = `
+                    <svg width="100" height="150">
+                        <rect width="100" height="150" rx="15" ry="15" style="fill:#f0f0f0;stroke:${color};stroke-width:2" />
+                        <text x="50%" y="50%" alignment-baseline="middle" fill="${color}" text-anchor="middle" font-size="24" font-weight="bold">${card}</text>
+                    </svg>
+                `;
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = svg;
+                cardContainer.appendChild(div);
+            });
+            cards = drawnCards;
+            cal();
+        }
+        function getColorForSuit(suit) {
+            switch (suit) {
+                case '♠': return '#1e1e1e'; // 黑色
+                case '♥': return '#e60026'; // 红色
+                case '♣': return '#1e1e1e'; // 黑色
+                case '♦': return '#e60026'; // 红色
+                default: return '#1e1e1e'; // 黑色
+            }
+        }
+        function cal() {
+            if (cards && cards.length == 4) {
+                for (var i = 0; i < cards.length; i++) {
+                    go_to(cardToNumber(cards[i]));
+                }
+
+            }
+
+        }
+        var total_click = 0;
+        // number of clicks so far, will be reset when it reaches 4, it never goes below 0
+        var input_data = [];
+        function sortNumber(a, b) {
+            return a - b;
+        }
+        function cardToNumber(card) {
+
+            // 提取牌面的字符部分（去掉花色）
+            const cardValue = card.slice(0, -1); // 获取除去最后一个字符（花色）的部分
+            const cardIndex = values.indexOf(cardValue);
+
+            // 如果找到，输出其对应的数字（索引+2，因为'2'对应索引0）
+            if (cardIndex !== -1) {
+                return cardIndex + 1; // 索引转成对应的数字值
+            } else {
+                // 错误处理（如果没有找到对应的值，可以输出错误信息）
+                console.error(`Invalid card value: ${cardValue}`);
+            }
+
+            return -1;
+        }
+
+        function find_solution(fnum) {
+            fnumsted = fnum.slice();
+            fnumsted.sort(sortNumber);
+            begin = the_string.indexOf("[" + fnumsted + "]");
+            begin1 = the_string.indexOf("]", begin);
+            end1 = the_string.indexOf("[", begin1);
+            solution_F = 0;
+            if (end1 - begin1 < 4) {
+                // no solutions
+                output_str = "[ <font color =blue>" + fnum.toString().replace(/,/g, " ") + "</font> ]没有解法.";
+            } else {
+                sol_str = the_string.substr(begin1 + 2, end1 - begin1 - 3);
+                sol_str = sol_str.replace(/x/g, "&times;");
+                sol_vec = sol_str.split(" ");
+                f_str = "";
+                for (ii = 0; ii < sol_vec.length; ii++) {
+                    f_str += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[" + (ii + 1) + "]解法：" + sol_vec[ii] + "<br>";
+                }
+                output_str = "[ <font color =blue>" + fnum.toString().replace(/,/g, " ") + "</font> ]共有解法：<br><font color = green>" + f_str + "</font> ";
+                solution_F = 1;
+            }
+
+            document.getElementById("outputs").innerHTML = output_str;
+
+        }
+
+
+        function go_to(x) {
+
+            if (x == -1) // backspace
+            {
+                if (total_click > 0) {
+                    total_click--;
+                    input_data.pop();
+                }
+            } else {
+                total_click++;
+                input_data.push(x);
+                if (total_click == 1)
+                    document.getElementById("outputs").innerHTML = " ";
+                if (total_click == 4) {
+                    find_solution(input_data);
+                    input_data = [];
+                    total_click = 0;
+                }
+            }
+
+            str1 = input_data.toString().replace(/,/g, " ");
+            document.getElementById("inputs").innerHTML = str1 + "<br>";
+            // display the inputs
+        }
+    </script>
+</body>
+
+</html>
