@@ -43,7 +43,7 @@
         <button onclick="drawCards()">抽牌</button>
         <button onclick="cal()" style="display: none;">算牌</button>
         <button onclick="showResult(true)">显示结果</button>
-        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethord 0:+,1:-,2:*,3:/-->
+        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethod 0:+,1:-,2:*,3:/-->
          <button onclick="selectedMethod(0)">+</button>
          <button onclick="selectedMethod(1)">-</button>
          <button onclick="selectedMethod(2)">*</button>
@@ -122,8 +122,8 @@
             selectedCards.push(index);
             document.getElementById(`card${index}`).style.border = "2px solid blue";
           }else if(selectedCards.length == 2){
-            if(selMethord != -1){
-                var cd = calc(cardToNumber(selectedCards[0]), selMethord, cardToNumber(selectedCards[1]));
+            if(selMethod != -1){
+                var cd = calc(cardToNumber(selectedCards[0]), selMethod, cardToNumber(selectedCards[1]));
                 document.getElementById(`card${selectedCards[0]}`).display = "none";
                 document.getElementById(`card${selectedCards[1]}`).display = "none";
                 selMethod = -1;
