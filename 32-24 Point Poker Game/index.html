@@ -44,7 +44,7 @@
         <button onclick="cal()" style="display: none;">算牌</button>
         <button onclick="showResult(true)">显示结果</button>
         <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethord 0:+,1:-,2:*,3:/-->
-         <button onclick="selectedMethord(0)">+</button>
+         <button onclick="selectedMethod(0)">+</button>
          <button onclick="selectedMethod(1)">-</button>
          <button onclick="selectedMethod(2)">*</button>
          <button onclick="selectedMethod(3)">/</button>
@@ -68,13 +68,13 @@
         const method = ['+', '-', '*', '/'];
         
         function selectedMethod(i) {
-            selMethord = i;
+            selMethod = i;
             if(selectedCards.length == 2){
-                var cd = calc(cardToNumber(selectedCards[0]), selMethord, cardToNumber(selectedCards[1]));
+                var cd = calc(cardToNumber(selectedCards[0]), selMethod, cardToNumber(selectedCards[1]));
                 document.getElementById(`card${selectedCards[0]}`).display = "none";
                 document.getElementById(`card${selectedCards[1]}`).display = "none";
                 selectedCards = [];
-                selMethord = -1;
+                selMethod = -1;
                 addCard(cd+" ", "#007f0e",cards.length); 
             }
         }
@@ -126,7 +126,7 @@
                 var cd = calc(cardToNumber(selectedCards[0]), selMethord, cardToNumber(selectedCards[1]));
                 document.getElementById(`card${selectedCards[0]}`).display = "none";
                 document.getElementById(`card${selectedCards[1]}`).display = "none";
-                selMethord = -1;
+                selMethod = -1;
                 addCard(cd+" ", "#007f0e",cards.length); 
             }
             document.getElementById(`card${selectedCards[0]}`).style.border = "";
