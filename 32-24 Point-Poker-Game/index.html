@@ -39,43 +39,94 @@
 </head>
 
 <body>
-    <div>
+    <h1>24点</h1>
+    <div id = "score" style="font-size: 2em;font-weight: bold;">得分: 0</div>
+    <div style="display:flex;justify-content:space-between">
+        
+        
         <button onclick="drawCards()">抽牌</button>
         <button onclick="cal()" style="display: none;">算牌</button>
-        <button onclick="showResult(true)">显示结果</button>
-        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethod 0:+,1:-,2:*,3:/-->
-         <button onclick="selectedMethod(0)">+</button>
-         <button onclick="selectedMethod(1)">-</button>
-         <button onclick="selectedMethod(2)">*</button>
-         <button onclick="selectedMethod(3)">/</button>
-
+        <button onclick="gaveup()" >放弃牌</button>
+        <button onclick="showResult(true)" style="display: none;">显示结果</button>
+        <div id="counter" style="font-size: 2em;font-weight: bold;"></div>
     </div>
 
     <div>
         <div class="card-container" id="cardContainer"> <!-- 这里将显示抽出的牌 --> </div>
-        <div id="outputs" style="display: none;font-size: 1.5em;"></div>
-        <div id="inputs"></div>
+        <div id="outputs" style="display: none;font-size: 1.5em;" onclick="drawCards()"></div>
+        <div id="inputs" ></div>
+    </div>
+    <div id="operation">
+        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethod 0:+,1:-,2:*,3:/-->
+
+        <button onclick="selectedMethod(0)">+</button>
+        <button onclick="selectedMethod(1)">-</button>
+        <button onclick="selectedMethod(2)">*</button>
+        <button onclick="selectedMethod(3)">/</button>
     </div>
     <script type="text/javascript" src="str.js"></script>
 
     <script>
-
+        var countDown = 60;
+        var finalResult = 24;
+        var ep = 0.000001;
         var cards;
+        var processColor = "#007f0e";
         // 扑克牌的数组（去掉大小王）
         const suits = ['♠', '♥', '♣', '♦'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         const deck = [];
         const method = ['+', '-', '*', '/'];
-        
+        var interval;
+        var score = 0;
+        function gaveup() {
+            clearInterval(interval); // 停止计时器
+            fail(); // 倒计时结束，触发fail函数
+
+            score = score - 5;
+            document.getElementById("score").innerHTML = "得分: " + score;
+        }
+        function startCountdown() {
+            countDown = 60;
+            const counterElement = document.getElementById("counter");
+            counterElement.textContent = countDown+"\""; // 显示初始倒计时
+
+            interval = setInterval(() => {
+                countDown--; // 每秒减少1
+                counterElement.textContent = countDown+"\""; // 更新显示
+
+                if (countDown <= 0) {
+                    clearInterval(interval); // 停止计时器
+                    fail(); // 倒计时结束，触发fail函数
+                }
+            }, 1000); // 每1000毫秒（1秒）执行一次
+        }
+
+        function fail() { 
+            showResult(true);
+            document.getElementById("outputs").innerHTML += "很遗憾,单击此处继续游戏！";
+        }
+        function checkCardSourceReturnCardNumber(cardIndex) {
+            if (cardIndex >= 4) {
+                return (cards[cardIndex].replace(/[♠♥♣♦\s]/, '')) * 1;
+            } else {
+                return cardToNumber(cards[cardIndex]);
+            }
+        }
         function selectedMethod(i) {
             selMethod = i;
-            if(selectedCards.length == 2){
-                var cd = calc(cardToNumber(selectedCards[0]), selMethod, cardToNumber(selectedCards[1]));
-                document.getElementById(`card${selectedCards[0]}`).display = "none";
-                document.getElementById(`card${selectedCards[1]}`).display = "none";
+            if (selectedCards.length == 2) {
+                var cd = calc(checkCardSourceReturnCardNumber(selectedCards[0]), selMethod, checkCardSourceReturnCardNumber(selectedCards[1]));
+                document.getElementById(`card${selectedCards[0]}`).style.display = "none";
+                document.getElementById(`card${selectedCards[1]}`).style.display = "none";
                 selectedCards = [];
                 selMethod = -1;
-                addCard(cd+" ", "#007f0e",cards.length); 
+                if (cards.length < 6) {
+                    addCard(cd + " ", processColor, cards.length);
+                    cards.push(cd + " ");
+                } else {
+                    resetCals(cd);
+                }
             }
         }
         // 创建扑克牌数组
@@ -89,6 +140,7 @@
             document.getElementById("outputs").style.display = show ? "block" : "none";
         }
         function drawCards() {
+            startCountdown();
             // 清空上次输出
             document.getElementById("outputs").innerHTML = " ";
             showResult(false);
@@ -109,44 +161,75 @@
             drawnCards.forEach(card => {
                 const color = getColorForSuit(card.slice(-1)); // 根据花色获取颜色
                 // 使用SVG绘制圆角矩形并显示牌
-                addCard(card, color,index);
+                addCard(card, color, index);
                 index++;
-                
+
             });
             cards = drawnCards;
             cal();
         }
-        var selectedCards = [];
-        function clcikCard(index){
-          if(selectedCards.length  <2){
-            selectedCards.push(index);
-            document.getElementById(`card${index}`).style.border = "2px solid blue";
-          }else if(selectedCards.length == 2){
-            if(selMethod != -1){
-                var cd = calc(cardToNumber(selectedCards[0]), selMethod, cardToNumber(selectedCards[1]));
-                document.getElementById(`card${selectedCards[0]}`).display = "none";
-                document.getElementById(`card${selectedCards[1]}`).display = "none";
-                selMethod = -1;
-                addCard(cd+" ", "#007f0e",cards.length); 
+        function resetCals(result){
+            if(result*1 == finalResult){
+                showResult(true);
+                document.getElementById("outputs").innerHTML += "恭喜你，答对了！单击此处继续游戏！";
+                clearInterval(interval); // 停止计时器
+                score = score + countDown;
+                document.getElementById("score").innerHTML = "得分: " + score;
             }
-            document.getElementById(`card${selectedCards[0]}`).style.border = "";
-            document.getElementById(`card${selectedCards[1]}`).style.border = "";
-            selectedCards = [];
-          }
+            //cards 数组只保留4张牌
+            cards = cards.slice(0, 4);
+            //去掉card0 card1 card2 card3 的border
+            document.getElementById("card0").style.border = "none";
+            document.getElementById("card1").style.border = "none";
+            document.getElementById("card2").style.border = "none";
+            document.getElementById("card3").style.border = "none";
+            //显示id 为card0 card1 card2 card3 的元素
+            document.getElementById("card0").style.display = "flex";
+            document.getElementById("card1").style.display = "flex";
+            document.getElementById("card2").style.display = "flex";
+            document.getElementById("card3").style.display = "flex";
+            
+            //删除id 为card4 card5  的元素
+            document.getElementById("card4").remove();
+            document.getElementById("card5").remove();
+
+        };
+        var selectedCards = [];
+        function clcikCard(index) {
+            if (selectedCards.length < 2) {
+                selectedCards.push(index);
+                document.getElementById(`card${index}`).style.border = "2px solid blue";
+            } else if (selectedCards.length == 2) {
+                if (selMethod != -1) {
+                    var cd = calc(checkCardSourceReturnCardNumber(selectedCards[0]), selMethod, checkCardSourceReturnCardNumber(selectedCards[1]));
+                    document.getElementById(`card${selectedCards[0]}`).style.display = "none";
+                    document.getElementById(`card${selectedCards[1]}`).style.display = "none";
+                    selMethod = -1;
+                    if(cards.length < 6){
+                        addCard(cd + " ", "#007f0e", cards.length);
+                        cards.push(cd + " ");
+                    }else{
+                        resetCals(cd);
+                    }
+                }
+                document.getElementById(`card${selectedCards[0]}`).style.border = "";
+                document.getElementById(`card${selectedCards[1]}`).style.border = "";
+                selectedCards = [];
+            }
         }
-        function addCard(card, color,index) {
+        function addCard(card, color, index) {
             const svg = `
                     <svg width="100" height="150">
                         <rect width="100" height="150" rx="15" ry="15" style="fill:#f0f0f0;stroke:${color};stroke-width:2" />
                         <text x="50%" y="50%" alignment-baseline="middle" fill="${color}" text-anchor="middle" font-size="24" font-weight="bold">${card}</text>
                     </svg>
                 `;
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.id = `card${index}`;
-                div.setAttribute('onclick', `clcikCard(${index})`);
-                div.innerHTML = svg;
-                cardContainer.appendChild(div);
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.id = `card${index}`;
+            div.setAttribute('onclick', `clcikCard(${index})`);
+            div.innerHTML = svg;
+            cardContainer.appendChild(div);
         }
         function getColorForSuit(suit) {
             switch (suit) {
@@ -175,7 +258,8 @@
         function cardToNumber(card) {
 
             // 提取牌面的字符部分（去掉花色）
-            const cardValue = card.slice(0, -1); // 获取除去最后一个字符（花色）的部分
+            const cardValue = card.replace(/[♠♥♣♦\s]/, '');
+            // 获取除去最后一个字符（花色）的部分的索引
             const cardIndex = values.indexOf(cardValue);
 
             // 如果找到，输出其对应的数字（索引+2，因为'2'对应索引0）
@@ -183,7 +267,7 @@
                 return cardIndex + 1; // 索引转成对应的数字值
             } else {
                 // 错误处理（如果没有找到对应的值，可以输出错误信息）
-                console.error(`Invalid card value: ${cardValue}`);
+                console.error(`Invalid card value: ${cardValue}, input: ${card}`);
             }
 
             return -1;
@@ -198,7 +282,11 @@
             solution_F = 0;
             if (end1 - begin1 < 4) {
                 // no solutions
-                output_str = "[ <font color =blue>" + fnum.toString().replace(/,/g, " ") + "</font> ]没有解法.";
+                output_str = "[ <font color =blue>" + fnum.toString().replace(/,/g, " ") + "</font> ]没有解法. 单击此处继续游戏！";
+                document.getElementById("outputs").innerHTML = output_str;
+                clearInterval(interval);
+                showResult(true);
+                return;
             } else {
                 sol_str = the_string.substr(begin1 + 2, end1 - begin1 - 3);
                 sol_str = sol_str.replace(/x/g, "&times;");

@@ -67,6 +67,8 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 28. **Emoji Catcher Game**: Catch falling emojis with a basket or container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄
 29. **Whack a Mole Game**: Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️
 30. **Guess Number Game**: Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖
+31. **Air Hockey Game**: A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑
+32. **24 Point Poker Game**: A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏
 
 ## License
 

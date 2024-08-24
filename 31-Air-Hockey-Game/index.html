@@ -104,28 +104,20 @@
     var animationId;
     var gameRunning = false;
     var ballColor = "#FFF";
-
-    startBtn.addEventListener("click", function () {
-      if (!gameRunning) {
-        // only start the game if gameRunning is false
-        gameRunning = true; // set gameRunning to true when the game starts
-        loop();
-      }
-    });
-
-    pauseBtn.addEventListener("click", function () {
-      gameRunning = false;
-      cancelAnimationFrame(animationId);
-    });
-
-    restartBtn.addEventListener("click", function () {
-      document.location.reload();
-    });
-
-    addEventListener("load", (event) => {
-      draw();
-    });
-
+    //for speed calculation
+    var elapsed = 0;
+    var lastTime = 0;
+    var lastLeftPaddleY = null;
+    var lastLeftPaddleX = null;
+    var lastRightPaddleY = null;
+    var lastRightPaddleX = null;
+    var speedLeftPaddleX = null;
+    var speedLeftPaddleY = null;
+    var speedRightPaddleX = null;
+    var speedRightPaddleY = null;
+    //当球卡边时重置游戏
+    var minialSpeed = 0.3;
+    var addSpeed = 0.1;
     // Define ball properties
     var ballRadius = 10;
     var ballX = canvas.width / 2;
@@ -153,16 +145,11 @@
     var previousXPositionLeft = 0 + edgeWidth;
     var touchYstartRight = null;
     var touchXstartRight = null;
+    //for position calculation
     var previousYPositionRight = canvas.height / 2;
     var previousXPositionRight = canvas.width - edgeWidth;
     const canvasBounds = canvas.getBoundingClientRect();
     const canvasMiddle = canvasBounds.width / 2 + canvasBounds.left;
-
-
-    // Listen for keyboard events
-    document.addEventListener("keydown", keyDownHandler);
-    document.addEventListener("keyup", keyUpHandler);
-
     // Handle key press
     var upPressed = false;
     var downPressed = false;
@@ -214,40 +201,69 @@
       }
     }
 
-    function calculateCollision(sx, sy, px, py, qx, qy, r, R) {
-      // 计算小球到大球的单位法向量
+    function calculateCollision(sx, sy, px, py, qx, qy, r, R, tx = 0, ty = 0) {
+      // 计算小球到大球的向量
       const dx = px - qx;
       const dy = py - qy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // 单位法向量
+      // 计算单位法向量
       const nx = dx / distance;
       const ny = dy / distance;
 
-      // 计算小球在法向量方向的速度分量（投影）
-      const vDotN = sx * nx + sy * ny;
-      // 如果接近切线方向，避免出现反射到对侧的现象
-      if (Math.abs(vDotN) < 0.5) {
-        // 处理切线碰撞的特例：此时仅改变法线方向的速度分量
-        const tangentialSx = sy * nx;
-        const tangentialSy = -sx * ny;
-        return {
-          reflectedVx: tangentialSx,
-          reflectedVy: tangentialSy,
-          newPx: px,
-          newPy: py
-        };
-      }
-      // 计算法向量方向的反射速度分量
-      const reflectedVx = sx - 2 * vDotN * nx;
-      const reflectedVy = sy - 2 * vDotN * ny;
-      // 位置修正：将小球移出大球的表面
-      const overlap = r + R - distance;
-      const newPx = px + nx * overlap;
-      const newPy = py + ny * overlap;
-      return { reflectedVx, reflectedVy, newPx, newPy };
-    }
+      // 计算小球相对于大球的速度
+      const relativeSx = sx - tx;
+      const relativeSy = sy - ty;
 
+      // 计算小球在法向量方向的速度分量（投影）
+      const vDotN = relativeSx * nx + relativeSy * ny;
+
+      // 检测碰撞和切线情况
+      if (distance <= r + R) {
+        if (Math.abs(vDotN) < 0.5) {
+          // 处理切线碰撞：避免小球被吸住，改变切线方向速度
+          const tangentialSx = -relativeSy * nx;
+          const tangentialSy = relativeSx * ny;
+          const reflectedVx = tangentialSx + tx;
+          const reflectedVy = tangentialSy + ty;
+
+          // 保持小球在原位置，不作位置修正
+          return {
+            reflectedVx,
+            reflectedVy,
+            newPx: px,
+            newPy: py
+          };
+        } else {
+          // 计算弹性碰撞后的速度
+          const reflectedVx = relativeSx - 2 * vDotN * nx;
+          const reflectedVy = relativeSy - 2 * vDotN * ny;
+
+          // 计算大球速度传递的30%，但沿法线方向
+          const transferVx = 0.3 * tx * nx;
+          const transferVy = 0.3 * ty * ny;
+
+          // 合成最终速度，反射速度加上传递速度
+          const finalVx = reflectedVx + transferVx;
+          const finalVy = reflectedVy + transferVy;
+
+          // 位置修正：将小球移出大球的表面
+          const overlap = r + R - distance;
+          const newPx = px + nx * overlap;
+          const newPy = py + ny * overlap;
+
+          return {
+            reflectedVx: finalVx,
+            reflectedVy: finalVy,
+            newPx,
+            newPy
+          };
+        }
+      }
+
+      // 没有碰撞发生，返回原速度和位置
+      return { reflectedVx: sx, reflectedVy: sy, newPx: px, newPy: py };
+    }
     function hasCollided(px, py, qx, qy, r, R) {
       // 计算两个球中心的距离
       const dx = px - qx;
@@ -288,15 +304,27 @@
         leftPaddleX += paddleSpeed;
       }
 
-      // Move ball
-      ballX += ballSpeedX;
-      ballY += ballSpeedY;
+   
 
       // Check if ball collides with top or bottom of canvas
       if (ballY - ballRadius - edgeWidth < 0 || ballY + ballRadius + edgeWidth > canvas.height) {
-        ballSpeedY = -ballSpeedY;
-      }
+        if (Math.abs(ballSpeedY) > minialSpeed) {
+          ballSpeedY = -ballSpeedY;
+          if(ballSpeedY > 0) {
+            ballSpeedY += addSpeed;
+          }else{
+            ballSpeedY -= addSpeed;
+          }
+        } else {
+          console.log("ballSpeedY: " + ballSpeedY);
+          reset();
+        }
 
+      }
+         // Move ball
+         ballX += ballSpeedX;
+         ballY += ballSpeedY;
+          
       // Check if ball collides with left paddle
       /*if (
         ballX - ballRadius < paddleWidth &&
@@ -307,7 +335,7 @@
       }*/
 
       if (hasCollided(ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight / 2)) {
-        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight / 2);
+        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, leftPaddleX, leftPaddleY, ballRadius, paddleHeight / 2, speedLeftPaddleX, speedLeftPaddleY);
         ballSpeedX = ballMove.reflectedVx;
         ballSpeedY = ballMove.reflectedVy;
         ballX = ballMove.newPx;
@@ -323,7 +351,7 @@
         ballSpeedX = -ballSpeedX;
       }*/
       if (hasCollided(ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight / 2)) {
-        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight / 2);
+        var ballMove = calculateCollision(ballSpeedX, ballSpeedY, ballX, ballY, rightPaddleX, rightPaddleY, ballRadius, paddleHeight / 2, speedRightPaddleX, speedRightPaddleY);
         ballSpeedX = ballMove.reflectedVx;
         ballSpeedY = ballMove.reflectedVy;
         ballX = ballMove.newPx;
@@ -339,7 +367,18 @@
           reset();
         }
       } else if (ballX < edgeWidth || ballX > canvas.width - edgeWidth) {
-        ballSpeedX = -ballSpeedX;
+        if (Math.abs(ballSpeedX) > minialSpeed) {
+          ballSpeedX = -ballSpeedX;
+          if(ballSpeedX > 0) {
+            ballSpeedX += addSpeed;
+          }else{
+            ballSpeedX -= addSpeed;
+          }
+        } else {
+          console.log("ballSpeedX:"+ballSpeedX);
+          reset();
+        }
+
       }
 
 
@@ -442,6 +481,12 @@
     function actionStart(e) {
       //e.preventDefault();
       //判断是鼠标左键点击还是触摸
+      lastTime = Date.now();
+      lastLeftPaddleX = leftPaddleX;
+      lastRightPaddleX = rightPaddleX;
+      lastLeftPaddleY = leftPaddleY;
+      lastRightPaddleY = rightPaddleY;
+
       if (!gameRunning) { return; }
       var leftPt = { pageX: canvas.width, pageY: -1 }, rightPt = { pageX: 0, pageY: -1 };
 
@@ -467,6 +512,17 @@
 
     }
     function actionEnd(e) {
+      lastTime = 0;
+      lastLeftPaddleX = null;
+      lastRightPaddleX = null;
+      lastLeftPaddleY = null;
+      lastRightPaddleY = null;
+      speedLeftPaddleX = null;
+      speedRightPaddleX = null;
+      speedRightPaddleY = null;
+      speedLeftPaddleY = null;
+
+
       //e.preventDefault();
       if (touchYstartRight != null) {
         touchYstartRight = null;
@@ -483,6 +539,7 @@
     }
 
     function actionMove(e) {
+      elapsed = Date.now() - lastTime;
       e.preventDefault(); // 防止页面滚动
       if (gameRunning) {
         if (e.touches) { // 触摸事件
@@ -521,10 +578,26 @@
         if (leftTouch && touchYstartLeft !== null) {
           let distYLeft = leftTouch.pageY - touchYstartLeft;
           leftPaddleY = previousYPositionLeft + distYLeft;
-          leftPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddleY));
+          leftPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight / 2, leftPaddleY));
           let distXLeft = leftTouch.pageX - touchXstartLeft;
           leftPaddleX = previousXPositionLeft + distXLeft;
           leftPaddleX = Math.max(0, Math.min(canvas.width / 2, leftPaddleX));
+          if (speedLeftPaddleX === null && lastLeftPaddleX != leftPaddleX) {
+            if (lastLeftPaddleX === null) {
+              lastLeftPaddleX = leftPaddleX;
+            } else {
+              speedLeftPaddleX = (leftPaddleX - lastLeftPaddleX) / elapsed;
+              lastLeftPaddleX = leftPaddleX;
+            }
+          }
+          if (speedLeftPaddleY === null && lastLeftPaddleY != leftPaddleY) {
+            if (lastLeftPaddleY === null) {
+              lastLeftPaddleY = leftPaddleY;
+            } else {
+              speedLeftPaddleY = (leftPaddleY - lastLeftPaddleY) / elapsed;
+              lastLeftPaddleY = leftPaddleY;
+            }
+          }
         }
       } catch (e) { }
 
@@ -533,10 +606,26 @@
         if (rightTouch && touchYstartRight !== null) {
           let distYRight = rightTouch.pageY - touchYstartRight;
           rightPaddleY = previousYPositionRight + distYRight;
-          rightPaddleY = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddleY));
+          rightPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight / 2, rightPaddleY));
           let distXRight = rightTouch.pageX - touchXstartRight;
           rightPaddleX = previousXPositionRight + distXRight;
           rightPaddleX = Math.min(canvas.width, Math.max(canvas.width / 2, rightPaddleX));
+          if (speedRightPaddleX === null && lastRightPaddleX != rightPaddleX) {
+            if (lastRightPaddleX === null) {
+              lastRightPaddleX = rightPaddleX;
+            } else {
+              speedRightPaddleX = (rightPaddleX - lastRightPaddleX) / elapsed;
+              lastRightPaddleX = rightPaddleX;
+            }
+          }
+          if (speedRightPaddleY === null && lastRightPaddleY != rightPaddleY) {
+            if (lastRightPaddleY === null) {
+              lastRightPaddleY = rightPaddleY;
+            } else {
+              speedRightPaddleY = (rightPaddleY - lastRightPaddleY) / elapsed;
+              lastRightPaddleY = rightPaddleY;
+            }
+          }
         }
       } catch (e) { }
     }
@@ -550,31 +639,85 @@
         if (touchYstartLeft !== null) {
           let distYLeft = mouseY - touchYstartLeft;
           leftPaddleY = previousYPositionLeft + distYLeft;
-          leftPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight/2, leftPaddleY));
+          leftPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight / 2, leftPaddleY));
           let distXLeft = mouseX - touchXstartLeft;
           leftPaddleX = previousXPositionLeft + distXLeft;
           leftPaddleX = Math.max(0, Math.min(canvas.width / 2, leftPaddleX));
+          if (speedLeftPaddleX === null && lastLeftPaddleX != leftPaddleX) {
+            if (lastLeftPaddleX === null) {
+              lastLeftPaddleX = leftPaddleX;
+            } else {
+              speedLeftPaddleX = (leftPaddleX - lastLeftPaddleX) / elapsed;
+            }
+          }
+          if (speedLeftPaddleY === null && lastLeftPaddleY != leftPaddleY) {
+            if (lastLeftPaddleY === null) {
+              lastLeftPaddleY = leftPaddleY;
+            } else {
+              speedLeftPaddleY = (leftPaddleY - lastLeftPaddleY) / elapsed;
+            }
+          }
         }
       } else {
         if (touchYstartRight !== null) {
           let distYRight = mouseY - touchYstartRight;
           rightPaddleY = previousYPositionRight + distYRight;
-          rightPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight/2, rightPaddleY));
+          rightPaddleY = Math.max(0 + paddleHeight / 2, Math.min(canvas.height - paddleHeight / 2, rightPaddleY));
           let distXRight = mouseX - touchXstartRight;
           rightPaddleX = previousXPositionRight + distXRight;
           rightPaddleX = Math.min(canvas.width, Math.max(canvas.width / 2, rightPaddleX));
+          if (speedRightPaddleX === null && lastRightPaddleX != rightPaddleX) {
+            if (lastRightPaddleX === null) {
+              lastRightPaddleX = rightPaddleX;
+            } else {
+              speedRightPaddleX = (rightPaddleX - lastRightPaddleX) / elapsed;
+            }
+          }
+          if (speedRightPaddleY === null && lastRightPaddleY != rightPaddleY) {
+            if (lastRightPaddleY === null) {
+              lastRightPaddleY = rightPaddleY;
+            } else {
+              speedRightPaddleY = (rightPaddleY - lastRightPaddleY) / elapsed;
+            }
+          }
         }
       }
     }
 
 
-    // 事件监听器
+    // Add event listeners
+
+    startBtn.addEventListener("click", function () {
+      if (!gameRunning) {
+        // only start the game if gameRunning is false
+        gameRunning = true; // set gameRunning to true when the game starts
+        loop();
+      }
+    });
+
+    pauseBtn.addEventListener("click", function () {
+      gameRunning = false;
+      cancelAnimationFrame(animationId);
+    });
+
+    restartBtn.addEventListener("click", function () {
+      document.location.reload();
+    });
+
+    addEventListener("load", (event) => {
+      draw();
+    });
+
+    // Listen for keyboard events
+    document.addEventListener("keydown", keyDownHandler);
+    document.addEventListener("keyup", keyUpHandler);
     document.addEventListener('touchstart', actionStart, { passive: false });
     document.addEventListener('touchend', actionEnd);
     document.addEventListener('touchmove', actionMove, { passive: false });
     document.addEventListener('mousedown', actionStart);
     document.addEventListener('mouseup', actionEnd);
     document.addEventListener('mousemove', actionMove);  
+
   </script>
 </body>
 
