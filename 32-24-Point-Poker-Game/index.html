@@ -6,63 +6,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>24点</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
         .card-container {
             display: flex;
-            justify-content: flex-start;
-            margin-top: 20px;
-            width: 80%;
+            justify-content: center;
             flex-wrap: wrap;
-
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
         }
-
         .card {
             width: 100px;
             height: 150px;
-            background-color: #f0f0f0;
+            background-color: #fff;
             border-radius: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
             font-weight: bold;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-            margin: 1vmin;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
         }
-
+        .card:hover {
+            transform: translateY(-5px);
+        }
         button {
-            margin-top: 20px;
+            margin: 10px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #operation {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
         }
     </style>
 </head>
 
 <body>
-    <h1>24点</h1>
-    <div id = "score" style="font-size: 2em;font-weight: bold;">得分: 0</div>
-    <div style="display:flex;justify-content:space-between">
-        
-        
-        <button onclick="drawCards()">抽牌</button>
-        <button onclick="cal()" style="display: none;">算牌</button>
-        <button onclick="gaveup()" >放弃牌</button>
-        <button onclick="showResult(true)" style="display: none;">显示结果</button>
-        <div id="counter" style="font-size: 2em;font-weight: bold;"></div>
+    <h1>24点游戏</h1>
+    <div class="game-info">
+        <div id="score" style="font-size: 1.5em; font-weight: bold;">得分: 0</div>
+        <div id="counter" style="font-size: 1.5em; font-weight: bold;"></div>
     </div>
-
     <div>
-        <div class="card-container" id="cardContainer"> <!-- 这里将显示抽出的牌 --> </div>
-        <div id="outputs" style="display: none;font-size: 1.5em;" onclick="drawCards()"></div>
-        <div id="inputs" ></div>
+        <button onclick="drawCards()">开始</button>
+        <button onclick="unhide()" id="calButton" style="display: none;">算牌</button>
+        <button onclick="gaveup()">放弃牌</button>
+        <button onclick="showResult(true)" style="display: none;">显示结果</button>
     </div>
+    <div class="card-container" id="cardContainer"></div>
+    <div id="outputs" style="display: none; font-size: 1.5em;" onclick="drawCards()"></div>
+    <div id="inputs"></div>
+    <div id="overlay" onclick="hide()"></div>
     <div id="operation">
-        <!-- 显示四个按钮，代表四则运算，点击后赋值selectedMethod 0:+,1:-,2:*,3:/-->
-
-        <button onclick="selectedMethod(0)">+</button>
-        <button onclick="selectedMethod(1)">-</button>
-        <button onclick="selectedMethod(2)">*</button>
-        <button onclick="selectedMethod(3)">/</button>
+        <button onclick="selectedMethod(0)">＋</button>
+        <button onclick="selectedMethod(1)">－</button>
+        <button onclick="selectedMethod(2)">×</button>
+        <button onclick="selectedMethod(3)">÷</button>
     </div>
     <script type="text/javascript" src="str.js"></script>
 
@@ -79,6 +127,16 @@
         const method = ['+', '-', '*', '/'];
         var interval;
         var score = 0;
+        function unhide() {
+            document.getElementById('operation').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function hide() {
+            document.getElementById('operation').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
         function gaveup() {
             clearInterval(interval); // 停止计时器
             fail(); // 倒计时结束，触发fail函数
@@ -116,6 +174,7 @@
         function selectedMethod(i) {
             selMethod = i;
             if (selectedCards.length == 2) {
+                hide();
                 var cd = calc(checkCardSourceReturnCardNumber(selectedCards[0]), selMethod, checkCardSourceReturnCardNumber(selectedCards[1]));
                 document.getElementById(`card${selectedCards[0]}`).style.display = "none";
                 document.getElementById(`card${selectedCards[1]}`).style.display = "none";
@@ -199,6 +258,9 @@
             if (selectedCards.length < 2) {
                 selectedCards.push(index);
                 document.getElementById(`card${index}`).style.border = "2px solid blue";
+                if(selectedCards.length == 2){
+                    unhide();
+                }
             } else if (selectedCards.length == 2) {
                 if (selMethod != -1) {
                     var cd = calc(checkCardSourceReturnCardNumber(selectedCards[0]), selMethod, checkCardSourceReturnCardNumber(selectedCards[1]));
