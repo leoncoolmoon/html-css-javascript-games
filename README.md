@@ -35,6 +35,8 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 | 28  | [Emoji Catcher Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/28-Emoji-Catcher-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/28-Emoji-Catcher-Game/) |
 | 29  | [Whack A Mole Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/29-Whack-A-Mole-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/29-Whack-A-Mole-Game/) |
 | 30  | [Guess Number Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/30-Guess-Number-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/30-Guess-Number-Game/) |
+| 31  | [Air Hockey Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/31-Air-Hockey-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/31-Air-Hockey-Game/) |
+| 32  | [24 Point Poker Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/32-24-Point-Poker-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/32-24-Point-Poker-Game/) |
 ## Games Description
 
 1. **Candy Crush Game**: Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭
