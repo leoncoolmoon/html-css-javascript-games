@@ -2,9 +2,11 @@ body {
   font-family: "Pacifico";
   display: flex;
   justify-content: center;
+  width: 95vmin;
 }
 
 canvas {
   border: 1x solid #0a3cda;
   margin: 10px;
+  width: 90vmin;
 }
