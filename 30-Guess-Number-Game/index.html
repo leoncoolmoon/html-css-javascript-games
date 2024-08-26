@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
     <title>猜数字游戏</title>
     <meta charset="utf-8">
@@ -110,20 +110,20 @@
 </head>
 <body>
 <div class="container">
-    <h1>猜数字游戏</h1>
+    <h1 id="title">猜数字游戏</h1>
     <div id="game-info">
-        <span>积分: <span id="score">0</span></span>
-        <span>剩余时间: <span id="timer">300</span>秒</span>
-        <span>剩余猜测: <span id="guesses-left">8</span></span>
+        <span><span id="score-label">积分:</span> <span id="score">0</span></span>
+        <span><span id="timer-label">剩余时间:</span> <span id="timer">300</span><span id="seconds-label">秒</span></span>
+        <span><span id="guesses-left-label">剩余猜测:</span> <span id="guesses-left">8</span></span>
     </div>
-    <p>在下面的表单中输入一个4位数字（数字不重复），然后点击"猜测"按钮。你有8次机会和300秒时间。</p>
-    <p>如果数字和位置都正确，你会得到一个"A"。如果数字正确但位置错误，你会得到一个"B"。</p>
+    <p id="instruction1">在下面的表单中输入一个4位数字（数字不重复），然后点击"猜测"按钮。你有8次机会和300秒时间。</p>
+    <p id="instruction2">如果数字和位置都正确，你会得到一个"A"。如果数字正确但位置错误，你会得到一个"B"。</p>
     <button id="new-game-btn" onclick="newGame()">新游戏</button>
     <button id="give-up-btn" onclick="giveUp()">放弃</button>
-    <div id="records"><h3>猜测记录:</h3></div>
-    <label for="guess">你的猜测:</label>
+    <div id="records"><h3 id="records-title">猜测记录:</h3></div>
+    <label for="guess" id="guess-label">你的猜测:</label>
     <input type="text" id="guess" name="guess" pattern="\d{4}">
-    <button onclick="submitGuess(document.getElementById('guess').value)">猜测</button>
+    <button onclick="submitGuess(document.getElementById('guess').value)" id="guess-button">猜测</button>
     <div id="result"></div>
 </div>
 
@@ -134,6 +134,97 @@
 </div>
 
 <script>
+    const translations = {
+        "zh": {
+            "title": "猜数字游戏",
+            "scoreLabel": "积分:",
+            "timerLabel": "剩余时间:",
+            "secondsLabel": "秒",
+            "guessesLeftLabel": "剩余猜测:",
+            "instruction1": "在下面的表单中输入一个4位数字（数字不重复），然后点击\"猜测\"按钮。你有8次机会和300秒时间。",
+            "instruction2": "如果数字和位置都正确，你会得到一个\"A\"。如果数字正确但位置错误，你会得到一个\"B\"。",
+            "newGame": "新游戏",
+            "giveUp": "放弃",
+            "recordsTitle": "猜测记录:",
+            "guessLabel": "你的猜测:",
+            "guessButton": "猜测",
+            "timeUp": "时间到！",
+            "inputError":"请输入一个4位数字，且数字不能重复。",
+            "correctAnswer": "恭喜！你猜对了！",
+            "incorrectAnswer": "很遗憾！你猜错了！",
+            "giveUpMessage": "你放弃了猜测，正确答案是",
+            "noGame": "没有进行中的游戏。",
+            "finalAnswer": "正确答案是"
+        },
+        "en": {
+            "title": "Number Guessing Game",
+            "scoreLabel": "Score:",
+            "timerLabel": "Time Left:",
+            "secondsLabel": "seconds",
+            "guessesLeftLabel": "Guesses Left:",
+            "instruction1": "Enter a 4-digit number (no repeated digits) below and click the \"Guess\" button. You have 8 chances and 300 seconds.",
+            "instruction2": "If a number and position are correct, you will get an \"A\". If a number is correct but in the wrong position, you will get a \"B\".",
+            "newGame": "New Game",
+            "giveUp": "Give Up",
+            "recordsTitle": "Guess Records:",
+            "guessLabel": "Your Guess:",
+            "guessButton": "Guess",
+            "timeUp": "Time's Up!",
+            "inputError":"Please enter a 4-digit number, no repeated digits.",
+            "correctAnswer": "Congratulations! You guessed correctly!",
+            "incorrectAnswer": "Sorry! You guessed incorrectly!",
+            "giveUpMessage": "You gave up and the correct answer is",
+            "noGame": "No game in progress.",
+            "finalAnswer": "The correct answer is"
+        },
+        "ja": {
+            "title": "数字当てゲーム",
+            "scoreLabel": "スコア:",
+            "timerLabel": "残り時間:",
+            "secondsLabel": "秒",
+            "guessesLeftLabel": "残りの推測:",
+            "instruction1": "下のフォームに4桁の数字（数字は重複しない）を入力し、「推測」ボタンをクリックしてください。8回のチャンスと300秒があります。",
+            "instruction2": "数字と位置が両方とも正しい場合は「A」が表示されます。数字が正しいが位置が間違っている場合は「B」が表示されます。",
+            "newGame": "新しいゲーム",
+            "giveUp": "ギブアップ",
+            "recordsTitle": "推測記録:",
+            "guessLabel": "あなたの推測:",
+            "guessButton": "推測",
+            "timeUp": "時間切れ！",
+            "inputError":"4桁の数字を入力してください。数字は重複しない。",
+            "correctAnswer": "おめでとう！正解です！",
+            "incorrectAnswer": "残念！正解しません！",
+            "giveUpMessage": "ギブアップしました。正解は",
+            "noGame": "進行中のゲームはありません。",
+            "finalAnswer": "正解は"
+        }
+    };
+
+    var translatedPage = translations[detectLanguage()];
+    function detectLanguage() {
+        const lang = navigator.language.slice(0, 2);
+        return translations[lang] ? lang : "en";
+    }
+
+    function translatePage() {
+
+        document.getElementById("title").textContent = translatedPage.title;
+        document.getElementById("score-label").textContent = translatedPage.scoreLabel;
+        document.getElementById("timer-label").textContent = translatedPage.timerLabel;
+        document.getElementById("seconds-label").textContent = translatedPage.secondsLabel;
+        document.getElementById("guesses-left-label").textContent = translatedPage.guessesLeftLabel;
+        document.getElementById("instruction1").textContent = translatedPage.instruction1;
+        document.getElementById("instruction2").textContent = translatedPage.instruction2;
+        document.getElementById("new-game-btn").textContent = translatedPage.newGame;
+        document.getElementById("give-up-btn").textContent = translatedPage.giveUp;
+        document.getElementById("records-title").textContent = translatedPage.recordsTitle;
+        document.getElementById("guess-label").textContent = translatedPage.guessLabel;
+        document.getElementById("guess-button").textContent = translatedPage.guessButton;
+    }
+
+    translatePage();
+
+    // 下面是你的游戏逻辑的JavaScript代码
     let answer = "", records = [], score = 0, timer, guessesLeft = 8, isGameActive = false, timeLeft = 300;
 
     const generateNumber = () => Array.from({length: 10}, (_, i) => i)
@@ -151,7 +242,7 @@
     }
 
     const renderRecords = () => {
-        let list = "<h3>猜测记录:</h3>";
+        let list = `<h3>${translatedPage.recordsTitle}</h3>`;
         for (let {guess, result} of records) {
             list += `<p>${guess}: ${result}</p>`;
         }
@@ -172,7 +263,7 @@
             timeLeft--;
             updateGameInfo();
             if (timeLeft <= 0) {
-                endGame(false, "时间到！");
+                endGame(false, translatedPage.timeUp);
             }
         }, 1000);
     }
@@ -199,7 +290,7 @@
         }
         if (!isGameActive) return;
         if (!/^(?!.*(.).*\1)\d{4}$/.test(guess)) {
-            alert("请输入一个4位数字，且数字不能重复。");
+            alert(translatedPage.inputError);
             document.getElementById("guess").value = "";
             document.getElementById("guess").focus();
             return;
@@ -212,9 +303,9 @@
         updateGameInfo();
         document.getElementById("result").textContent = result;
         if (result === "4A0B") {
-            endGame(true, "恭喜你，你赢了！");
+            endGame(true, translatedPage.correctAnswer);
         } else if (guessesLeft <= 0) {
-            endGame(false, "很遗憾，你输了。");
+            endGame(false, translatedPage.incorrectAnswer);
         }
         document.getElementById('guess').value = "";
         document.getElementById('guess').focus();
@@ -233,16 +324,16 @@
 
     const giveUp = () => {
         if (isGameActive) {
-            endGame(false, "你放弃了游戏。");
+            endGame(false, translatedPage.giveUpMessage);
         } else {
-            alert("没有进行中的游戏。");
+            alert(translatedPage.noGame);
         }
     }
 
     const showResultPopup = (message) => {
         document.getElementById("give-up-btn").style.display = "none";
         document.getElementById("result-message").textContent = message;
-        document.getElementById("result-details").textContent = `正确答案是 ${answer}`;
+        document.getElementById("result-details").textContent = `${translatedPage.finalAnswer}: ${answer}`;
         document.getElementById("overlay").style.display = "block";
         document.getElementById("result-popup").style.display = "block";
         document.getElementById("result-popup").focus();
