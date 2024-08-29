@@ -1045,7 +1045,12 @@
     <script type="module">
       import gsap from 'https://cdn.skypack.dev/gsap@3.11.0';
       let FIRING = false;
-      
+      document.addEventListener('contextmenu', event => event.preventDefault());
+ // 获取直升机元素
+ const helicopter = document.querySelector('.helicopter__wrapper');
+// 游戏状态
+let gameOver = false;
+        let targets = [];
       let score = 0;
       let timeLeft = 60;
       let gameInterval;
@@ -1119,27 +1124,25 @@
         FIRING = false;
       });
 
-        function createTarget() {
+      function createTarget() {
             const target = document.createElement('div');
+
             target.className = 'target';
-            target.style.left = `${Math.random() * window.innerWidth}px`;
-            target.style.top = `${Math.random() * window.innerHeight}px`;
+            target.style.left = '0px';
+            target.style.bottom = '0px';
             document.body.appendChild(target);
+            targets.push(target);
 
+            // 移动目标
             gsap.to(target, {
-                x: gsap.utils.random(-500, 500),
-                y: gsap.utils.random(-300, 300),
-                duration: 2,
-                ease: "none",
-                repeat: -1,
-                yoyo: true
-            });
-
-            target.addEventListener('click', () => {
-                score += 10;
-                scoreElement.textContent = score;
-                target.remove();
-                createTarget();
+                x: `${Math.random() * window.innerWidth}px`,
+                y: `${-Math.random() * window.innerHeight}px`,
+                duration: 5,
+                ease: 'none',
+                onComplete: () => {
+                    document.body.removeChild(target);
+                    targets = targets.filter(t => t !== target);
+                }
             });
         }
 
@@ -1157,6 +1160,7 @@
                 timeLeft--;
                 timerElement.textContent = timeLeft;
                 if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
                     endGame();
                 }
             }, 1000);
@@ -1303,6 +1307,69 @@
           '--on': window.__THEME === THEMES.DARK ? 0 : 1,
         });
       });
+             // 检测碰撞
+    function checkCollision(helicopter, target) {
+            const helicopterRect = helicopter.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+
+            return !(
+                helicopterRect.right < targetRect.left || 
+                helicopterRect.left > targetRect.right || 
+                helicopterRect.bottom < targetRect.top || 
+                helicopterRect.top > targetRect.bottom
+            );
+        }
+
+
+      function gameLoop() {
+            if (gameOver) return;
+
+            targets.forEach(target => {
+                if (checkCollision(helicopter, target)) {
+                    gameOver = true;
+                    document.getElementById('gameOver').style.display = 'block';
+                    return;
+                }
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+// 射击功能
+function shoot(x, y) {
+            const bullet = document.createElement('div');
+            bullet.className = 'target'; // 重用目标的样式
+            bullet.style.backgroundColor = 'yellow';
+            bullet.style.left = `${x}px`;
+            bullet.style.top = `${y}px`;
+            document.body.appendChild(bullet);
+
+            gsap.to(bullet, {
+                x: '+=1000',
+                duration: 1,
+                onUpdate: () => {
+                    targets.forEach(target => {
+                        if (checkCollision(bullet, target)) {
+                            document.body.removeChild(target);
+                            targets = targets.filter(t => t !== target);
+                        }
+                    });
+                },
+                onComplete: () => {
+                    document.body.removeChild(bullet);
+                }
+            });
+        }
+       // 事件监听
+       document.addEventListener('click', (event) => {
+            if (!gameOver) {
+                shoot(event.clientX, event.clientY);
+            }
+        });
+
+        // 开始游戏
+        setInterval(createTarget, 2000); // 每2秒创建一个新目标
+        gameLoop();
+
     </script>
   </body>
 </html>
