@@ -2,7 +2,7 @@
 <html lang="zh">
   <head>
     <meta charset="UTF-8" />
-    <title>可以射击的3D直升机</title>
+    <title>直升机射击小游戏</title>
     <style>
       .cuboid {
         width: 100%;
@@ -793,9 +793,55 @@
           --alpha: 1;
         }
       }
+      .target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate3d(0, 0, 100vmin);
+        }
+        
+        #score, #timer {
+            position: fixed;
+            top: 20px;
+            font-size: 24px;
+            color: white;
+            z-index: 1000;
+        }
+        
+        #score {
+            left: 20px;
+        }
+        
+        #timer {
+            right: 20px;
+        }
+        
+        #gameOver {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 2000;
+        }
     </style>
   </head>
   <body>
+    <div id="score">得分: <span id="scoreValue">0</span></div>
+    <div id="timer">时间: <span id="timeLeft">60</span>s</div>
+    <div id="gameOver" onclick="restartGame()">
+        <h2>游戏结束</h2>
+        <p>你的得分: <span id="finalScore"></span></p>
+        <p>点击任意处重新开始</p>
+    </div>
+
     <div class="scene">
       <div class="helicopter__tilter">
         <div class="helicopter__wrapper">
@@ -999,7 +1045,18 @@
     <script type="module">
       import gsap from 'https://cdn.skypack.dev/gsap@3.11.0';
       let FIRING = false;
+      
+      let score = 0;
+      let timeLeft = 60;
+      let gameInterval;
+
       const BOUNDS = 50;
+
+      const scoreElement = document.getElementById('scoreValue');
+      const timerElement = document.getElementById('timeLeft');
+      const gameOverElement = document.getElementById('gameOver');
+      const finalScoreElement = document.getElementById('finalScore');
+
       document.addEventListener('pointermove', ({ x, y }) => {
         const newX = gsap.utils.mapRange(
           0,
@@ -1061,6 +1118,107 @@
       document.addEventListener('pointerup', () => {
         FIRING = false;
       });
+
+        function createTarget() {
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.style.left = `${Math.random() * window.innerWidth}px`;
+            target.style.top = `${Math.random() * window.innerHeight}px`;
+            document.body.appendChild(target);
+
+            gsap.to(target, {
+                x: gsap.utils.random(-500, 500),
+                y: gsap.utils.random(-300, 300),
+                duration: 2,
+                ease: "none",
+                repeat: -1,
+                yoyo: true
+            });
+
+            target.addEventListener('click', () => {
+                score += 10;
+                scoreElement.textContent = score;
+                target.remove();
+                createTarget();
+            });
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            scoreElement.textContent = score;
+            timerElement.textContent = timeLeft;
+            gameOverElement.style.display = 'none';
+
+            createTarget();
+            createTarget();
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            gameOverElement.style.display = 'block';
+            finalScoreElement.textContent = score;
+            document.querySelectorAll('.target').forEach(target => target.remove());
+        }
+
+        window.restartGame = startGame;
+
+        startGame();
+
+        // 修改射击逻辑
+        gsap.ticker.add((time, deltaTime, frame) => {
+            if (FIRING) {
+                const AMMO = document.createElement('div');
+                AMMO.innerHTML = `
+                    <div class="cuboid cuboid--ammo">
+                        <div class="cuboid__side"></div>
+                        <div class="cuboid__side"></div>
+                        <div class="cuboid__side"></div>
+                        <div class="cuboid__side"></div>
+                        <div class="cuboid__side"></div>
+                        <div class="cuboid__side"></div>
+                    </div>
+                `;
+                AMMO.className = 'helicopter__ammo';
+                AMMO.style.setProperty('--hue', Math.random() * 360);
+                
+                const launcher = frame % 2 === 0 ? document.querySelector('.helicopter__launcher--left') : document.querySelector('.helicopter__launcher--right');
+                launcher.appendChild(AMMO);
+
+                gsap.to(AMMO, {
+                    xPercent: () => gsap.utils.random(-3000, -2000),
+                    onComplete: () => {
+                        const targets = document.querySelectorAll('.target');
+                        targets.forEach(target => {
+                            if (isColliding(AMMO, target)) {
+                                score += 5;
+                                scoreElement.textContent = score;
+                                target.remove();
+                                createTarget();
+                            }
+                        });
+                        AMMO.remove();
+                    }
+                });
+            }
+        });
+
+        function isColliding(elem1, elem2) {
+            const rect1 = elem1.getBoundingClientRect();
+            const rect2 = elem2.getBoundingClientRect();
+            return !(rect1.right < rect2.left || 
+                     rect1.left > rect2.right || 
+                     rect1.bottom < rect2.top || 
+                     rect1.top > rect2.bottom);
+        }
 
       // Purely for debugging purposes
       // import { GUI } from 'https://cdn.skypack.dev/dat.gui'
