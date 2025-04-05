@@ -71,6 +71,8 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 30. **Guess Number Game**: Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖
 31. **Air Hockey Game**: A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑
 32. **24 Point Poker Game**: A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏
+33. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
+34. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
 
 ## License
 
