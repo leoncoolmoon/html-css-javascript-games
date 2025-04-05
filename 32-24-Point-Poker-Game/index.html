@@ -97,9 +97,10 @@
         <div id="counter" style="font-size: 1.5em; font-weight: bold;"></div>
     </div>
     <div>
-        <button onclick="drawCards()">开始</button>
+        <button onclick="drawCards()" id="startButton">开始</button>
         <button onclick="unhide()" id="calButton" style="display: none;">算牌</button>
-        <button onclick="gaveup()">放弃牌</button>
+        <button onclick="gaveup()">放弃本局</button>
+		<button onclick="resetCals(-1)">重置本局</button>
         <button onclick="showResult(true)" style="display: none;">显示结果</button>
     </div>
     <div class="card-container" id="cardContainer"></div>
@@ -201,7 +202,8 @@
         function drawCards() {
             startCountdown();
             // 清空上次输出
-            document.getElementById("outputs").innerHTML = " ";
+            document.getElementById("outputs").innerHTML = " "; 
+			document.getElementById("startButton").style.display = "none";
             showResult(false);
             // 随机抽取4张不重复的牌
             let drawnCards = [];
@@ -255,7 +257,15 @@
         };
         var selectedCards = [];
         function clcikCard(index) {
-            if (selectedCards.length < 2) {
+			// 检查是否已经选中了这张卡片
+			const cardIndex = selectedCards.indexOf(index);
+            if (cardIndex !== -1) {
+				// 如果已经选中，取消选择
+				document.getElementById(`card${index}`).style.border = "none";
+				selectedCards.splice(cardIndex, 1);
+				// 如果之前已经显示操作窗口，现在应该隐藏
+				hide();
+			} else if (selectedCards.length < 2) {
                 selectedCards.push(index);
                 document.getElementById(`card${index}`).style.border = "2px solid blue";
                 if(selectedCards.length == 2){
