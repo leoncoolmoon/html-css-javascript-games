@@ -37,6 +37,9 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 | 30  | [Guess Number Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/30-Guess-Number-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/30-Guess-Number-Game/) |
 | 31  | [Air Hockey Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/31-Air-Hockey-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/31-Air-Hockey-Game/) |
 | 32  | [24 Point Poker Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/32-24-Point-Poker-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/32-24-Point-Poker-Game/) |
+| 33  | [Snakes and ladders](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/33-Snakes_ladders)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/33-Snakes_ladders/) |
+| 34  | [Helicopter Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/34-helicopter-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/34-helicopter-Game/) |
+| 35  | [RubikCube Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/35-RubikCube-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/35-RubikCube-Game/) |
 ## Games Description
 
 1. **Candy Crush Game**: Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭
@@ -71,8 +74,9 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 30. **Guess Number Game**: Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖
 31. **Air Hockey Game**: A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑
 32. **24 Point Poker Game**: A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏
-33. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
-34. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
+33. **Snakes and ladders**: A Classic Board Game Experience Enjoy the timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead, but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜
+34. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
+35. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
 
 ## License
 
