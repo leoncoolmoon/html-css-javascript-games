@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>渡河经典 · 幸存者与丧尸</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            background: #1a3a5c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+        .wrapper { width: 760px; max-width: 96vw; }
+
+        .game-title {
+            text-align: center;
+            font-size: 1.9rem;
+            color: #ffe5a0;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            margin-bottom: 12px;
+            letter-spacing: 3px;
+        }
+
+        /* ===== SCENE ===== */
+        .scene {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+
+        .sky-layer {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, #1e4d78 0%, #4a90c8 55%, #87ceeb 100%);
+        }
+        .sun {
+            position: absolute; top: 18px; right: 60px;
+            width: 48px; height: 48px;
+            background: radial-gradient(circle, #fff7a0 30%, #ffe066 60%, #ffcc0080 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 30px 10px #ffd70055;
+            animation: sunPulse 4s ease-in-out infinite;
+        }
+        @keyframes sunPulse {
+            0%,100% { box-shadow: 0 0 30px 10px #ffd70055; }
+            50%      { box-shadow: 0 0 50px 20px #ffd70088; }
+        }
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.85);
+            border-radius: 40px;
+        }
+        .cloud::before, .cloud::after {
+            content: ''; position: absolute;
+            background: rgba(255,255,255,0.85); border-radius: 50%;
+        }
+        .cloud1 { width:70px;height:22px;top:22px;left:80px;  animation: cloudDrift 18s linear infinite; }
+        .cloud1::before{width:32px;height:32px;top:-16px;left:10px;}
+        .cloud1::after {width:22px;height:22px;top:-10px;left:32px;}
+        .cloud2 { width:50px;height:16px;top:45px;left:220px; animation: cloudDrift 25s linear infinite 8s; }
+        .cloud2::before{width:24px;height:24px;top:-12px;left:8px;}
+        .cloud2::after {width:16px;height:16px;top:-8px; left:24px;}
+        @keyframes cloudDrift {
+            0%{transform:translateX(0);}50%{transform:translateX(30px);}100%{transform:translateX(0);}
+        }
+
+        /* River */
+        .river-bg {
+            position: absolute; bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 280px; height: 160px;
+            background: linear-gradient(180deg, #2471a3 0%, #1a5276 100%);
+        }
+        .river-waves {
+            position: absolute; bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 280px; height: 160px;
+            overflow: hidden; pointer-events: none;
+        }
+        .river-waves::before {
+            content:''; position:absolute; top:28px; left:-40px;
+            width:360px; height:16px;
+            background: repeating-linear-gradient(90deg,
+                transparent 0,transparent 20px,
+                rgba(255,255,255,0.13) 20px,rgba(255,255,255,0.13) 40px);
+            animation: waveScroll 2.5s linear infinite;
+        }
+        .river-waves::after {
+            content:''; position:absolute; top:62px; left:-20px;
+            width:320px; height:12px;
+            background: repeating-linear-gradient(90deg,
+                transparent 0,transparent 16px,
+                rgba(255,255,255,0.08) 16px,rgba(255,255,255,0.08) 32px);
+            animation: waveScroll 3.5s linear infinite reverse;
+        }
+        @keyframes waveScroll {
+            0%{transform:translateX(0);}100%{transform:translateX(40px);}
+        }
+
+        /* Banks */
+        .bank-left {
+            position: absolute; bottom:0; left:0;
+            width: calc(50% - 140px); height:160px;
+            background: linear-gradient(180deg,#5baa4a 0%,#4a8a3a 38%,#c4953a 38%,#a07030 100%);
+        }
+        .bank-right {
+            position: absolute; bottom:0; right:0;
+            width: calc(50% - 140px); height:160px;
+            background: linear-gradient(180deg,#4a9940 0%,#3a8030 38%,#c49040 38%,#a07030 100%);
+        }
+        .bank-left::before, .bank-right::before {
+            content:''; position:absolute; top:0; left:0; right:0;
+            height:8px; background:#7bcf5a; border-radius:0 0 6px 6px;
+        }
+        .dock-left {
+            position: absolute; bottom:0; right:0;
+            width:16px; height:160px;
+            background: linear-gradient(90deg,#7a4a1a,#5a3010);
+        }
+        .dock-right {
+            position: absolute; bottom:0; left:0;
+            width:16px; height:160px;
+            background: linear-gradient(90deg,#5a3010,#7a4a1a);
+        }
+
+        /* Trees */
+        .tree {
+            position: absolute; bottom:60px;
+            display:flex; flex-direction:column; align-items:center;
+            pointer-events:none;
+        }
+        .tree-crown { font-size:1.6rem; line-height:1; filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.3)); }
+        .tree-trunk  { width:5px; height:14px; background:#7a4a1a; border-radius:2px; }
+        .tree-l1 { left:10px; }
+        .tree-l2 { left:52px; bottom:64px; }
+        .tree-r1 { right:10px; }
+        .tree-r2 { right:50px; bottom:64px; }
+
+        /* characters area */
+        .creatures-area {
+            position: absolute; bottom:110px;
+            display:flex; flex-wrap:wrap; gap:6px;
+            align-items:flex-end; justify-content:center;
+        }
+        .creatures-left  { left:6px; right:calc(50% + 138px + 16px + 2px); }
+        .creatures-right { right:6px; left:calc(50% + 138px + 16px + 2px); }
+
+        .creature-token {
+            display:flex; flex-direction:column; align-items:center;
+            cursor:pointer; transition:transform 0.12s; position:relative;
+        }
+        .creature-token:hover  { transform:translateY(-5px); }
+        .creature-token:active { transform:scale(0.88); }
+        .creature-token.inactive { opacity:0.45; cursor:default; }
+        .creature-token.inactive:hover { transform:none; }
+        .creature-emoji  { font-size:2rem; line-height:1; filter:drop-shadow(0 3px 3px rgba(0,0,0,0.35)); }
+        .creature-shadow { width:22px; height:5px; background:rgba(0,0,0,0.2); border-radius:50%; margin-top:2px; }
+
+        /* ===== BOAT ===== */
+        .boat-wrap {
+            position: absolute;
+            bottom: 34px;
+            width: 130px;
+            display: flex; flex-direction:column; align-items:center;
+            cursor: pointer;
+            left: calc(50% - 200px);
+            transition: filter 0.2s;
+        }
+        .boat-wrap:hover  { filter: brightness(1.15); }
+        .boat-wrap:active { filter: brightness(0.9); }
+
+        .boat-sail { position:relative; pointer-events:none; }
+        .sail-mast { width:3px; height:52px; background:#6b4a20; margin:0 auto; }
+        .sail-flag { font-size:1.2rem; position:absolute; top:0; left:6px; animation: flagWave 1.5s ease-in-out infinite; }
+        @keyframes flagWave {
+            0%,100%{transform:rotate(-5deg);}50%{transform:rotate(8deg);}
+        }
+
+        .boat-body {
+            position:relative; width:130px; height:40px;
+            background:linear-gradient(180deg,#c8843a 0%,#8b5e2c 100%);
+            border-radius:0 0 40px 40px;
+            box-shadow:0 5px 0 #5a3a18,0 8px 16px rgba(0,0,0,0.35);
+            display:flex; align-items:center; justify-content:center; gap:6px; padding:0 8px;
+        }
+        .boat-rim {
+            position:absolute; top:-6px; left:-4px; right:-4px; height:12px;
+            background:linear-gradient(180deg,#e0a050 0%,#b87030 100%);
+            border-radius:6px 6px 0 0;
+        }
+        .boat-creature {
+            font-size:1.5rem;
+            filter:drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+            cursor:pointer; transition:transform 0.1s; position:relative; z-index:1;
+        }
+        .boat-creature:hover  { transform:translateY(-3px); }
+
+        .boat-wrap.crossing { transition: left 0.7s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Victory */
+        .victory-overlay {
+            display:none; position:absolute; inset:0;
+            background:rgba(10,40,10,0.78);
+            border-radius:24px;
+            align-items:center; justify-content:center; flex-direction:column; gap:10px;
+            z-index:10; backdrop-filter:blur(3px);
+        }
+        .victory-overlay.show { display:flex; animation:victoryPop 0.4s ease-out; }
+        @keyframes victoryPop {
+            0%{opacity:0;transform:scale(0.8);}100%{opacity:1;transform:scale(1);}
+        }
+        .victory-text { font-size:2.2rem; color:#ffe066; text-shadow:0 2px 12px rgba(0,0,0,0.7); }
+        .victory-sub  { font-size:1rem; color:#c8ffb0; }
+
+        .instruction-box {
+            margin-top:10px;
+            background:rgba(0,0,0,0.35);
+            border-radius:12px; padding:7px 16px;
+            font-size:0.8rem; color:#c8e6ff; text-align:center;
+            backdrop-filter:blur(4px);
+        }
+        .info-bar {
+            display:flex; align-items:center; justify-content:space-between;
+            gap:8px; margin-top:10px; flex-wrap:wrap;
+        }
+        .badge {
+            background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15);
+            color:#ffe5a0; padding:6px 14px; border-radius:30px; font-size:0.9rem; white-space:nowrap;
+        }
+        .btn {
+            background:linear-gradient(180deg,#e8b84b,#c89030);
+            border:none; border-bottom:3px solid #7a5010;
+            padding:7px 18px; border-radius:30px;
+            color:#3a1a00; font-weight:bold; font-size:0.85rem;
+            cursor:pointer; font-family:inherit; transition:0.08s; white-space:nowrap;
+        }
+        .btn:active { transform:translateY(2px); border-bottom-width:1px; }
+        .btn.red   { background:linear-gradient(180deg,#e87050,#c04030); border-color:#7a2010; color:#fff; }
+        .btn.green { background:linear-gradient(180deg,#60c050,#3a8030); border-color:#1a5010; color:#fff; }
+
+        .message-area {
+            text-align:center; margin-top:10px;
+            font-size:1rem; color:#ffe5a0;
+            background:rgba(0,0,0,0.35); padding:8px 16px;
+            border-radius:30px; min-height:38px;
+            display:flex; align-items:center; justify-content:center;
+            backdrop-filter:blur(4px); transition:background 0.3s;
+        }
+        .message-area.danger { background:rgba(180,30,30,0.5); color:#ffc0c0; }
+        .message-area.win    { background:rgba(30,140,30,0.5);  color:#c0ffc0; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="game-title">🤵‍♂️ 幸存者与🧟‍♀️丧尸 · 渡河经典</div>
+
+    <div class="scene" id="scene">
+        <div class="sky-layer"></div>
+        <div class="sun"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+
+        <div class="river-bg"></div>
+        <div class="river-waves"></div>
+        <div class="bank-left"><div class="dock-left"></div></div>
+        <div class="bank-right"><div class="dock-right"></div></div>
+
+        <div class="tree tree-l1"><div class="tree-crown">🌳</div><div class="tree-trunk"></div></div>
+        <div class="tree tree-l2"><div class="tree-crown">🌲</div><div class="tree-trunk"></div></div>
+        <div class="tree tree-r1"><div class="tree-crown">🌳</div><div class="tree-trunk"></div></div>
+        <div class="tree tree-r2"><div class="tree-crown">🌲</div><div class="tree-trunk"></div></div>
+
+        <div class="creatures-area creatures-left"  id="leftItems"></div>
+        <div class="creatures-area creatures-right" id="rightItems"></div>
+
+        <div class="boat-wrap" id="boat" style="left:calc(50% - 200px);">
+            <div class="boat-sail">
+		<div id="boatItems" style="display:flex;gap:6px;align-items:center;position:relative;z-index:1;"></div>
+            </div>
+            <div class="boat-body">
+                <div class="boat-rim"></div>
+		<div class="sail-flag">⚓</div>
+            </div>
+        </div>
+
+        <div class="victory-overlay" id="victoryOverlay">
+            <div class="victory-text" id="victoryText">🎉 渡河成功！</div>
+            <div class="victory-sub"  id="victorySub"></div>
+        </div>
+    </div>
+
+    <div class="instruction-box">
+        🤵‍♂️ 幸存者 与 🧟‍♀️ 丧尸 | 船容量2人 | 任一边丧尸多于幸存者(且幸存者>0)则失败<br>
+        💡 点击岸上人物上船 / 点击船上人物下船 / 点击船体开船
+    </div>
+
+    <div class="info-bar">
+        <div class="badge">📖 关卡 <span id="levelNum">1</span>/<span id="totalLevels">5</span></div>
+        <div class="badge">🚶 步数: <span id="stepCount">0</span></div>
+        <button class="btn red"   id="resetBtn">🔄 重来本关</button>
+        <button class="btn" id="hintBtn">💡 智能提示</button>
+        <button class="btn green" id="nextBtn">➡️ 下一关</button>
+    </div>
+
+    <div class="message-area" id="messageArea">🌊 将所有幸存者和丧尸从左岸运到右岸！船最多载2人。</div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 经典幸存者与丧尸问题 (Missionaries & Cannibals)
+    // 船容量固定 = 2 人，规则：任何岸边，如果幸存者人数>0 且丧尸人数>幸存者人数 → 失败
+    // 状态: { leftM, leftC, rightM, rightC, boatM, boatC, boatSide, steps }
+    // --------------------------------------------------------------
+    const EMOJIS = { M:'🤵‍♂️', C:'🧟‍♀️' };
+    const NAMES  = { M:'幸存者', C:'丧尸' };
+
+    // 预定义关卡 (M左, C左, 船容量固定2)
+    const LEVELS = [
+        { name: "入门 · 1幸存者1丧尸", leftM:1, leftC:1, rightM:0, rightC:0 },
+        { name: "基础 · 2幸存者1丧尸", leftM:2, leftC:1, rightM:0, rightC:0 },
+        { name: "经典 · 3幸存者3丧尸", leftM:3, leftC:3, rightM:0, rightC:0 },
+        { name: "挑战 · 3幸存者2丧尸", leftM:3, leftC:2, rightM:0, rightC:0 },
+        { name: "均衡 · 4幸存者4丧尸", leftM:4, leftC:4, rightM:0, rightC:0 }
+    ];
+    const TOTAL_LEVELS = LEVELS.length;
+
+    // 船的停靠位置（视觉）
+    const DOCK_LEFT_POS  = "calc(50% - 200px)";
+    const DOCK_RIGHT_POS = "calc(50% + 70px)";
+
+    let currentLevelIndex = 0;
+    let unlockedLevel = 0;      // 通关解锁下一关
+    let gameState;
+    let animating = false;
+    const BOAT_CAPACITY = 2;    // 经典容量为2
+
+    const leftDiv      = document.getElementById("leftItems");
+    const rightDiv     = document.getElementById("rightItems");
+    const boatItemsDiv = document.getElementById("boatItems");
+    const stepSpan     = document.getElementById("stepCount");
+    const levelNumSpan = document.getElementById("levelNum");
+    const totalSpan    = document.getElementById("totalLevels");
+    const msgDiv       = document.getElementById("messageArea");
+    const boatEl       = document.getElementById("boat");
+    const victoryOverlay = document.getElementById("victoryOverlay");
+    const victoryText    = document.getElementById("victoryText");
+    const victorySub     = document.getElementById("victorySub");
+
+    // ---------- 安全性检查 (核心规则) ----------
+    // side: "left" 或 "right", 检查该岸边是否安全
+    function isSideSafe(m, c) {
+        if (m === 0) return true;   // 没有幸存者则安全
+        return c <= m;              // 丧尸不能多于幸存者
+    }
+
+    // 整体状态是否安全 (两岸+船上的不算，因为船在航行时，岸上的状态才是关键)
+    function isGlobalSafe(state) {
+        const leftSafe  = isSideSafe(state.leftM, state.leftC);
+        const rightSafe = isSideSafe(state.rightM, state.rightC);
+        return leftSafe && rightSafe;
+    }
+
+    // 检查胜利条件: 左岸全空，船在右岸
+    function checkVictory() {
+        const { leftM, leftC, boatSide } = gameState;
+        if (boatSide !== "right") return false;
+        if (leftM !== 0 || leftC !== 0) return false;
+        return true;
+    }
+
+    function showVictory() {
+        if (currentLevelIndex === unlockedLevel && currentLevelIndex + 1 < TOTAL_LEVELS) {
+            unlockedLevel = currentLevelIndex + 1;
+        }
+        const isLast = currentLevelIndex + 1 >= TOTAL_LEVELS;
+        victoryText.innerHTML = isLast ? "🏆 全关卡制霸！" : `🎉 第 ${currentLevelIndex+1} 关通关！`;
+        victorySub.innerHTML  = isLast ? "幸存者与丧尸和平渡河" : `步数: ${gameState.steps} · 点击「下一关」`;
+        victoryOverlay.classList.add("show");
+        setMsg(`🎉 成功渡河！用了 ${gameState.steps} 步`, "win");
+    }
+
+    function failAndReset() {
+        setMsg("⚠️ 危险！某岸丧尸攻击了幸存者，重新开始本关...", "danger");
+        setTimeout(() => {
+            victoryOverlay.classList.remove("show");
+            initLevel(currentLevelIndex);
+            setMsg("🔄 已重置，尝试更巧妙的渡河顺序");
+        }, 1300);
+    }
+
+    // ---------- 上船/下船逻辑 ----------
+    function tryMoveItem(type, toBoat) {
+        if (animating) return;
+        const side = gameState.boatSide;  // 船在哪边
+        if (toBoat) {
+            // 上船: 检查船容量
+            const boatCount = gameState.boatM + gameState.boatC;
+            if (boatCount >= BOAT_CAPACITY) {
+                setMsg(`⚠️ 船只能容纳 ${BOAT_CAPACITY} 人！`, "danger");
+                return;
+            }
+            if (type === 'M' && gameState[`${side}M`] <= 0) return;
+            if (type === 'C' && gameState[`${side}C`] <= 0) return;
+            
+            if (type === 'M') { gameState[`${side}M`]--; gameState.boatM++; }
+            else              { gameState[`${side}C`]--; gameState.boatC++; }
+            setMsg(`📌 ${NAMES[type]} 登上小船`);
+        } else {
+            // 下船: 从船上卸到当前船所在的岸边
+            if (type === 'M' && gameState.boatM <= 0) return;
+            if (type === 'C' && gameState.boatC <= 0) return;
+            if (type === 'M') { gameState.boatM--; gameState[`${gameState.boatSide}M`]++; }
+            else              { gameState.boatC--; gameState[`${gameState.boatSide}C`]++; }
+            setMsg(`🏝️ ${NAMES[type]} 下船到岸边`);
+        }
+        updateUI();
+    }
+
+    // 过河核心
+    function crossRiver() {
+        if (animating) return;
+        const newSide = gameState.boatSide === "left" ? "right" : "left";
+        animating = true;
+
+        // 构建过河后的临时状态 (先假设船抵达，再检查安全性)
+        let newLeftM = gameState.leftM, newLeftC = gameState.leftC;
+        let newRightM = gameState.rightM, newRightC = gameState.rightC;
+        const boatM = gameState.boatM, boatC = gameState.boatC;
+
+        if (newSide === "right") {
+            newRightM += boatM;
+            newRightC += boatC;
+        } else {
+            newLeftM += boatM;
+            newLeftC += boatC;
+        }
+
+        // 检查两岸安全 (农夫即幸存者/丧尸都会下船，所以船上的已经加入对应岸边)
+        const leftSafe  = isSideSafe(newLeftM, newLeftC);
+        const rightSafe = isSideSafe(newRightM, newRightC);
+        const willFail = !leftSafe || !rightSafe;
+
+        // 动画过渡
+        const targetPos = newSide === "right" ? DOCK_RIGHT_POS : DOCK_LEFT_POS;
+        boatEl.style.transition = "left 0.7s cubic-bezier(0.4,0,0.2,1)";
+        boatEl.style.left = targetPos;
+
+        setTimeout(() => {
+            boatEl.style.transition = "";
+            // 提交状态更新
+            gameState.leftM = newLeftM;
+            gameState.leftC = newLeftC;
+            gameState.rightM = newRightM;
+            gameState.rightC = newRightC;
+            gameState.boatM = 0;
+            gameState.boatC = 0;
+            gameState.boatSide = newSide;
+            gameState.steps++;
+            stepSpan.innerText = gameState.steps;
+            updateUI();
+            animating = false;
+
+            if (willFail) {
+                failAndReset();
+            } else if (checkVictory()) {
+                showVictory();
+            } else {
+                setMsg(`⛵ 到达${newSide === "right" ? "右岸" : "左岸"}，步数 ${gameState.steps}`);
+            }
+        }, 720);
+    }
+
+    // ---------- UI 渲染 ----------
+    function renderBank(container, mCount, cCount, side) {
+        container.innerHTML = "";
+        const boatHere = gameState.boatSide === side;
+        const addItem = (type, count) => {
+            for (let i = 0; i < count; i++) {
+                const tok = document.createElement("div");
+                tok.className = "creature-token" + (boatHere ? "" : " inactive");
+                tok.innerHTML = `<span class="creature-emoji">${EMOJIS[type]}</span><div class="creature-shadow"></div>`;
+                tok.title = boatHere ? `${NAMES[type]}（点击上船）` : "船不在此岸";
+                tok.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!boatHere) { setMsg(`🚫 船不在${side === "left" ? "左岸" : "右岸"}，无法上船`, "danger"); return; }
+                    tryMoveItem(type, true);
+                };
+                container.appendChild(tok);
+            }
+        };
+        addItem('M', mCount);
+        addItem('C', cCount);
+    }
+
+    function renderBoat(boatM, boatC) {
+        boatItemsDiv.innerHTML = "";
+        const add = (type, count) => {
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement("span");
+                span.className = "boat-creature";
+                span.textContent = EMOJIS[type];
+                span.title = `${NAMES[type]}（点击下船）`;
+                span.onclick = (e) => { e.stopPropagation(); tryMoveItem(type, false); };
+                boatItemsDiv.appendChild(span);
+            }
+        };
+        add('M', boatM);
+        add('C', boatC);
+    }
+
+    function updateUI() {
+        renderBank(leftDiv,  gameState.leftM, gameState.leftC, "left");
+        renderBank(rightDiv, gameState.rightM, gameState.rightC, "right");
+        renderBoat(gameState.boatM, gameState.boatC);
+        stepSpan.innerText = gameState.steps;
+    }
+
+    function setMsg(text, cls = "") {
+        msgDiv.className = "message-area " + cls;
+        msgDiv.innerHTML = text;
+    }
+
+    // ---------- 智能提示 (BFS找下一步可行移动) ----------
+    function getHint() {
+        // 简单启发: 列出当前所有可能的上船组合(船容量2)，然后试过河，看是否有安全结果
+        const side = gameState.boatSide;
+        let availableM = (side === "left") ? gameState.leftM : gameState.rightM;
+        let availableC = (side === "left") ? gameState.leftC : gameState.rightC;
+        let possibleBoats = [];
+        // 枚举 (m,c) 上船组合，1~2人
+        for (let m = 0; m <= Math.min(availableM, 2); m++) {
+            for (let c = 0; c <= Math.min(availableC, 2); c++) {
+                if (m + c === 0) continue;
+                if (m + c <= 2) {
+                    possibleBoats.push({m, c});
+                }
+            }
+        }
+        // 尝试每个组合过河后的临时状态
+        for (let b of possibleBoats) {
+            let newLeftM = gameState.leftM, newLeftC = gameState.leftC;
+            let newRightM = gameState.rightM, newRightC = gameState.rightC;
+            if (side === "left") {
+                newLeftM -= b.m; newLeftC -= b.c;
+                newRightM += b.m; newRightC += b.c;
+            } else {
+                newRightM -= b.m; newRightC -= b.c;
+                newLeftM += b.m; newLeftC += b.c;
+            }
+            if (newLeftM < 0 || newLeftC < 0 || newRightM < 0 || newRightC < 0) continue;
+            if (isSideSafe(newLeftM, newLeftC) && isSideSafe(newRightM, newRightC)) {
+                let hintMsg = [];
+                if (b.m > 0) hintMsg.push(`${b.m}位幸存者`);
+                if (b.c > 0) hintMsg.push(`${b.c}位丧尸`);
+                const toDir = side === "left" ? "右岸" : "左岸";
+                return `💡 尝试带 ${hintMsg.join(" + ")} 前往 ${toDir}`;
+            }
+        }
+        return null;
+    }
+
+    function showHint() {
+        const hint = getHint();
+        if (hint) {
+            setMsg(hint, "");
+        } else {
+            setMsg("🤔 当前局面似乎没有直接安全移动，试试重置或调整顺序", "danger");
+        }
+    }
+
+    // ---------- 关卡初始化 ----------
+    function initLevel(idx) {
+        const lvl = LEVELS[idx];
+        gameState = {
+            leftM: lvl.leftM, leftC: lvl.leftC,
+            rightM: lvl.rightM, rightC: lvl.rightC,
+            boatM: 0, boatC: 0,
+            boatSide: "left",
+            steps: 0
+        };
+        boatEl.style.transition = "";
+        boatEl.style.left = DOCK_LEFT_POS;
+        levelNumSpan.innerText = idx + 1;
+        totalSpan.innerText = TOTAL_LEVELS;
+        victoryOverlay.classList.remove("show");
+        updateUI();
+        setMsg(`📖 ${lvl.name}  | 船容量2人 | 避免丧尸吃幸存者`);
+    }
+
+    function resetLevel() {
+        if (animating) return;
+        initLevel(currentLevelIndex);
+        setMsg("🔄 本关已重置");
+    }
+
+    function nextLevel() {
+        if (animating) return;
+        if (currentLevelIndex + 1 < TOTAL_LEVELS && currentLevelIndex + 1 <= unlockedLevel) {
+            currentLevelIndex++;
+            initLevel(currentLevelIndex);
+            setMsg(`🌟 进入第 ${currentLevelIndex+1} 关：${LEVELS[currentLevelIndex].name}`);
+        } else if (currentLevelIndex + 1 >= TOTAL_LEVELS) {
+            setMsg("🏁 已是最后一关，通关撒花！");
+        } else {
+            setMsg("🔒 请先通关当前关卡才能解锁下一关", "danger");
+        }
+    }
+
+    // 事件绑定
+    document.getElementById("resetBtn").onclick = resetLevel;
+    document.getElementById("nextBtn").onclick = nextLevel;
+    document.getElementById("hintBtn").onclick = showHint;
+    boatEl.onclick = crossRiver;
+
+    // 启动游戏
+    unlockedLevel = 0;
+    currentLevelIndex = 0;
+    initLevel(0);
+    setMsg("⛵ 经典幸存者与丧尸！点击岸上人物上船，点击船体开船");
+</script>
+</body>
+</html>

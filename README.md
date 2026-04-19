@@ -40,6 +40,7 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 | 33  | [Snakes and ladders](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/33-Snakes_ladders)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/33-Snakes_ladders/) |
 | 34  | [Helicopter Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/34-helicopter-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/34-helicopter-Game/) |
 | 35  | [RubikCube Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/35-RubikCube-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/35-RubikCube-Game/) |
+| 36  | [River crossing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/36-Cross-River-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/36-Cross-River-Game/) |
 ## Games Description
 
 1. **Candy Crush Game**: Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭
@@ -77,7 +78,7 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 33. **Snakes and ladders**: A Classic Board Game Experience Enjoy the timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead, but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜
 34. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
 35. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
-
+36. **River crossing Game**: Classic river puzzle. Boat holds two. Avoid zombies eating survivors. 🧟‍♂️🚣
 ## License
 
 The MIT License
