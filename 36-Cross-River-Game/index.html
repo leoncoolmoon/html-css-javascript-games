@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>渡河经典 · 幸存者与丧尸</title>
+    <title>渡河经典 · 幸存者与丧尸 | River Crossing · Survivors & Zombies</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
         * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
@@ -14,17 +14,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-          }
+        }
 
         .wrapper { width: 760px; max-width: 96vw; }
 
+        /* 标题区域 双语 */
         .game-title {
             text-align: center;
-            font-size: 1.9rem;
+            font-size: 1.6rem;
             color: #ffe5a0;
             text-shadow: 0 2px 8px rgba(0,0,0,0.5);
             margin-bottom: 12px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            line-height: 1.3;
+        }
+        .game-title small {
+            font-size: 0.8rem;
+            display: block;
+            color: #e6d5a8;
+            letter-spacing: 1px;
         }
 
         /* ===== SCENE ===== */
@@ -217,14 +225,14 @@
         @keyframes victoryPop {
             0%{opacity:0;transform:scale(0.8);}100%{opacity:1;transform:scale(1);}
         }
-        .victory-text { font-size:2.2rem; color:#ffe066; text-shadow:0 2px 12px rgba(0,0,0,0.7); }
-        .victory-sub  { font-size:1rem; color:#c8ffb0; }
+        .victory-text { font-size:2rem; color:#ffe066; text-shadow:0 2px 12px rgba(0,0,0,0.7); text-align:center; }
+        .victory-sub  { font-size:0.9rem; color:#c8ffb0; text-align:center; }
 
         .instruction-box {
             margin-top:10px;
             background:rgba(0,0,0,0.35);
             border-radius:12px; padding:7px 16px;
-            font-size:0.8rem; color:#c8e6ff; text-align:center;
+            font-size:0.75rem; color:#c8e6ff; text-align:center;
             backdrop-filter:blur(4px);
         }
         .info-bar {
@@ -233,13 +241,13 @@
         }
         .badge {
             background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15);
-            color:#ffe5a0; padding:6px 14px; border-radius:30px; font-size:0.9rem; white-space:nowrap;
+            color:#ffe5a0; padding:6px 14px; border-radius:30px; font-size:0.85rem; white-space:nowrap;
         }
         .btn {
             background:linear-gradient(180deg,#e8b84b,#c89030);
             border:none; border-bottom:3px solid #7a5010;
             padding:7px 18px; border-radius:30px;
-            color:#3a1a00; font-weight:bold; font-size:0.85rem;
+            color:#3a1a00; font-weight:bold; font-size:0.8rem;
             cursor:pointer; font-family:inherit; transition:0.08s; white-space:nowrap;
         }
         .btn:active { transform:translateY(2px); border-bottom-width:1px; }
@@ -248,7 +256,7 @@
 
         .message-area {
             text-align:center; margin-top:10px;
-            font-size:1rem; color:#ffe5a0;
+            font-size:0.9rem; color:#ffe5a0;
             background:rgba(0,0,0,0.35); padding:8px 16px;
             border-radius:30px; min-height:38px;
             display:flex; align-items:center; justify-content:center;
@@ -256,11 +264,20 @@
         }
         .message-area.danger { background:rgba(180,30,30,0.5); color:#ffc0c0; }
         .message-area.win    { background:rgba(30,140,30,0.5);  color:#c0ffc0; }
+
+        /* 双语辅助 */
+        .lang-zh { font-weight:500; }
+        .lang-en { font-size:0.7rem; opacity:0.85; margin-left: 6px; }
+        .badge .lang-en, .btn .lang-en { margin-left: 4px; font-size:0.65rem; }
+        .instruction-box .lang-en { display: block; margin-top: 3px; font-size:0.7rem; opacity:0.9; }
     </style>
 </head>
 <body>
 <div class="wrapper">
-    <div class="game-title">🤵‍♂️ 幸存者与🧟‍♀️丧尸 · 渡河经典</div>
+    <div class="game-title">
+        🤵‍♂️ 幸存者与丧尸 · 渡河经典 
+        <small>Survivors & Zombies · Classic River Crossing</small>
+    </div>
 
     <div class="scene" id="scene">
         <div class="sky-layer"></div>
@@ -283,11 +300,11 @@
 
         <div class="boat-wrap" id="boat" style="left:calc(50% - 200px);">
             <div class="boat-sail">
-		<div id="boatItems" style="display:flex;gap:6px;align-items:center;position:relative;z-index:1;"></div>
+                <div id="boatItems" style="display:flex;gap:6px;align-items:center;position:relative;z-index:1;"></div>
             </div>
             <div class="boat-body">
                 <div class="boat-rim"></div>
-		<div class="sail-flag">⚓</div>
+                <div class="sail-flag">⚓</div>
             </div>
         </div>
 
@@ -298,50 +315,49 @@
     </div>
 
     <div class="instruction-box">
-        🤵‍♂️ 幸存者 与 🧟‍♀️ 丧尸 | 船容量2人 | 任一边丧尸多于幸存者(且幸存者>0)则失败<br>
-        💡 点击岸上人物上船 / 点击船上人物下船 / 点击船体开船
+        <span class="lang-zh">🤵‍♂️ 幸存者与 🧟‍♀️ 丧尸 | 船容量2人 | 任一边丧尸多于幸存者(且幸存者>0)则失败</span>
+        <span class="lang-en">⚖️ Boat capacity: 2 | On any bank, if survivors > 0 and zombies > survivors → you lose.</span>
+        <span class="lang-zh">💡 点击岸上人物上船 / 点击船上人物下船 / 点击船体开船</span>
+        <span class="lang-en">🖱️ Click characters to board / click on boat passengers to disembark / click boat to cross.</span>
     </div>
 
     <div class="info-bar">
-        <div class="badge">📖 关卡 <span id="levelNum">1</span>/<span id="totalLevels">5</span></div>
-        <div class="badge">🚶 步数: <span id="stepCount">0</span></div>
-        <button class="btn red"   id="resetBtn">🔄 重来本关</button>
-        <button class="btn" id="hintBtn">💡 智能提示</button>
-        <button class="btn green" id="nextBtn">➡️ 下一关</button>
+        <div class="badge">📖 <span class="lang-zh">关卡</span><span class="lang-en">Level</span> <span id="levelNum">1</span>/<span id="totalLevels">5</span></div>
+        <div class="badge">🚶 <span class="lang-zh">步数</span><span class="lang-en">Steps</span>: <span id="stepCount">0</span></div>
+        <button class="btn red" id="resetBtn"><span class="lang-zh">🔄 重来本关</span><span class="lang-en">Reset</span></button>
+        <button class="btn" id="hintBtn">💡 <span class="lang-zh">智能提示</span><span class="lang-en">Hint</span></button>
+        <button class="btn green" id="nextBtn"><span class="lang-zh">➡️ 下一关</span><span class="lang-en">Next</span></button>
     </div>
 
-    <div class="message-area" id="messageArea">🌊 将所有幸存者和丧尸从左岸运到右岸！船最多载2人。</div>
+    <div class="message-area" id="messageArea"><span class="lang-zh">🌊 将所有幸存者和丧尸从左岸运到右岸！船最多载2人。</span><span class="lang-en" style="margin-left:8px;">🌊 Move all from left bank to right. Boat max 2.</span></div>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    // 经典幸存者与丧尸问题 (Missionaries & Cannibals)
-    // 船容量固定 = 2 人，规则：任何岸边，如果幸存者人数>0 且丧尸人数>幸存者人数 → 失败
-    // 状态: { leftM, leftC, rightM, rightC, boatM, boatC, boatSide, steps }
-    // --------------------------------------------------------------
+    // 经典幸存者与丧尸 (Missionaries & Cannibals)
+    // 船容量固定 = 2
     const EMOJIS = { M:'🤵‍♂️', C:'🧟‍♀️' };
-    const NAMES  = { M:'幸存者', C:'丧尸' };
+    const NAMES_ZH = { M:'幸存者', C:'丧尸' };
+    const NAMES_EN = { M:'Survivor', C:'Zombie' };
 
-    // 预定义关卡 (M左, C左, 船容量固定2)
+    // 预定义关卡
     const LEVELS = [
-        { name: "入门 · 1幸存者1丧尸", leftM:1, leftC:1, rightM:0, rightC:0 },
-        { name: "基础 · 2幸存者1丧尸", leftM:2, leftC:1, rightM:0, rightC:0 },
-        { name: "经典 · 3幸存者3丧尸", leftM:3, leftC:3, rightM:0, rightC:0 },
-        { name: "挑战 · 3幸存者2丧尸", leftM:3, leftC:2, rightM:0, rightC:0 },
-        { name: "均衡 · 4幸存者4丧尸", leftM:4, leftC:4, rightM:0, rightC:0 }
+        { name_zh: "入门 · 1幸存者1丧尸", name_en: "Starter · 1 Survivor 1 Zombie", leftM:1, leftC:1, rightM:0, rightC:0 },
+        { name_zh: "基础 · 2幸存者1丧尸", name_en: "Basic · 2 Survivors 1 Zombie", leftM:2, leftC:1, rightM:0, rightC:0 },
+        { name_zh: "经典 · 3幸存者3丧尸", name_en: "Classic · 3 Survivors 3 Zombies", leftM:3, leftC:3, rightM:0, rightC:0 },
+        { name_zh: "挑战 · 3幸存者2丧尸", name_en: "Challenge · 3 Survivors 2 Zombies", leftM:3, leftC:2, rightM:0, rightC:0 },
+        { name_zh: "均衡 · 4幸存者4丧尸", name_en: "Balanced · 4 Survivors 4 Zombies", leftM:4, leftC:4, rightM:0, rightC:0 }
     ];
     const TOTAL_LEVELS = LEVELS.length;
-
-    // 船的停靠位置（视觉）
     const DOCK_LEFT_POS  = "calc(50% - 200px)";
     const DOCK_RIGHT_POS = "calc(50% + 70px)";
+    const BOAT_CAPACITY = 2;
 
     let currentLevelIndex = 0;
-    let unlockedLevel = 0;      // 通关解锁下一关
+    let unlockedLevel = 0;
     let gameState;
     let animating = false;
-    const BOAT_CAPACITY = 2;    // 经典容量为2
 
+    // DOM 元素
     const leftDiv      = document.getElementById("leftItems");
     const rightDiv     = document.getElementById("rightItems");
     const boatItemsDiv = document.getElementById("boatItems");
@@ -354,26 +370,19 @@
     const victoryText    = document.getElementById("victoryText");
     const victorySub     = document.getElementById("victorySub");
 
-    // ---------- 安全性检查 (核心规则) ----------
-    // side: "left" 或 "right", 检查该岸边是否安全
+    // ---------- 安全规则 ----------
     function isSideSafe(m, c) {
-        if (m === 0) return true;   // 没有幸存者则安全
-        return c <= m;              // 丧尸不能多于幸存者
+        if (m === 0) return true;
+        return c <= m;
     }
 
-    // 整体状态是否安全 (两岸+船上的不算，因为船在航行时，岸上的状态才是关键)
     function isGlobalSafe(state) {
-        const leftSafe  = isSideSafe(state.leftM, state.leftC);
-        const rightSafe = isSideSafe(state.rightM, state.rightC);
-        return leftSafe && rightSafe;
+        return isSideSafe(state.leftM, state.leftC) && isSideSafe(state.rightM, state.rightC);
     }
 
-    // 检查胜利条件: 左岸全空，船在右岸
     function checkVictory() {
         const { leftM, leftC, boatSide } = gameState;
-        if (boatSide !== "right") return false;
-        if (leftM !== 0 || leftC !== 0) return false;
-        return true;
+        return (boatSide === "right" && leftM === 0 && leftC === 0);
     }
 
     function showVictory() {
@@ -381,30 +390,29 @@
             unlockedLevel = currentLevelIndex + 1;
         }
         const isLast = currentLevelIndex + 1 >= TOTAL_LEVELS;
-        victoryText.innerHTML = isLast ? "🏆 全关卡制霸！" : `🎉 第 ${currentLevelIndex+1} 关通关！`;
-        victorySub.innerHTML  = isLast ? "幸存者与丧尸和平渡河" : `步数: ${gameState.steps} · 点击「下一关」`;
+        victoryText.innerHTML = isLast ? "🏆 全关卡制霸！🏆 All Clear!" : `🎉 第 ${currentLevelIndex+1} 关通关！<br><span style="font-size:1rem;">Level ${currentLevelIndex+1} Complete!</span>`;
+        victorySub.innerHTML  = isLast ? "幸存者与丧尸和平渡河 | Survivors & Zombies crossed peacefully" : `${gameState.steps} steps · 点击「下一关」 | Click Next`;
         victoryOverlay.classList.add("show");
-        setMsg(`🎉 成功渡河！用了 ${gameState.steps} 步`, "win");
+        setMsg(`🎉 Victory! ${gameState.steps} steps used.`, "win");
     }
 
     function failAndReset() {
-        setMsg("⚠️ 危险！某岸丧尸攻击了幸存者，重新开始本关...", "danger");
+        setMsg("⚠️ Danger! Zombies attacked survivors. Resetting level... | ⚠️ 危险！丧尸攻击幸存者，重置本关", "danger");
         setTimeout(() => {
             victoryOverlay.classList.remove("show");
             initLevel(currentLevelIndex);
-            setMsg("🔄 已重置，尝试更巧妙的渡河顺序");
+            setMsg("🔄 Reset. Try a different crossing order | 🔄 已重置，尝试更巧妙的渡河顺序");
         }, 1300);
     }
 
-    // ---------- 上船/下船逻辑 ----------
+    // ---------- 上船/下船 ----------
     function tryMoveItem(type, toBoat) {
         if (animating) return;
-        const side = gameState.boatSide;  // 船在哪边
+        const side = gameState.boatSide;
         if (toBoat) {
-            // 上船: 检查船容量
             const boatCount = gameState.boatM + gameState.boatC;
             if (boatCount >= BOAT_CAPACITY) {
-                setMsg(`⚠️ 船只能容纳 ${BOAT_CAPACITY} 人！`, "danger");
+                setMsg(`⚠️ Boat capacity ${BOAT_CAPACITY}! | ⚠️ 船只能容纳 ${BOAT_CAPACITY} 人！`, "danger");
                 return;
             }
             if (type === 'M' && gameState[`${side}M`] <= 0) return;
@@ -412,25 +420,22 @@
             
             if (type === 'M') { gameState[`${side}M`]--; gameState.boatM++; }
             else              { gameState[`${side}C`]--; gameState.boatC++; }
-            setMsg(`📌 ${NAMES[type]} 登上小船`);
+            setMsg(`📌 ${NAMES_ZH[type]} 登船 | ${NAMES_EN[type]} boarded`);
         } else {
-            // 下船: 从船上卸到当前船所在的岸边
             if (type === 'M' && gameState.boatM <= 0) return;
             if (type === 'C' && gameState.boatC <= 0) return;
             if (type === 'M') { gameState.boatM--; gameState[`${gameState.boatSide}M`]++; }
             else              { gameState.boatC--; gameState[`${gameState.boatSide}C`]++; }
-            setMsg(`🏝️ ${NAMES[type]} 下船到岸边`);
+            setMsg(`🏝️ ${NAMES_ZH[type]} 下船 | ${NAMES_EN[type]} disembarked`);
         }
         updateUI();
     }
 
-    // 过河核心
     function crossRiver() {
         if (animating) return;
         const newSide = gameState.boatSide === "left" ? "right" : "left";
         animating = true;
 
-        // 构建过河后的临时状态 (先假设船抵达，再检查安全性)
         let newLeftM = gameState.leftM, newLeftC = gameState.leftC;
         let newRightM = gameState.rightM, newRightC = gameState.rightC;
         const boatM = gameState.boatM, boatC = gameState.boatC;
@@ -443,19 +448,16 @@
             newLeftC += boatC;
         }
 
-        // 检查两岸安全 (农夫即幸存者/丧尸都会下船，所以船上的已经加入对应岸边)
         const leftSafe  = isSideSafe(newLeftM, newLeftC);
         const rightSafe = isSideSafe(newRightM, newRightC);
         const willFail = !leftSafe || !rightSafe;
 
-        // 动画过渡
         const targetPos = newSide === "right" ? DOCK_RIGHT_POS : DOCK_LEFT_POS;
         boatEl.style.transition = "left 0.7s cubic-bezier(0.4,0,0.2,1)";
         boatEl.style.left = targetPos;
 
         setTimeout(() => {
             boatEl.style.transition = "";
-            // 提交状态更新
             gameState.leftM = newLeftM;
             gameState.leftC = newLeftC;
             gameState.rightM = newRightM;
@@ -473,7 +475,8 @@
             } else if (checkVictory()) {
                 showVictory();
             } else {
-                setMsg(`⛵ 到达${newSide === "right" ? "右岸" : "左岸"}，步数 ${gameState.steps}`);
+                const sideName = newSide === "right" ? "右岸 | right bank" : "左岸 | left bank";
+                setMsg(`⛵ Arrived at ${sideName} · Steps: ${gameState.steps}`);
             }
         }, 720);
     }
@@ -487,10 +490,11 @@
                 const tok = document.createElement("div");
                 tok.className = "creature-token" + (boatHere ? "" : " inactive");
                 tok.innerHTML = `<span class="creature-emoji">${EMOJIS[type]}</span><div class="creature-shadow"></div>`;
-                tok.title = boatHere ? `${NAMES[type]}（点击上船）` : "船不在此岸";
+                const actionText = boatHere ? `(${NAMES_ZH[type]} 上船 | board)` : `船不在${side === "left" ? "左岸" : "右岸"} | boat away`;
+                tok.title = actionText;
                 tok.onclick = (e) => {
                     e.stopPropagation();
-                    if (!boatHere) { setMsg(`🚫 船不在${side === "left" ? "左岸" : "右岸"}，无法上船`, "danger"); return; }
+                    if (!boatHere) { setMsg(`🚫 Boat not at ${side === "left" ? "left bank" : "right bank"}`, "danger"); return; }
                     tryMoveItem(type, true);
                 };
                 container.appendChild(tok);
@@ -507,7 +511,7 @@
                 const span = document.createElement("span");
                 span.className = "boat-creature";
                 span.textContent = EMOJIS[type];
-                span.title = `${NAMES[type]}（点击下船）`;
+                span.title = `${NAMES_ZH[type]} (点击下船 | click to disembark)`;
                 span.onclick = (e) => { e.stopPropagation(); tryMoveItem(type, false); };
                 boatItemsDiv.appendChild(span);
             }
@@ -517,7 +521,7 @@
     }
 
     function updateUI() {
-        renderBank(leftDiv,  gameState.leftM, gameState.leftC, "left");
+        renderBank(leftDiv, gameState.leftM, gameState.leftC, "left");
         renderBank(rightDiv, gameState.rightM, gameState.rightC, "right");
         renderBoat(gameState.boatM, gameState.boatC);
         stepSpan.innerText = gameState.steps;
@@ -525,26 +529,22 @@
 
     function setMsg(text, cls = "") {
         msgDiv.className = "message-area " + cls;
+        // 保留双语样式，但text已是双语组合或单语，简单显示
         msgDiv.innerHTML = text;
     }
 
-    // ---------- 智能提示 (BFS找下一步可行移动) ----------
+    // ---------- 智能提示 ----------
     function getHint() {
-        // 简单启发: 列出当前所有可能的上船组合(船容量2)，然后试过河，看是否有安全结果
         const side = gameState.boatSide;
         let availableM = (side === "left") ? gameState.leftM : gameState.rightM;
         let availableC = (side === "left") ? gameState.leftC : gameState.rightC;
         let possibleBoats = [];
-        // 枚举 (m,c) 上船组合，1~2人
         for (let m = 0; m <= Math.min(availableM, 2); m++) {
             for (let c = 0; c <= Math.min(availableC, 2); c++) {
                 if (m + c === 0) continue;
-                if (m + c <= 2) {
-                    possibleBoats.push({m, c});
-                }
+                if (m + c <= 2) possibleBoats.push({m, c});
             }
         }
-        // 尝试每个组合过河后的临时状态
         for (let b of possibleBoats) {
             let newLeftM = gameState.leftM, newLeftC = gameState.leftC;
             let newRightM = gameState.rightM, newRightC = gameState.rightC;
@@ -557,11 +557,12 @@
             }
             if (newLeftM < 0 || newLeftC < 0 || newRightM < 0 || newRightC < 0) continue;
             if (isSideSafe(newLeftM, newLeftC) && isSideSafe(newRightM, newRightC)) {
-                let hintMsg = [];
-                if (b.m > 0) hintMsg.push(`${b.m}位幸存者`);
-                if (b.c > 0) hintMsg.push(`${b.c}位丧尸`);
-                const toDir = side === "left" ? "右岸" : "左岸";
-                return `💡 尝试带 ${hintMsg.join(" + ")} 前往 ${toDir}`;
+                let hintParts_zh = [], hintParts_en = [];
+                if (b.m > 0) { hintParts_zh.push(`${b.m}位幸存者`); hintParts_en.push(`${b.m} survivor${b.m>1?'s':''}`); }
+                if (b.c > 0) { hintParts_zh.push(`${b.c}位丧尸`); hintParts_en.push(`${b.c} zombie${b.c>1?'s':''}`); }
+                const toDir_zh = side === "left" ? "右岸" : "左岸";
+                const toDir_en = side === "left" ? "right bank" : "left bank";
+                return `💡 ${hintParts_zh.join(" + ")} → ${toDir_zh}  | ${hintParts_en.join(" + ")} → ${toDir_en}`;
             }
         }
         return null;
@@ -572,7 +573,7 @@
         if (hint) {
             setMsg(hint, "");
         } else {
-            setMsg("🤔 当前局面似乎没有直接安全移动，试试重置或调整顺序", "danger");
+            setMsg("🤔 No safe move found now. Try reset. | 当前没有安全移动，试试重置", "danger");
         }
     }
 
@@ -592,13 +593,13 @@
         totalSpan.innerText = TOTAL_LEVELS;
         victoryOverlay.classList.remove("show");
         updateUI();
-        setMsg(`📖 ${lvl.name}  | 船容量2人 | 避免丧尸吃幸存者`);
+        setMsg(`📖 ${lvl.name_zh} | ${lvl.name_en}  | 容量2 | Boat cap 2 | 避免丧尸吃幸存者`);
     }
 
     function resetLevel() {
         if (animating) return;
         initLevel(currentLevelIndex);
-        setMsg("🔄 本关已重置");
+        setMsg("🔄 Reset current level | 重来本关");
     }
 
     function nextLevel() {
@@ -606,11 +607,11 @@
         if (currentLevelIndex + 1 < TOTAL_LEVELS && currentLevelIndex + 1 <= unlockedLevel) {
             currentLevelIndex++;
             initLevel(currentLevelIndex);
-            setMsg(`🌟 进入第 ${currentLevelIndex+1} 关：${LEVELS[currentLevelIndex].name}`);
+            setMsg(`🌟 Enter Level ${currentLevelIndex+1}: ${LEVELS[currentLevelIndex].name_zh} / ${LEVELS[currentLevelIndex].name_en}`);
         } else if (currentLevelIndex + 1 >= TOTAL_LEVELS) {
-            setMsg("🏁 已是最后一关，通关撒花！");
+            setMsg("🏁 Final level cleared! Congrats | 已是最后一关，通关撒花！");
         } else {
-            setMsg("🔒 请先通关当前关卡才能解锁下一关", "danger");
+            setMsg("🔒 Complete current level first | 请先通关当前关卡", "danger");
         }
     }
 
@@ -624,7 +625,7 @@
     unlockedLevel = 0;
     currentLevelIndex = 0;
     initLevel(0);
-    setMsg("⛵ 经典幸存者与丧尸！点击岸上人物上船，点击船体开船");
+    setMsg("⛵ Classic Survivors & Zombies! Click to board / cross | 经典渡河谜题，开始挑战");
 </script>
 </body>
 </html>
