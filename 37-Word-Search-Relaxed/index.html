@@ -288,48 +288,68 @@ const GRID_SIZE=11;
 const DIRS=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
 let grid=[],words=[],placed=[],found=[],foundColors={};
 let selecting=false,selStart=null,selCells=[];
-
-// async function fetchWords(theme){
-//   const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
-//   const res=await fetch("https://api.anthropic.com/v1/messages",{
-//     method:"POST",headers:{"Content-Type":"application/json"},
-//     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,messages:[{role:"user",content:prompt}]})
-//   });
-//   if(!res.ok)throw new Error("API");
-//   const data=await res.json();
-//   const text=data.content.map(b=>b.text||"").join("");
-//   const arr=JSON.parse(text.replace(/```json|```/g,"").trim());
-//   return arr.map(w=>w.toUpperCase().replace(/[^A-Z]/g,"")).filter(w=>w.length>=3&&w.length<=8).slice(0,8);
-// }
+/*
 async function fetchWords(theme){
-    const prompt = `Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
+  const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,messages:[{role:"user",content:prompt}]})
+  });
+  if(!res.ok)throw new Error("API");
+  const data=await res.json();
+  const text=data.content.map(b=>b.text||"").join("");
+  const arr=JSON.parse(text.replace(/```json|```/g,"").trim());
+  return arr.map(w=>w.toUpperCase().replace(/[^A-Z]/g,"")).filter(w=>w.length>=3&&w.length<=8).slice(0,8);
+}
+*/
+async function fetchWords(theme) {
+    const prompt = `Give me exactly 8 words related to the theme: "${theme}". 
+Rules: 
+- Each word: 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words
+- For each word, provide a short definition (one sentence, 5-15 words)
+
+Return ONLY a JSON array where each element has: {"word": "WORD", "def": "Short definition"}
+Example: [{"word":"BALLET","def":"Classical dance form with precise movements"},{"word":"SALSA","def":"Lively Latin dance of Cuban origin"}]
+
+Return ONLY the JSON array, no other text.`;
     
     try {
-        // 将 Anthropic 的地址换成 Pollinations 的地址即可
         const res = await fetch("https://text.pollinations.ai/openai/v1/chat/completions", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-                // Pollinations 不需要 Authorization 头！
-            },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                model: "openai", // 或者使用其他免费模型，如 "mistral"
+                model: "openai",
                 messages: [{ role: "user", content: prompt }],
-                max_tokens: 300
+                max_tokens: 800  // 增加 token 因为要返回定义
             })
         });
 
         if (!res.ok) throw new Error("API 请求失败");
         const data = await res.json();
-        // Pollinations 返回格式与 OpenAI 相同，因此解析方式也需要调整
         const text = data.choices[0].message.content;
-        const arr = JSON.parse(text.replace(/```json|```/g, "").trim());
-        return arr.map(w => w.toUpperCase().replace(/[^A-Z]/g, ""))
-                  .filter(w => w.length >= 3 && w.length <= 8)
-                  .slice(0, 8);
+        
+        // 解析包含单词和定义的 JSON 数组
+        const cleanedText = text.replace(/```json|```/g, "").trim();
+        const wordDefArray = JSON.parse(cleanedText);
+        
+        // 验证并处理数据
+        const words = [];
+        const definitions = {};
+        
+        for (const item of wordDefArray) {
+            const word = item.word.toUpperCase().replace(/[^A-Z]/g, "");
+            const def = item.def || "A great word!";
+            if (word.length >= 3 && word.length <= 8) {
+                words.push(word);
+                definitions[word] = def;
+            }
+        }
+        
+        return { words: words.slice(0, 8), definitions: definitions };
+        
     } catch (error) {
         console.error("获取单词失败:", error);
-        return ["DEFAULT", "WORDS", "HERE", "FOR", "SAFETY"];
+        return null;  // 返回 null 表示失败，使用 fallback
     }
 }
 function makeGrid(){
@@ -457,7 +477,7 @@ function applyFoundColors(){
     }
   });
 }
-
+/*
 function checkWord(){
   const letters=selCells.map(([r,c])=>grid[r][c]).join("");
   const rev=letters.split("").reverse().join("");
@@ -485,14 +505,53 @@ function checkWord(){
   }
   document.getElementById("status").textContent="";
 }
-
+*/
+// 修改 checkWord 函数中的定义显示部分
+async function checkWord() {
+    const letters = selCells.map(([r,c])=>grid[r][c]).join("");
+    const rev = letters.split("").reverse().join("");
+    for(const {word,cells} of placed) {
+        if(found.includes(word)) continue;
+        if(letters === word || rev === word) {
+            const ci = found.length % 8;
+            found.push(word);
+            foundColors[word] = ci;
+            const chip = document.getElementById(`chip-${word}`);
+            if(chip) chip.className = "word-chip found";
+            applyFoundColors();
+            
+            // 优先使用 AI 定义，其次使用内置 DICT，最后用默认文本
+            let def;
+            if (currentDefinitions && currentDefinitions[word]) {
+                def = currentDefinitions[word];  // AI 返回的定义
+            } else if (DICT[word]) {
+                def = `${DICT[word].pos} ${DICT[word].def}`;  // 内置词典
+            } else {
+                def = "A wonderful word from your theme!";  // 降级
+            }
+            
+            showToast(word, def);
+            
+            if(found.length === placed.length) {
+                document.getElementById("win-msg").style.display = "block";
+                document.getElementById("status").textContent = "";
+                playWin();
+            } else {
+                document.getElementById("status").textContent = `✓ Found: ${word}`;
+                playFound();
+            }
+            return;
+        }
+    }
+    document.getElementById("status").textContent = "";
+}
 function resetSelection(){
   found=[];foundColors={};
   document.getElementById("win-msg").style.display="none";
   document.getElementById("status").textContent="";
   renderGrid();renderWordList();
 }
-
+/*
 async function loadNewTheme(){
   const theme=document.getElementById("theme-select").value;
   document.getElementById("theme-title").textContent=theme.toUpperCase();
@@ -517,6 +576,50 @@ async function loadNewTheme(){
   renderWordList();renderGrid();
   startAmbience();
 }
+*/
+// 在全局变量区域添加
+let currentDefinitions = {};  // 存储当前主题的 AI 定义
 
+// 修改 loadNewTheme 函数
+async function loadNewTheme() {
+    const theme = document.getElementById("theme-select").value;
+    document.getElementById("theme-title").textContent = theme.toUpperCase();
+    document.getElementById("game-area").style.display = "none";
+    document.getElementById("loading-overlay").innerHTML = '<span class="spinner"></span>Fetching words...';
+    document.getElementById("loading-overlay").style.display = "block";
+    
+    let source = "AI";
+    let aiResult = null;
+    
+    try {
+        aiResult = await fetchWords(theme);
+        if (aiResult && aiResult.words && aiResult.words.length >= 4) {
+            words = aiResult.words;
+            currentDefinitions = aiResult.definitions;  // 保存 AI 返回的定义
+        } else {
+            throw new Error("AI returned insufficient words");
+        }
+    } catch(e) {
+        // AI 失败，使用内置词典作为 fallback
+        console.warn("Using fallback dictionary:", e);
+        words = [...(FALLBACK[theme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
+        currentDefinitions = {};  // 清空 AI 定义，将使用 DICT
+        source = "built-in dictionary";
+    }
+    
+    found = [];
+    foundColors = {};
+    makeGrid();
+    
+    document.getElementById("loading-overlay").style.display = "none";
+    document.getElementById("game-area").style.display = "block";
+    document.getElementById("win-msg").style.display = "none";
+    document.getElementById("status").textContent = "";
+    document.getElementById("source-tag").textContent = `Words sourced from: ${source}`;
+    
+    renderWordList();
+    renderGrid();
+    startAmbience();
+}
 loadNewTheme();
 </script>
