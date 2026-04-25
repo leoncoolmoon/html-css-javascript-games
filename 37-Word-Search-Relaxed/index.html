@@ -1,0 +1,522 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Quicksand',sans-serif;overflow-x:hidden}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:1rem}
+#header{text-align:center;margin-bottom:.75rem}
+#theme-badge{display:inline-block;background:rgba(34,197,94,0.85);color:white;font-family:'Nunito',sans-serif;font-weight:900;font-size:12px;letter-spacing:2px;padding:3px 14px;border-radius:20px;margin-bottom:5px;backdrop-filter:blur(4px)}
+#theme-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:var(--color-text-primary);text-shadow:0 1px 8px rgba(255,255,255,0.4)}
+#word-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:.75rem;padding:8px 10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(8px);border-radius:12px;border:0.5px solid rgba(255,255,255,0.7)}
+.word-chip{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.8);border:1.5px solid rgba(200,220,200,0.8);color:#4a6a4a;transition:all .3s;letter-spacing:.5px;cursor:default}
+.word-chip.found{background:rgba(187,247,208,0.9);border-color:#16a34a;color:#14532d;text-decoration:line-through}
+#grid-wrap{display:flex;justify-content:center;margin-bottom:.75rem}
+#grid{display:inline-grid;gap:3px;user-select:none;cursor:pointer}
+.cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;border-radius:8px;background:rgba(255,255,255,0.6);border:1.5px solid rgba(180,220,180,0.5);color:#2d4a2d;transition:background .12s,transform .1s;backdrop-filter:blur(3px)}
+.cell.selecting{background:#fef08a;border-color:#ca8a04;color:#713f12;transform:scale(1.1)}
+.cell.found-0{background:rgba(187,247,208,0.85);border-color:#16a34a;color:#14532d}
+.cell.found-1{background:rgba(191,219,254,0.85);border-color:#2563eb;color:#1e3a8a}
+.cell.found-2{background:rgba(254,205,170,0.85);border-color:#ea580c;color:#431407}
+.cell.found-3{background:rgba(233,213,255,0.85);border-color:#9333ea;color:#4a044e}
+.cell.found-4{background:rgba(165,243,252,0.85);border-color:#0891b2;color:#083344}
+.cell.found-5{background:rgba(254,215,170,0.85);border-color:#d97706;color:#451a03}
+.cell.found-6{background:rgba(249,168,212,0.85);border-color:#db2777;color:#500724}
+.cell.found-7{background:rgba(167,243,208,0.85);border-color:#059669;color:#064e3b}
+#controls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+button{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:7px 15px;border-radius:20px;border:1.5px solid rgba(180,220,180,0.8);background:rgba(255,255,255,0.65);color:#2d4a2d;cursor:pointer;transition:all .15s;backdrop-filter:blur(4px)}
+button:hover{background:rgba(255,255,255,0.9)}
+button.primary{background:rgba(34,197,94,0.8);border-color:#16a34a;color:white}
+button.primary:hover{background:rgba(22,163,74,0.9)}
+#status{text-align:center;font-size:13px;color:#4a6a4a;margin-bottom:6px;min-height:18px}
+#win-msg{display:none;text-align:center;background:rgba(220,252,231,0.9);border:1.5px solid #16a34a;border-radius:12px;padding:12px;margin-top:6px;color:#15803d;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;backdrop-filter:blur(6px)}
+#loading-overlay{text-align:center;padding:2rem;color:#4a6a4a;font-size:14px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(100,180,100,0.3);border-top-color:#22c55e;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:7px}
+@keyframes spin{to{transform:rotate(360deg)}}
+select{font-family:'Quicksand',sans-serif;font-weight:600;font-size:12px;padding:5px 10px;border-radius:20px;border:1.5px solid rgba(180,220,180,0.8);background:rgba(255,255,255,0.65);color:#2d4a2d;cursor:pointer;backdrop-filter:blur(4px)}
+#source-tag{text-align:center;font-size:10px;color:#6a8a6a;margin-bottom:5px;font-style:italic}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,40,20,0.88);color:#d1fae5;font-family:'Quicksand',sans-serif;font-size:13px;padding:10px 18px;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:999;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;max-width:280px;text-align:center;line-height:1.5}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast strong{display:block;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:#86efac;margin-bottom:3px}
+#mute-btn{position:fixed;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.55);border:1px solid rgba(180,220,180,0.7);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);font-size:15px;line-height:1;padding:0}
+</style>
+
+<canvas id="bg-canvas"></canvas>
+<button id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+<div id="toast"><strong id="toast-word"></strong><span id="toast-def"></span></div>
+
+<div id="app">
+  <div id="header">
+    <div id="theme-badge">WORD SEARCH</div>
+    <div id="theme-title">Loading...</div>
+  </div>
+  <div id="loading-overlay"><span class="spinner"></span>Getting ready...</div>
+  <div id="game-area" style="display:none">
+    <div id="word-list"></div>
+    <div id="source-tag"></div>
+    <div id="status"></div>
+    <div id="grid-wrap"><div id="grid"></div></div>
+    <div id="win-msg">🎉 You found all the words! Well done!</div>
+    <div id="controls">
+      <select id="theme-select">
+        <option value="Dance">Dance</option>
+        <option value="Animals">Animals</option>
+        <option value="Countries">Countries</option>
+        <option value="Sports">Sports</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Space">Space</option>
+        <option value="Instruments">Instruments</option>
+        <option value="Colours">Colours</option>
+        <option value="Ocean">Ocean</option>
+        <option value="Weather">Weather</option>
+      </select>
+      <button class="primary" onclick="loadNewTheme()">New Theme</button>
+      <button onclick="resetSelection()">Restart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Embedded mini-dictionary (StarDict-style: word → {pos, def}) ── */
+const DICT = {
+  BALLET:{pos:"n.",def:"Classical dance form with precise, graceful movements"},
+  SALSA:{pos:"n.",def:"Lively Latin dance of Cuban origin"},
+  TANGO:{pos:"n.",def:"Passionate Argentine partner dance with dramatic pauses"},
+  WALTZ:{pos:"n.",def:"Smooth ballroom dance in triple time"},
+  SWING:{pos:"n.",def:"Energetic jazz-based dance from the 1930s"},
+  FOXTROT:{pos:"n.",def:"Ballroom dance with slow and quick steps"},
+  JIVE:{pos:"n.",def:"Fast, lively dance associated with rock and roll"},
+  SAMBA:{pos:"n.",def:"Brazilian carnival dance with a syncopated rhythm"},
+  RUMBA:{pos:"n.",def:"Cuban dance known for hip movements"},
+  POLKA:{pos:"n.",def:"Fast Bohemian dance in duple time"},
+  LION:{pos:"n.",def:"Large African big cat; the 'king of beasts'"},
+  TIGER:{pos:"n.",def:"Largest wild cat, known for its striped coat"},
+  ELEPHANT:{pos:"n.",def:"Largest land animal with a long trunk and tusks"},
+  GIRAFFE:{pos:"n.",def:"Tallest living animal with an exceptionally long neck"},
+  ZEBRA:{pos:"n.",def:"African equid with distinctive black-and-white stripes"},
+  PENGUIN:{pos:"n.",def:"Flightless seabird native to the Southern Hemisphere"},
+  DOLPHIN:{pos:"n.",def:"Highly intelligent marine mammal that lives in groups"},
+  EAGLE:{pos:"n.",def:"Large bird of prey with keen eyesight and powerful wings"},
+  WOLF:{pos:"n.",def:"Social carnivorous mammal that hunts in packs"},
+  PANDA:{pos:"n.",def:"Bear native to China, known for eating bamboo"},
+  FRANCE:{pos:"n.",def:"Country in Western Europe, capital Paris"},
+  BRAZIL:{pos:"n.",def:"Largest country in South America"},
+  JAPAN:{pos:"n.",def:"Island nation in East Asia known for its culture"},
+  INDIA:{pos:"n.",def:"South Asian nation, world's most populous country"},
+  EGYPT:{pos:"n.",def:"North African country famous for ancient pyramids"},
+  CANADA:{pos:"n.",def:"World's second-largest country, north of the USA"},
+  ITALY:{pos:"n.",def:"Mediterranean country shaped like a boot"},
+  PERU:{pos:"n.",def:"South American country, home of Machu Picchu"},
+  SPAIN:{pos:"n.",def:"Iberian Peninsula country known for flamenco"},
+  KENYA:{pos:"n.",def:"East African nation known for the Great Rift Valley"},
+  SOCCER:{pos:"n.",def:"World's most popular sport, played with a round ball"},
+  TENNIS:{pos:"n.",def:"Racket sport played on a court divided by a net"},
+  RUGBY:{pos:"n.",def:"Team sport played with an oval ball, full contact"},
+  BOXING:{pos:"n.",def:"Combat sport where two fighters punch each other"},
+  CRICKET:{pos:"n.",def:"Bat-and-ball game popular in Commonwealth nations"},
+  HOCKEY:{pos:"n.",def:"Sport played on ice or grass with a stick and puck"},
+  GOLF:{pos:"n.",def:"Sport of hitting a ball into holes using clubs"},
+  SWIM:{pos:"v.",def:"To move through water using the body"},
+  ROWING:{pos:"n.",def:"Sport of propelling a boat with oars"},
+  CYCLING:{pos:"n.",def:"Sport or activity of riding a bicycle"},
+  APPLE:{pos:"n.",def:"Round fruit with red, green or yellow skin"},
+  MANGO:{pos:"n.",def:"Sweet tropical fruit with yellow flesh and a stone"},
+  GRAPE:{pos:"n.",def:"Small sweet fruit growing in clusters on a vine"},
+  PEACH:{pos:"n.",def:"Soft juicy fruit with fuzzy golden-red skin"},
+  LEMON:{pos:"n.",def:"Sour yellow citrus fruit rich in vitamin C"},
+  MELON:{pos:"n.",def:"Large sweet fruit with thick rind and juicy flesh"},
+  PAPAYA:{pos:"n.",def:"Tropical fruit with orange flesh and black seeds"},
+  PLUM:{pos:"n.",def:"Small oval fruit with smooth skin and sweet flesh"},
+  GUAVA:{pos:"n.",def:"Tropical fruit with pink flesh and a sweet aroma"},
+  KIWI:{pos:"n.",def:"Small brown fruit with bright green flesh and tiny seeds"},
+  MARS:{pos:"n.",def:"The fourth planet from the Sun; the Red Planet"},
+  VENUS:{pos:"n.",def:"Hottest planet in the solar system, second from the Sun"},
+  SATURN:{pos:"n.",def:"Sixth planet, famous for its beautiful ring system"},
+  EARTH:{pos:"n.",def:"Our home planet; the only known planet with life"},
+  URANUS:{pos:"n.",def:"Seventh planet, rotates on its side"},
+  NEPTUNE:{pos:"n.",def:"Eighth and farthest planet in the solar system"},
+  MOON:{pos:"n.",def:"Earth's only natural satellite"},
+  SUN:{pos:"n.",def:"The star at the centre of our solar system"},
+  COMET:{pos:"n.",def:"Icy body that develops a tail when near the Sun"},
+  NEBULA:{pos:"n.",def:"Cloud of gas and dust in outer space"},
+  PIANO:{pos:"n.",def:"Keyboard instrument with hammers striking strings"},
+  GUITAR:{pos:"n.",def:"Six-stringed instrument plucked or strummed"},
+  VIOLIN:{pos:"n.",def:"Bowed string instrument with a high, rich tone"},
+  FLUTE:{pos:"n.",def:"Wind instrument played by blowing across a hole"},
+  DRUMS:{pos:"n.",def:"Percussion instruments struck to create rhythm"},
+  CELLO:{pos:"n.",def:"Large bowed string instrument with deep warm tones"},
+  HARP:{pos:"n.",def:"Large plucked string instrument with a triangular frame"},
+  LUTE:{pos:"n.",def:"Ancient plucked string instrument with a pear-shaped body"},
+  OBOE:{pos:"n.",def:"Double-reed woodwind with a distinctive nasal tone"},
+  BANJO:{pos:"n.",def:"Plucked string instrument with a circular drum body"},
+  RED:{pos:"adj.",def:"Colour of blood and ripe cherries; a primary colour"},
+  BLUE:{pos:"adj.",def:"Colour of the sky and sea; a primary colour"},
+  GREEN:{pos:"adj.",def:"Colour of grass and leaves; mixed from blue and yellow"},
+  YELLOW:{pos:"adj.",def:"Bright colour of the sun; a primary colour"},
+  ORANGE:{pos:"adj.",def:"Warm colour between red and yellow"},
+  PURPLE:{pos:"adj.",def:"Deep colour between red and blue"},
+  PINK:{pos:"adj.",def:"Light, warm colour; pale red"},
+  TEAL:{pos:"adj.",def:"Blue-green colour resembling the teal duck"},
+  CORAL:{pos:"adj.",def:"Warm pinkish-orange colour"},
+  AMBER:{pos:"adj.",def:"Warm golden-yellow colour like fossilised resin"},
+  WHALE:{pos:"n.",def:"Largest animal on Earth; a marine mammal"},
+  SHARK:{pos:"n.",def:"Cartilaginous fish known for sharp teeth and speed"},
+  CORAL2:{pos:"n.",def:"Marine invertebrates that build reef structures"},
+  KELP:{pos:"n.",def:"Large brown seaweed forming underwater forests"},
+  SQUID:{pos:"n.",def:"Ten-limbed marine mollusc capable of squirting ink"},
+  OCTOPUS:{pos:"n.",def:"Eight-armed intelligent mollusc of the deep sea"},
+  SEAL:{pos:"n.",def:"Marine mammal with flippers; excellent swimmer"},
+  TIDE:{pos:"n.",def:"Rise and fall of sea levels due to lunar gravity"},
+  REEF:{pos:"n.",def:"Ridge of coral near the ocean surface"},
+  WAVE:{pos:"n.",def:"Ridge of water moving across the ocean surface"},
+  RAIN:{pos:"n.",def:"Water falling from clouds in liquid drops"},
+  SNOW:{pos:"n.",def:"Frozen water that falls as white crystalline flakes"},
+  STORM:{pos:"n.",def:"Violent weather with strong wind, rain or thunder"},
+  CLOUD:{pos:"n.",def:"Visible mass of water droplets floating in the sky"},
+  FROST:{pos:"n.",def:"Thin layer of ice that forms on cold surfaces"},
+  HAIL:{pos:"n.",def:"Frozen rain that falls as small balls of ice"},
+  FOG:{pos:"n.",def:"Thick mist close to the ground reducing visibility"},
+  WIND:{pos:"n.",def:"Natural movement of air from high to low pressure"},
+  SLEET:{pos:"n.",def:"Rain mixed with snow or partially melted snowflakes"},
+  THUNDER:{pos:"n.",def:"Loud sound caused by lightning heating the air rapidly"}
+};
+
+/* ── Fallback word sets ── */
+const FALLBACK = {
+  Dance:["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"],
+  Animals:["LION","TIGER","ELEPHANT","GIRAFFE","ZEBRA","PENGUIN","DOLPHIN","EAGLE"],
+  Countries:["FRANCE","BRAZIL","JAPAN","INDIA","EGYPT","CANADA","ITALY","PERU"],
+  Sports:["SOCCER","TENNIS","RUGBY","BOXING","CRICKET","HOCKEY","GOLF","SWIM"],
+  Fruits:["APPLE","MANGO","GRAPE","PEACH","LEMON","MELON","PAPAYA","PLUM"],
+  Space:["MARS","VENUS","SATURN","EARTH","URANUS","NEPTUNE","MOON","COMET"],
+  Instruments:["PIANO","GUITAR","VIOLIN","FLUTE","DRUMS","CELLO","HARP","OBOE"],
+  Colours:["RED","BLUE","GREEN","YELLOW","ORANGE","PURPLE","PINK","TEAL"],
+  Ocean:["WHALE","SHARK","SQUID","OCTOPUS","SEAL","TIDE","REEF","WAVE"],
+  Weather:["RAIN","SNOW","STORM","CLOUD","FROST","HAIL","FOG","WIND"]
+};
+
+/* ── Audio engine ── */
+let audioCtx = null, muted = false;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function playTone(freq,dur,type='sine',vol=0.08){
+  if(muted)return;
+  try{
+    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(0,c.currentTime);
+    g.gain.linearRampToValueAtTime(vol,c.currentTime+0.04);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+    o.start(c.currentTime);o.stop(c.currentTime+dur);
+  }catch(e){}
+}
+function playFound(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.25,'sine',.1),i*100))}
+function playWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.4,'sine',.12),i*120))}
+function playSelect(){playTone(880,.05,'sine',.04)}
+
+let ambInterval=null;
+function startAmbience(){
+  if(muted||ambInterval)return;
+  const notes=[261,294,329,349,392,440,494,523];
+  ambInterval=setInterval(()=>{
+    if(muted)return;
+    const f=notes[Math.floor(Math.random()*notes.length)];
+    playTone(f,1.5,'sine',0.03);
+  },2200);
+}
+function stopAmbience(){clearInterval(ambInterval);ambInterval=null}
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
+  if(!muted)startAmbience(); else stopAmbience();
+}
+
+/* ── Background canvas ── */
+const cvs=document.getElementById('bg-canvas');
+const ctx2=cvs.getContext('2d');
+let W,H,particles=[];
+function resizeCvs(){W=cvs.width=window.innerWidth;H=cvs.height=window.innerHeight}
+resizeCvs();window.addEventListener('resize',()=>{resizeCvs();initParticles()});
+
+function initParticles(){
+  particles=Array.from({length:38},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    r:1+Math.random()*3,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    alpha:0.08+Math.random()*0.18,
+    hue:120+Math.random()*60
+  }));
+}
+initParticles();
+
+let t=0;
+function drawBg(){
+  t+=0.003;
+  const g=ctx2.createLinearGradient(0,0,W,H);
+  const h1=120+Math.sin(t)*20, h2=160+Math.cos(t*.7)*20;
+  g.addColorStop(0,`hsl(${h1},45%,82%)`);
+  g.addColorStop(.5,`hsl(${(h1+h2)/2},35%,88%)`);
+  g.addColorStop(1,`hsl(${h2},40%,78%)`);
+  ctx2.fillStyle=g;
+  ctx2.fillRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    ctx2.beginPath();
+    ctx2.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx2.fillStyle=`hsla(${p.hue},60%,60%,${p.alpha})`;
+    ctx2.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+/* ── Toast ── */
+let toastTimer=null;
+function showToast(word,def){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-word').textContent=word;
+  document.getElementById('toast-def').textContent=def;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+/* ── Word search logic ── */
+const GRID_SIZE=11;
+const DIRS=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+let grid=[],words=[],placed=[],found=[],foundColors={};
+let selecting=false,selStart=null,selCells=[];
+
+// async function fetchWords(theme){
+//   const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
+//   const res=await fetch("https://api.anthropic.com/v1/messages",{
+//     method:"POST",headers:{"Content-Type":"application/json"},
+//     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,messages:[{role:"user",content:prompt}]})
+//   });
+//   if(!res.ok)throw new Error("API");
+//   const data=await res.json();
+//   const text=data.content.map(b=>b.text||"").join("");
+//   const arr=JSON.parse(text.replace(/```json|```/g,"").trim());
+//   return arr.map(w=>w.toUpperCase().replace(/[^A-Z]/g,"")).filter(w=>w.length>=3&&w.length<=8).slice(0,8);
+// }
+async function fetchWords(theme){
+    const prompt = `Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
+    
+    try {
+        // 将 Anthropic 的地址换成 Pollinations 的地址即可
+        const res = await fetch("https://text.pollinations.ai/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+                // Pollinations 不需要 Authorization 头！
+            },
+            body: JSON.stringify({
+                model: "openai", // 或者使用其他免费模型，如 "mistral"
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 300
+            })
+        });
+
+        if (!res.ok) throw new Error("API 请求失败");
+        const data = await res.json();
+        // Pollinations 返回格式与 OpenAI 相同，因此解析方式也需要调整
+        const text = data.choices[0].message.content;
+        const arr = JSON.parse(text.replace(/```json|```/g, "").trim());
+        return arr.map(w => w.toUpperCase().replace(/[^A-Z]/g, ""))
+                  .filter(w => w.length >= 3 && w.length <= 8)
+                  .slice(0, 8);
+    } catch (error) {
+        console.error("获取单词失败:", error);
+        return ["DEFAULT", "WORDS", "HERE", "FOR", "SAFETY"];
+    }
+}
+function makeGrid(){
+  grid=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(""));
+  placed=[];
+  const shuffled=[...words].sort(()=>Math.random()-.5);
+  for(const w of shuffled)placeWord(w);
+  for(let r=0;r<GRID_SIZE;r++)
+    for(let c=0;c<GRID_SIZE;c++)
+      if(!grid[r][c])grid[r][c]=String.fromCharCode(65+Math.floor(Math.random()*26));
+}
+
+function placeWord(word){
+  /* Truly random: shuffle ALL (dir, row, col) combos, try them in random order */
+  const candidates=[];
+  for(const dir of DIRS)
+    for(let r=0;r<GRID_SIZE;r++)
+      for(let c=0;c<GRID_SIZE;c++)
+        candidates.push([dir,r,c]);
+  /* Fisher-Yates shuffle */
+  for(let i=candidates.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+  }
+  for(const [dir,r,c] of candidates){
+    if(canPlace(word,r,c,dir)){
+      const cells=[];
+      for(let i=0;i<word.length;i++){
+        grid[r+dir[0]*i][c+dir[1]*i]=word[i];
+        cells.push([r+dir[0]*i,c+dir[1]*i]);
+      }
+      placed.push({word,cells});
+      return true;
+    }
+  }
+  return false;
+}
+
+function canPlace(word,r,c,dir){
+  for(let i=0;i<word.length;i++){
+    const nr=r+dir[0]*i,nc=c+dir[1]*i;
+    if(nr<0||nr>=GRID_SIZE||nc<0||nc>=GRID_SIZE)return false;
+    if(grid[nr][nc]&&grid[nr][nc]!==word[i])return false;
+  }
+  return true;
+}
+
+function renderGrid(){
+  const el=document.getElementById("grid");
+  el.style.gridTemplateColumns=`repeat(${GRID_SIZE},36px)`;
+  el.innerHTML="";
+  for(let r=0;r<GRID_SIZE;r++)
+    for(let c=0;c<GRID_SIZE;c++){
+      const cell=document.createElement("div");
+      cell.className="cell";cell.textContent=grid[r][c];
+      cell.dataset.r=r;cell.dataset.c=c;
+      el.appendChild(cell);
+    }
+  applyFoundColors();
+  el.onmousedown=startSel;el.onmousemove=moveSel;el.onmouseup=endSel;
+  el.ontouchstart=e=>{e.preventDefault();startSel(e.touches[0])};
+  el.ontouchmove=e=>{e.preventDefault();moveSel(e.touches[0])};
+  el.ontouchend=e=>{e.preventDefault();endSel()};
+}
+
+function renderWordList(){
+  document.getElementById("word-list").innerHTML=
+    words.map(w=>`<span class="word-chip${found.includes(w)?" found":""}" id="chip-${w}">${w}</span>`).join("");
+}
+
+function cellAt(e){
+  const t=document.elementFromPoint(e.clientX,e.clientY);
+  if(!t||!t.classList.contains("cell"))return null;
+  return[parseInt(t.dataset.r),parseInt(t.dataset.c)];
+}
+
+function startSel(e){
+  const rc=cellAt(e);if(!rc)return;
+  selecting=true;selStart=rc;selCells=[rc];highlight();playSelect();
+}
+
+function moveSel(e){
+  if(!selecting||!selStart)return;
+  const rc=cellAt(e);if(!rc)return;
+  const[r0,c0]=selStart,[r1,c1]=rc;
+  const dr=r1-r0,dc=c1-c0;
+  if(dr===0&&dc===0){selCells=[selStart];highlight();return}
+  let sR=dr===0?0:dr/Math.abs(dr),sC=dc===0?0:dc/Math.abs(dc);
+  if(Math.abs(dr)!==Math.abs(dc)&&dr!==0&&dc!==0){
+    if(Math.abs(dr)>Math.abs(dc))sC=0;else sR=0;
+  }
+  selCells=[];
+  for(let i=0;i<=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));i++){
+    const nr=r0+sR*i,nc=c0+sC*i;
+    if(nr>=0&&nr<GRID_SIZE&&nc>=0&&nc<GRID_SIZE)selCells.push([nr,nc]);
+  }
+  highlight();
+}
+
+function endSel(){
+  if(!selecting)return;selecting=false;checkWord();selCells=[];highlight();
+}
+
+function highlight(){
+  document.querySelectorAll(".cell").forEach(c=>{
+    const r=parseInt(c.dataset.r),col=parseInt(c.dataset.c);
+    const isSel=selCells.some(([sr,sc])=>sr===r&&sc===col);
+    c.classList.toggle("selecting",isSel);
+    for(let i=0;i<8;i++)c.classList.remove(`found-${i}`);
+    if(!isSel)
+      for(const[word,ci]of Object.entries(foundColors)){
+        const p=placed.find(p=>p.word===word);
+        if(p&&p.cells.some(([pr,pc])=>pr===r&&pc===col))c.classList.add(`found-${ci}`);
+      }
+  });
+}
+
+function applyFoundColors(){
+  document.querySelectorAll(".cell").forEach(c=>{
+    const r=parseInt(c.dataset.r),col=parseInt(c.dataset.c);
+    for(let i=0;i<8;i++)c.classList.remove(`found-${i}`);
+    for(const[word,ci]of Object.entries(foundColors)){
+      const p=placed.find(p=>p.word===word);
+      if(p&&p.cells.some(([pr,pc])=>pr===r&&pc===col))c.classList.add(`found-${ci}`);
+    }
+  });
+}
+
+function checkWord(){
+  const letters=selCells.map(([r,c])=>grid[r][c]).join("");
+  const rev=letters.split("").reverse().join("");
+  for(const{word,cells}of placed){
+    if(found.includes(word))continue;
+    if(letters===word||rev===word){
+      const ci=found.length%8;
+      found.push(word);foundColors[word]=ci;
+      const chip=document.getElementById(`chip-${word}`);
+      if(chip)chip.className="word-chip found";
+      applyFoundColors();
+      const entry=DICT[word]||DICT[word.toUpperCase()];
+      const def=entry?`${entry.pos} ${entry.def}`:"A great word!";
+      showToast(word,def);
+      if(found.length===placed.length){
+        document.getElementById("win-msg").style.display="block";
+        document.getElementById("status").textContent="";
+        playWin();
+      } else {
+        document.getElementById("status").textContent=`✓ Found: ${word}`;
+        playFound();
+      }
+      return;
+    }
+  }
+  document.getElementById("status").textContent="";
+}
+
+function resetSelection(){
+  found=[];foundColors={};
+  document.getElementById("win-msg").style.display="none";
+  document.getElementById("status").textContent="";
+  renderGrid();renderWordList();
+}
+
+async function loadNewTheme(){
+  const theme=document.getElementById("theme-select").value;
+  document.getElementById("theme-title").textContent=theme.toUpperCase();
+  document.getElementById("game-area").style.display="none";
+  document.getElementById("loading-overlay").innerHTML='<span class="spinner"></span>Fetching words...';
+  document.getElementById("loading-overlay").style.display="block";
+  let source="AI";
+  try{
+    words=await fetchWords(theme);
+    if(!words||words.length<4)throw new Error("few");
+  }catch(e){
+    words=[...(FALLBACK[theme]||FALLBACK.Dance)].sort(()=>Math.random()-.5);
+    source="built-in dictionary";
+  }
+  found=[];foundColors={};
+  makeGrid();
+  document.getElementById("loading-overlay").style.display="none";
+  document.getElementById("game-area").style.display="block";
+  document.getElementById("win-msg").style.display="none";
+  document.getElementById("status").textContent="";
+  document.getElementById("source-tag").textContent=`Words sourced from: ${source}`;
+  renderWordList();renderGrid();
+  startAmbience();
+}
+
+loadNewTheme();
+</script>

@@ -79,6 +79,7 @@ fork from https://github.com/he-is-talha/html-css-javascript-games
 34. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
 35. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
 36. **River crossing Game**: Classic river puzzle. Boat holds two. Avoid zombies eating survivors. 🧟‍♂️🚣
+37. **Word Search Relaxed**: Discover hidden words in a dynamic grid with smooth animations and fade-in background music. A relaxing yet engaging puzzle experience.🔍✨🎶
 ## License
 
 The MIT License
