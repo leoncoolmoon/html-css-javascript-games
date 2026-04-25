@@ -1,4 +1,3 @@
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -9,7 +8,7 @@ body{font-family:'Quicksand',sans-serif;overflow-x:hidden}
 #theme-badge{display:inline-block;background:rgba(34,197,94,0.85);color:white;font-family:'Nunito',sans-serif;font-weight:900;font-size:12px;letter-spacing:2px;padding:3px 14px;border-radius:20px;margin-bottom:5px;backdrop-filter:blur(4px)}
 #theme-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:var(--color-text-primary);text-shadow:0 1px 8px rgba(255,255,255,0.4)}
 #word-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:.75rem;padding:8px 10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(8px);border-radius:12px;border:0.5px solid rgba(255,255,255,0.7)}
-.word-chip{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.8);border:1.5px solid rgba(200,220,200,0.8);color:#4a6a4a;transition:all .3s;letter-spacing:.5px;cursor:default}
+.word-chip{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.8);border:1.5px solid rgba(200,220,200,0.8);color:#4a6a4a;transition:all .3s;cursor:default}
 .word-chip.found{background:rgba(187,247,208,0.9);border-color:#16a34a;color:#14532d;text-decoration:line-through}
 #grid-wrap{display:flex;justify-content:center;margin-bottom:.75rem}
 #grid{display:inline-grid;gap:3px;user-select:none;cursor:pointer}
@@ -23,18 +22,20 @@ body{font-family:'Quicksand',sans-serif;overflow-x:hidden}
 .cell.found-5{background:rgba(254,215,170,0.85);border-color:#d97706;color:#451a03}
 .cell.found-6{background:rgba(249,168,212,0.85);border-color:#db2777;color:#500724}
 .cell.found-7{background:rgba(167,243,208,0.85);border-color:#059669;color:#064e3b}
+.cell.hint{animation:pulse 1s ease-in-out 3;background:rgba(251,191,36,0.9);border-color:#d97706;color:#78350f}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);background:rgba(245,158,11,0.95)}}
 #controls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
 button{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:7px 15px;border-radius:20px;border:1.5px solid rgba(180,220,180,0.8);background:rgba(255,255,255,0.65);color:#2d4a2d;cursor:pointer;transition:all .15s;backdrop-filter:blur(4px)}
 button:hover{background:rgba(255,255,255,0.9)}
 button.primary{background:rgba(34,197,94,0.8);border-color:#16a34a;color:white}
 button.primary:hover{background:rgba(22,163,74,0.9)}
-#status{text-align:center;font-size:13px;color:#4a6a4a;margin-bottom:6px;min-height:18px}
+#status{text-align:center;font-size:13px;color:#4a6a6a;margin-bottom:6px;min-height:18px}
 #win-msg{display:none;text-align:center;background:rgba(220,252,231,0.9);border:1.5px solid #16a34a;border-radius:12px;padding:12px;margin-top:6px;color:#15803d;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;backdrop-filter:blur(6px)}
 #loading-overlay{text-align:center;padding:2rem;color:#4a6a4a;font-size:14px}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(100,180,100,0.3);border-top-color:#22c55e;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:7px}
 @keyframes spin{to{transform:rotate(360deg)}}
-select{font-family:'Quicksand',sans-serif;font-weight:600;font-size:12px;padding:5px 10px;border-radius:20px;border:1.5px solid rgba(180,220,180,0.8);background:rgba(255,255,255,0.65);color:#2d4a2d;cursor:pointer;backdrop-filter:blur(4px)}
 #source-tag{text-align:center;font-size:10px;color:#6a8a6a;margin-bottom:5px;font-style:italic}
+#next-badge{text-align:center;font-size:10px;color:#16a34a;margin-top:5px;font-weight:bold}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,40,20,0.88);color:#d1fae5;font-family:'Quicksand',sans-serif;font-size:13px;padding:10px 18px;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:999;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;max-width:280px;text-align:center;line-height:1.5}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast strong{display:block;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:#86efac;margin-bottom:3px}
@@ -56,28 +57,22 @@ select{font-family:'Quicksand',sans-serif;font-weight:600;font-size:12px;padding
     <div id="source-tag"></div>
     <div id="status"></div>
     <div id="grid-wrap"><div id="grid"></div></div>
-    <div id="win-msg">🎉 You found all the words! Well done!</div>
-    <div id="controls">
-      <select id="theme-select">
-        <option value="Dance">Dance</option>
-        <option value="Animals">Animals</option>
-        <option value="Countries">Countries</option>
-        <option value="Sports">Sports</option>
-        <option value="Fruits">Fruits</option>
-        <option value="Space">Space</option>
-        <option value="Instruments">Instruments</option>
-        <option value="Colours">Colours</option>
-        <option value="Ocean">Ocean</option>
-        <option value="Weather">Weather</option>
-      </select>
-      <button class="primary" onclick="loadNewTheme()">New Theme</button>
-      <button onclick="resetSelection()">Restart</button>
+    <div id="win-msg">
+      🎉 You found all the words! Well done!
+      <div style="margin-top:8px">
+        <button onclick="loadNextLevel()" style="background:#16a34a;color:white;border:none;padding:5px 15px;font-size:12px">Next Level →</button>
+      </div>
     </div>
+    <div id="controls">
+      <button onclick="resetSelection()">Restart Level</button>
+      <button onclick="giveHint()">💡 Hint</button>
+    </div>
+    <div id="next-badge"></div>
   </div>
 </div>
 
 <script>
-/* ── Embedded mini-dictionary (StarDict-style: word → {pos, def}) ── */
+/* ── Embedded mini-dictionary (fallback only) ── */
 const DICT = {
   BALLET:{pos:"n.",def:"Classical dance form with precise, graceful movements"},
   SALSA:{pos:"n.",def:"Lively Latin dance of Cuban origin"},
@@ -181,6 +176,14 @@ const DICT = {
   THUNDER:{pos:"n.",def:"Loud sound caused by lightning heating the air rapidly"}
 };
 
+
+/* ── Available themes (for random selection) ── */
+const ALL_THEMES = [
+  "Dance", "Animals", "Countries", "Sports", "Fruits", 
+  "Space", "Instruments", "Colours", "Ocean", "Weather",
+  "Movies", "Music", "Technology", "Nature", "Transport"
+];
+
 /* ── Fallback word sets ── */
 const FALLBACK = {
   Dance:["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"],
@@ -192,7 +195,7 @@ const FALLBACK = {
   Instruments:["PIANO","GUITAR","VIOLIN","FLUTE","DRUMS","CELLO","HARP","OBOE"],
   Colours:["RED","BLUE","GREEN","YELLOW","ORANGE","PURPLE","PINK","TEAL"],
   Ocean:["WHALE","SHARK","SQUID","OCTOPUS","SEAL","TIDE","REEF","WAVE"],
-  Weather:["RAIN","SNOW","STORM","CLOUD","FROST","HAIL","FOG","WIND"]
+  Weather:["RAIN","SNOW","STORM","CLOUD","FROST","HAIL","FOG","WIND"],
 };
 
 /* ── Audio engine ── */
@@ -213,6 +216,7 @@ function playTone(freq,dur,type='sine',vol=0.08){
 function playFound(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.25,'sine',.1),i*100))}
 function playWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.4,'sine',.12),i*120))}
 function playSelect(){playTone(880,.05,'sine',.04)}
+function playHint(){[523,523,659,659].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'sine',.08),i*120))}
 
 let ambInterval=null;
 function startAmbience(){
@@ -277,7 +281,14 @@ let toastTimer=null;
 function showToast(word,def){
   const t=document.getElementById('toast');
   document.getElementById('toast-word').textContent=word;
-  document.getElementById('toast-def').textContent=def;
+  let formattedDef = (def || "Great word!").trim();
+  if (formattedDef && !formattedDef.endsWith('.') && !formattedDef.endsWith('!') && !formattedDef.endsWith('?')) {
+    formattedDef += '.';
+  }
+  if (formattedDef) {
+    formattedDef = formattedDef.charAt(0).toUpperCase() + formattedDef.slice(1);
+  }
+  document.getElementById('toast-def').textContent = formattedDef;
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('show'),4000);
@@ -286,23 +297,16 @@ function showToast(word,def){
 /* ── Word search logic ── */
 const GRID_SIZE=11;
 const DIRS=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
-let grid=[],words=[],placed=[],found=[],foundColors={};
+let grid=[],words=[],placed=[],found=[],foundColors={},currentDefinitions={};
 let selecting=false,selStart=null,selCells=[];
-/*
+
+// 预加载数据
+let preloadedLevel = null;
+let isPreloading = false;
+let currentTheme = "";
+
+// AI 获取单词和定义
 async function fetchWords(theme){
-  const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: each word 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words. Return ONLY a JSON array. Example: ["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"]`;
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,messages:[{role:"user",content:prompt}]})
-  });
-  if(!res.ok)throw new Error("API");
-  const data=await res.json();
-  const text=data.content.map(b=>b.text||"").join("");
-  const arr=JSON.parse(text.replace(/```json|```/g,"").trim());
-  return arr.map(w=>w.toUpperCase().replace(/[^A-Z]/g,"")).filter(w=>w.length>=3&&w.length<=8).slice(0,8);
-}
-*/
-async function fetchWords(theme) {
     const prompt = `Give me exactly 8 words related to the theme: "${theme}". 
 Rules: 
 - Each word: 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words
@@ -320,19 +324,16 @@ Return ONLY the JSON array, no other text.`;
             body: JSON.stringify({
                 model: "openai",
                 messages: [{ role: "user", content: prompt }],
-                max_tokens: 800  // 增加 token 因为要返回定义
+                max_tokens: 800
             })
         });
 
         if (!res.ok) throw new Error("API 请求失败");
         const data = await res.json();
         const text = data.choices[0].message.content;
-        
-        // 解析包含单词和定义的 JSON 数组
         const cleanedText = text.replace(/```json|```/g, "").trim();
         const wordDefArray = JSON.parse(cleanedText);
         
-        // 验证并处理数据
         const words = [];
         const definitions = {};
         
@@ -345,281 +346,412 @@ Return ONLY the JSON array, no other text.`;
             }
         }
         
-        return { words: words.slice(0, 8), definitions: definitions };
-        
+        if (words.length < 4) throw new Error("Not enough words");
+        return { words: words.slice(0, 8), definitions: definitions, theme: theme };
     } catch (error) {
         console.error("获取单词失败:", error);
-        return null;  // 返回 null 表示失败，使用 fallback
+        return null;
     }
 }
+
+// 预加载下一关
+async function preloadNextLevel(currentThemeName) {
+  if (isPreloading) return;
+  isPreloading = true;
+  
+  // 随机选择下一个主题（不与当前相同）
+  let availableThemes = ALL_THEMES.filter(t => t !== currentThemeName);
+  if (availableThemes.length === 0) availableThemes = [...ALL_THEMES];
+  const nextTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
+  
+  try {
+    const result = await fetchWords(nextTheme);
+    if (result && result.words && result.words.length >= 4) {
+      preloadedLevel = result;
+      document.getElementById("next-badge").innerHTML = `✨ Next: ${nextTheme} (ready) ✨`;
+    } else {
+      // 使用 fallback
+      preloadedLevel = {
+        words: [...(FALLBACK[nextTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5),
+        definitions: {},
+        theme: nextTheme
+      };
+      document.getElementById("next-badge").innerHTML = `📚 Next: ${nextTheme} (from dictionary)`;
+    }
+  } catch (e) {
+    console.warn("Preload failed, using fallback");
+    preloadedLevel = {
+      words: [...(FALLBACK[nextTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5),
+      definitions: {},
+      theme: nextTheme
+    };
+    document.getElementById("next-badge").innerHTML = `📚 Next: ${nextTheme} (ready)`;
+  }
+  isPreloading = false;
+}
+
+// 加载下一关
+async function loadNextLevel() {
+  if (!preloadedLevel) {
+    // 如果没有预加载，立即加载
+    await loadNewRandomTheme(1);
+    return;
+  }
+  
+  // 使用预加载的数据
+  currentTheme = preloadedLevel.theme;
+  words = preloadedLevel.words;
+  currentDefinitions = preloadedLevel.definitions;
+  found = [];
+  foundColors = {};
+  
+  makeGrid();
+  
+  document.getElementById("win-msg").style.display = "none";
+  document.getElementById("theme-title").textContent = currentTheme.toUpperCase();
+  document.getElementById("source-tag").textContent = `Theme: ${currentTheme} | Ready to play!`;
+  renderWordList();
+  renderGrid();
+  startAmbience();
+  
+  // 清除提示并开始预加载下一关
+  document.getElementById("next-badge").innerHTML = "🔄 Loading next level...";
+  preloadedLevel = null;
+  
+  // 后台预加载下一关
+  setTimeout(() => preloadNextLevel(currentTheme), 100);
+}
+
+// 加载随机主题（初次启动或 fallback）
+async function loadNewRandomTheme(n) {
+  const randomTheme = ALL_THEMES[Math.floor(Math.random() * ALL_THEMES.length)];
+  
+  document.getElementById("theme-title").textContent = randomTheme.toUpperCase();
+  document.getElementById("game-area").style.display = "none";
+  document.getElementById("loading-overlay").innerHTML = '<span class="spinner"></span>Loading level...';
+  document.getElementById("loading-overlay").style.display = "block";
+  
+  let source = "AI";
+  let result = null;
+  if(n == 1){
+  try {
+    result = await fetchWords(randomTheme);
+    if (result && result.words && result.words.length >= 4) {
+      words = result.words;
+      currentDefinitions = result.definitions;
+      currentTheme = randomTheme;
+    } else {
+      throw new Error("AI failed");
+    }
+  } catch(e) {
+    console.warn("Using fallback dictionary:", e);
+    words = [...(FALLBACK[randomTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
+    currentDefinitions = {};
+    currentTheme = randomTheme;
+    source = "built-in dictionary";
+  }
+}else{
+    words = [...(FALLBACK[randomTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
+    currentDefinitions = {};
+    currentTheme = randomTheme;
+    source = "built-in dictionary";
+
+}
+
+  found = [];
+  foundColors = {};
+  makeGrid();
+  
+  document.getElementById("loading-overlay").style.display = "none";
+  document.getElementById("game-area").style.display = "block";
+  document.getElementById("win-msg").style.display = "none";
+  document.getElementById("status").textContent = "";
+  document.getElementById("source-tag").textContent = `Theme: ${currentTheme} | Source: ${source}`;
+  document.getElementById("next-badge").innerHTML = "🔄 Preparing next level...";
+  
+  renderWordList();
+  renderGrid();
+  startAmbience();
+  
+  // 后台预加载下一关
+  preloadedLevel = null;
+  setTimeout(() => preloadNextLevel(currentTheme), 500);
+}
+
+// 先放置单词，再填充随机字母
 function makeGrid(){
-  grid=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(""));
-  placed=[];
-  const shuffled=[...words].sort(()=>Math.random()-.5);
-  for(const w of shuffled)placeWord(w);
-  for(let r=0;r<GRID_SIZE;r++)
-    for(let c=0;c<GRID_SIZE;c++)
-      if(!grid[r][c])grid[r][c]=String.fromCharCode(65+Math.floor(Math.random()*26));
+  grid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(""));
+  placed = [];
+  
+  const shuffled = [...words].sort(() => Math.random() - 0.5);
+  let success = true;
+  
+  for (const word of shuffled) {
+    if (!placeWord(word)) {
+      success = false;
+      break;
+    }
+  }
+  
+  if (!success) {
+    makeGrid();
+    return;
+  }
+  
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      if (!grid[r][c]) {
+        grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      }
+    }
+  }
 }
 
 function placeWord(word){
-  /* Truly random: shuffle ALL (dir, row, col) combos, try them in random order */
-  const candidates=[];
-  for(const dir of DIRS)
-    for(let r=0;r<GRID_SIZE;r++)
-      for(let c=0;c<GRID_SIZE;c++)
-        candidates.push([dir,r,c]);
-  /* Fisher-Yates shuffle */
-  for(let i=candidates.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
-  }
-  for(const [dir,r,c] of candidates){
-    if(canPlace(word,r,c,dir)){
-      const cells=[];
-      for(let i=0;i<word.length;i++){
-        grid[r+dir[0]*i][c+dir[1]*i]=word[i];
-        cells.push([r+dir[0]*i,c+dir[1]*i]);
+  const candidates = [];
+  for (const dir of DIRS) {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (canPlace(word, r, c, dir)) {
+          candidates.push({dir, r, c});
+        }
       }
-      placed.push({word,cells});
-      return true;
     }
+  }
+  
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+  
+  for (const {dir, r, c} of candidates) {
+    const cells = [];
+    for (let i = 0; i < word.length; i++) {
+      const nr = r + dir[0] * i;
+      const nc = c + dir[1] * i;
+      cells.push([nr, nc]);
+      grid[nr][nc] = word[i];
+    }
+    placed.push({word, cells});
+    return true;
   }
   return false;
 }
 
-function canPlace(word,r,c,dir){
-  for(let i=0;i<word.length;i++){
-    const nr=r+dir[0]*i,nc=c+dir[1]*i;
-    if(nr<0||nr>=GRID_SIZE||nc<0||nc>=GRID_SIZE)return false;
-    if(grid[nr][nc]&&grid[nr][nc]!==word[i])return false;
+function canPlace(word, r, c, dir){
+  for (let i = 0; i < word.length; i++) {
+    const nr = r + dir[0] * i;
+    const nc = c + dir[1] * i;
+    if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) return false;
+    if (grid[nr][nc] && grid[nr][nc] !== word[i]) return false;
   }
   return true;
 }
 
 function renderGrid(){
-  const el=document.getElementById("grid");
-  el.style.gridTemplateColumns=`repeat(${GRID_SIZE},36px)`;
-  el.innerHTML="";
-  for(let r=0;r<GRID_SIZE;r++)
-    for(let c=0;c<GRID_SIZE;c++){
-      const cell=document.createElement("div");
-      cell.className="cell";cell.textContent=grid[r][c];
-      cell.dataset.r=r;cell.dataset.c=c;
+  const el = document.getElementById("grid");
+  el.style.gridTemplateColumns = `repeat(${GRID_SIZE},36px)`;
+  el.innerHTML = "";
+  for(let r = 0; r < GRID_SIZE; r++) {
+    for(let c = 0; c < GRID_SIZE; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = grid[r][c];
+      cell.dataset.r = r;
+      cell.dataset.c = c;
       el.appendChild(cell);
     }
+  }
   applyFoundColors();
-  el.onmousedown=startSel;el.onmousemove=moveSel;el.onmouseup=endSel;
-  el.ontouchstart=e=>{e.preventDefault();startSel(e.touches[0])};
-  el.ontouchmove=e=>{e.preventDefault();moveSel(e.touches[0])};
-  el.ontouchend=e=>{e.preventDefault();endSel()};
+  el.onmousedown = startSel;
+  el.onmousemove = moveSel;
+  el.onmouseup = endSel;
+  el.ontouchstart = e => { e.preventDefault(); startSel(e.touches[0]); };
+  el.ontouchmove = e => { e.preventDefault(); moveSel(e.touches[0]); };
+  el.ontouchend = e => { e.preventDefault(); endSel(); };
 }
 
 function renderWordList(){
-  document.getElementById("word-list").innerHTML=
-    words.map(w=>`<span class="word-chip${found.includes(w)?" found":""}" id="chip-${w}">${w}</span>`).join("");
+  document.getElementById("word-list").innerHTML = words.map(w => 
+    `<span class="word-chip${found.includes(w) ? " found" : ""}" id="chip-${w}">${w}</span>`
+  ).join("");
 }
 
 function cellAt(e){
-  const t=document.elementFromPoint(e.clientX,e.clientY);
-  if(!t||!t.classList.contains("cell"))return null;
-  return[parseInt(t.dataset.r),parseInt(t.dataset.c)];
+  const t = document.elementFromPoint(e.clientX, e.clientY);
+  if(!t || !t.classList.contains("cell")) return null;
+  return [parseInt(t.dataset.r), parseInt(t.dataset.c)];
 }
 
 function startSel(e){
-  const rc=cellAt(e);if(!rc)return;
-  selecting=true;selStart=rc;selCells=[rc];highlight();playSelect();
+  const rc = cellAt(e);
+  if(!rc) return;
+  selecting = true;
+  selStart = rc;
+  selCells = [rc];
+  highlight();
+  playSelect();
 }
 
 function moveSel(e){
-  if(!selecting||!selStart)return;
-  const rc=cellAt(e);if(!rc)return;
-  const[r0,c0]=selStart,[r1,c1]=rc;
-  const dr=r1-r0,dc=c1-c0;
-  if(dr===0&&dc===0){selCells=[selStart];highlight();return}
-  let sR=dr===0?0:dr/Math.abs(dr),sC=dc===0?0:dc/Math.abs(dc);
-  if(Math.abs(dr)!==Math.abs(dc)&&dr!==0&&dc!==0){
-    if(Math.abs(dr)>Math.abs(dc))sC=0;else sR=0;
+  if(!selecting || !selStart) return;
+  const rc = cellAt(e);
+  if(!rc) return;
+  const [r0,c0] = selStart;
+  const [r1,c1] = rc;
+  const dr = r1 - r0, dc = c1 - c0;
+  
+  if(dr === 0 && dc === 0) {
+    selCells = [selStart];
+    highlight();
+    return;
   }
-  selCells=[];
-  for(let i=0;i<=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));i++){
-    const nr=r0+sR*i,nc=c0+sC*i;
-    if(nr>=0&&nr<GRID_SIZE&&nc>=0&&nc<GRID_SIZE)selCells.push([nr,nc]);
+  
+  let sR = dr === 0 ? 0 : dr / Math.abs(dr);
+  let sC = dc === 0 ? 0 : dc / Math.abs(dc);
+  
+  if(Math.abs(dr) !== Math.abs(dc) && dr !== 0 && dc !== 0) {
+    if(Math.abs(dr) > Math.abs(dc)) sC = 0;
+    else sR = 0;
+  }
+  
+  selCells = [];
+  const steps = Math.max(Math.abs(r1 - r0), Math.abs(c1 - c0));
+  for(let i = 0; i <= steps; i++) {
+    const nr = r0 + sR * i;
+    const nc = c0 + sC * i;
+    if(nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+      selCells.push([nr, nc]);
+    }
   }
   highlight();
 }
 
 function endSel(){
-  if(!selecting)return;selecting=false;checkWord();selCells=[];highlight();
+  if(!selecting) return;
+  selecting = false;
+  checkWord();
+  selCells = [];
+  highlight();
 }
 
 function highlight(){
-  document.querySelectorAll(".cell").forEach(c=>{
-    const r=parseInt(c.dataset.r),col=parseInt(c.dataset.c);
-    const isSel=selCells.some(([sr,sc])=>sr===r&&sc===col);
-    c.classList.toggle("selecting",isSel);
-    for(let i=0;i<8;i++)c.classList.remove(`found-${i}`);
-    if(!isSel)
-      for(const[word,ci]of Object.entries(foundColors)){
-        const p=placed.find(p=>p.word===word);
-        if(p&&p.cells.some(([pr,pc])=>pr===r&&pc===col))c.classList.add(`found-${ci}`);
+  document.querySelectorAll(".cell").forEach(c => {
+    const r = parseInt(c.dataset.r);
+    const col = parseInt(c.dataset.c);
+    const isSel = selCells.some(([sr,sc]) => sr === r && sc === col);
+    c.classList.toggle("selecting", isSel);
+    for(let i = 0; i < 8; i++) c.classList.remove(`found-${i}`);
+    if(!isSel) {
+      for(const [word, ci] of Object.entries(foundColors)) {
+        const p = placed.find(p => p.word === word);
+        if(p && p.cells.some(([pr,pc]) => pr === r && pc === col)) {
+          c.classList.add(`found-${ci}`);
+        }
       }
+    }
   });
 }
 
 function applyFoundColors(){
-  document.querySelectorAll(".cell").forEach(c=>{
-    const r=parseInt(c.dataset.r),col=parseInt(c.dataset.c);
-    for(let i=0;i<8;i++)c.classList.remove(`found-${i}`);
-    for(const[word,ci]of Object.entries(foundColors)){
-      const p=placed.find(p=>p.word===word);
-      if(p&&p.cells.some(([pr,pc])=>pr===r&&pc===col))c.classList.add(`found-${ci}`);
+  document.querySelectorAll(".cell").forEach(c => {
+    const r = parseInt(c.dataset.r);
+    const col = parseInt(c.dataset.c);
+    for(let i = 0; i < 8; i++) c.classList.remove(`found-${i}`);
+    for(const [word, ci] of Object.entries(foundColors)) {
+      const p = placed.find(p => p.word === word);
+      if(p && p.cells.some(([pr,pc]) => pr === r && pc === col)) {
+        c.classList.add(`found-${ci}`);
+      }
     }
   });
 }
-/*
+
 function checkWord(){
-  const letters=selCells.map(([r,c])=>grid[r][c]).join("");
-  const rev=letters.split("").reverse().join("");
-  for(const{word,cells}of placed){
-    if(found.includes(word))continue;
-    if(letters===word||rev===word){
-      const ci=found.length%8;
-      found.push(word);foundColors[word]=ci;
-      const chip=document.getElementById(`chip-${word}`);
-      if(chip)chip.className="word-chip found";
+  const letters = selCells.map(([r,c]) => grid[r][c]).join("");
+  const rev = letters.split("").reverse().join("");
+  
+  for(const {word, cells} of placed) {
+    if(found.includes(word)) continue;
+    if(letters === word || rev === word) {
+      const ci = found.length % 8;
+      found.push(word);
+      foundColors[word] = ci;
+      
+      const chip = document.getElementById(`chip-${word}`);
+      if(chip) chip.className = "word-chip found";
       applyFoundColors();
-      const entry=DICT[word]||DICT[word.toUpperCase()];
-      const def=entry?`${entry.pos} ${entry.def}`:"A great word!";
-      showToast(word,def);
-      if(found.length===placed.length){
-        document.getElementById("win-msg").style.display="block";
-        document.getElementById("status").textContent="";
-        playWin();
+      
+      let def;
+      if(currentDefinitions && currentDefinitions[word]) {
+        def = currentDefinitions[word];
+      } else if(DICT[word]) {
+        def = `${DICT[word].pos} ${DICT[word].def}`;
       } else {
-        document.getElementById("status").textContent=`✓ Found: ${word}`;
+        def = "A wonderful word from your theme!";
+      }
+      showToast(word, def);
+      
+      if(found.length === placed.length) {
+        document.getElementById("win-msg").style.display = "block";
+        document.getElementById("status").textContent = "";
+        playWin();
+        stopAmbience();
+      } else {
+        document.getElementById("status").textContent = `✓ Found: ${word}`;
         playFound();
       }
       return;
     }
   }
-  document.getElementById("status").textContent="";
+  document.getElementById("status").textContent = "";
 }
-*/
-// 修改 checkWord 函数中的定义显示部分
-async function checkWord() {
-    const letters = selCells.map(([r,c])=>grid[r][c]).join("");
-    const rev = letters.split("").reverse().join("");
-    for(const {word,cells} of placed) {
-        if(found.includes(word)) continue;
-        if(letters === word || rev === word) {
-            const ci = found.length % 8;
-            found.push(word);
-            foundColors[word] = ci;
-            const chip = document.getElementById(`chip-${word}`);
-            if(chip) chip.className = "word-chip found";
-            applyFoundColors();
-            
-            // 优先使用 AI 定义，其次使用内置 DICT，最后用默认文本
-            let def;
-            if (currentDefinitions && currentDefinitions[word]) {
-                def = currentDefinitions[word];  // AI 返回的定义
-            } else if (DICT[word]) {
-                def = `${DICT[word].pos} ${DICT[word].def}`;  // 内置词典
-            } else {
-                def = "A wonderful word from your theme!";  // 降级
-            }
-            
-            showToast(word, def);
-            
-            if(found.length === placed.length) {
-                document.getElementById("win-msg").style.display = "block";
-                document.getElementById("status").textContent = "";
-                playWin();
-            } else {
-                document.getElementById("status").textContent = `✓ Found: ${word}`;
-                playFound();
-            }
-            return;
-        }
+
+function giveHint() {
+  if (!placed.length || found.length === placed.length) {
+    if (found.length === placed.length && placed.length > 0) {
+      showToast("🎉", "You already found all words! Click Next Level to continue!");
+    } else {
+      showToast("No words", "Loading or no words available yet");
     }
-    document.getElementById("status").textContent = "";
-}
-function resetSelection(){
-  found=[];foundColors={};
-  document.getElementById("win-msg").style.display="none";
-  document.getElementById("status").textContent="";
-  renderGrid();renderWordList();
-}
-/*
-async function loadNewTheme(){
-  const theme=document.getElementById("theme-select").value;
-  document.getElementById("theme-title").textContent=theme.toUpperCase();
-  document.getElementById("game-area").style.display="none";
-  document.getElementById("loading-overlay").innerHTML='<span class="spinner"></span>Fetching words...';
-  document.getElementById("loading-overlay").style.display="block";
-  let source="AI";
-  try{
-    words=await fetchWords(theme);
-    if(!words||words.length<4)throw new Error("few");
-  }catch(e){
-    words=[...(FALLBACK[theme]||FALLBACK.Dance)].sort(()=>Math.random()-.5);
-    source="built-in dictionary";
+    return;
   }
-  found=[];foundColors={};
-  makeGrid();
-  document.getElementById("loading-overlay").style.display="none";
-  document.getElementById("game-area").style.display="block";
-  document.getElementById("win-msg").style.display="none";
-  document.getElementById("status").textContent="";
-  document.getElementById("source-tag").textContent=`Words sourced from: ${source}`;
-  renderWordList();renderGrid();
+  
+  const unfound = placed.filter(p => !found.includes(p.word));
+  if (unfound.length === 0) {
+    showToast("Complete!", "All words found! Click Next Level!");
+    return;
+  }
+  
+  const hintWord = unfound[Math.floor(Math.random() * unfound.length)];
+  
+  for (const [r, c] of hintWord.cells) {
+    const cellDiv = document.querySelector(`.cell[data-r='${r}'][data-c='${c}']`);
+    if (cellDiv) {
+      cellDiv.classList.add('hint');
+      setTimeout(() => {
+        cellDiv.classList.remove('hint');
+      }, 1500);
+    }
+  }
+  
+  const def = currentDefinitions[hintWord.word] || 
+              (DICT[hintWord.word] ? `${DICT[hintWord.word].pos} ${DICT[hintWord.word].def}` : null) ||
+              "Try to find this word!";
+  showToast(`💡 Hint: ${hintWord.word}`, def);
+  playHint();
+}
+
+function resetSelection(){
+  found = [];
+  foundColors = {};
+  document.getElementById("win-msg").style.display = "none";
+  document.getElementById("status").textContent = "";
+  renderGrid();
+  renderWordList();
   startAmbience();
 }
-*/
-// 在全局变量区域添加
-let currentDefinitions = {};  // 存储当前主题的 AI 定义
 
-// 修改 loadNewTheme 函数
-async function loadNewTheme() {
-    const theme = document.getElementById("theme-select").value;
-    document.getElementById("theme-title").textContent = theme.toUpperCase();
-    document.getElementById("game-area").style.display = "none";
-    document.getElementById("loading-overlay").innerHTML = '<span class="spinner"></span>Fetching words...';
-    document.getElementById("loading-overlay").style.display = "block";
-    
-    let source = "AI";
-    let aiResult = null;
-    
-    try {
-        aiResult = await fetchWords(theme);
-        if (aiResult && aiResult.words && aiResult.words.length >= 4) {
-            words = aiResult.words;
-            currentDefinitions = aiResult.definitions;  // 保存 AI 返回的定义
-        } else {
-            throw new Error("AI returned insufficient words");
-        }
-    } catch(e) {
-        // AI 失败，使用内置词典作为 fallback
-        console.warn("Using fallback dictionary:", e);
-        words = [...(FALLBACK[theme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
-        currentDefinitions = {};  // 清空 AI 定义，将使用 DICT
-        source = "built-in dictionary";
-    }
-    
-    found = [];
-    foundColors = {};
-    makeGrid();
-    
-    document.getElementById("loading-overlay").style.display = "none";
-    document.getElementById("game-area").style.display = "block";
-    document.getElementById("win-msg").style.display = "none";
-    document.getElementById("status").textContent = "";
-    document.getElementById("source-tag").textContent = `Words sourced from: ${source}`;
-    
-    renderWordList();
-    renderGrid();
-    startAmbience();
-}
-loadNewTheme();
+// 启动游戏 - 使用随机主题并开始预加载
+loadNewRandomTheme(0);
 </script>
