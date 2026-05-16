@@ -1,48 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Word Search Relaxed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@400;500;600&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Quicksand',sans-serif;overflow-x:hidden}
-#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:1rem}
-#header{text-align:center;margin-bottom:.75rem}
-#theme-badge{display:inline-block;background:rgba(34,197,94,0.85);color:white;font-family:'Nunito',sans-serif;font-weight:900;font-size:12px;letter-spacing:2px;padding:3px 14px;border-radius:20px;margin-bottom:5px;backdrop-filter:blur(4px)}
-#theme-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:var(--color-text-primary);text-shadow:0 1px 8px rgba(255,255,255,0.4)}
-#word-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:.75rem;padding:8px 10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(8px);border-radius:12px;border:0.5px solid rgba(255,255,255,0.7)}
-.word-chip{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.8);border:1.5px solid rgba(200,220,200,0.8);color:#4a6a4a;transition:all .3s;cursor:default}
-.word-chip.found{background:rgba(187,247,208,0.9);border-color:#16a34a;color:#14532d;text-decoration:line-through}
-#grid-wrap{display:flex;justify-content:center;margin-bottom:.75rem}
-#grid{display:inline-grid;gap:3px;user-select:none;cursor:pointer}
-.cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;border-radius:8px;background:rgba(255,255,255,0.6);border:1.5px solid rgba(180,220,180,0.5);color:#2d4a2d;transition:background .12s,transform .1s;backdrop-filter:blur(3px)}
-.cell.selecting{background:#fef08a;border-color:#ca8a04;color:#713f12;transform:scale(1.1)}
-.cell.found-0{background:rgba(187,247,208,0.85);border-color:#16a34a;color:#14532d}
-.cell.found-1{background:rgba(191,219,254,0.85);border-color:#2563eb;color:#1e3a8a}
-.cell.found-2{background:rgba(254,205,170,0.85);border-color:#ea580c;color:#431407}
-.cell.found-3{background:rgba(233,213,255,0.85);border-color:#9333ea;color:#4a044e}
-.cell.found-4{background:rgba(165,243,252,0.85);border-color:#0891b2;color:#083344}
-.cell.found-5{background:rgba(254,215,170,0.85);border-color:#d97706;color:#451a03}
-.cell.found-6{background:rgba(249,168,212,0.85);border-color:#db2777;color:#500724}
-.cell.found-7{background:rgba(167,243,208,0.85);border-color:#059669;color:#064e3b}
-.cell.hint{animation:pulse 1s ease-in-out 3;background:rgba(251,191,36,0.9);border-color:#d97706;color:#78350f}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);background:rgba(245,158,11,0.95)}}
-#controls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
-button{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:7px 15px;border-radius:20px;border:1.5px solid rgba(180,220,180,0.8);background:rgba(255,255,255,0.65);color:#2d4a2d;cursor:pointer;transition:all .15s;backdrop-filter:blur(4px)}
-button:hover{background:rgba(255,255,255,0.9)}
-button.primary{background:rgba(34,197,94,0.8);border-color:#16a34a;color:white}
-button.primary:hover{background:rgba(22,163,74,0.9)}
-#status{text-align:center;font-size:13px;color:#4a6a6a;margin-bottom:6px;min-height:18px}
-#win-msg{display:none;text-align:center;background:rgba(220,252,231,0.9);border:1.5px solid #16a34a;border-radius:12px;padding:12px;margin-top:6px;color:#15803d;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;backdrop-filter:blur(6px)}
-#loading-overlay{text-align:center;padding:2rem;color:#4a6a4a;font-size:14px}
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(100,180,100,0.3);border-top-color:#22c55e;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:7px}
-@keyframes spin{to{transform:rotate(360deg)}}
-#source-tag{text-align:center;font-size:10px;color:#6a8a6a;margin-bottom:5px;font-style:italic}
-#next-badge{text-align:center;font-size:10px;color:#16a34a;margin-top:5px;font-weight:bold}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,40,20,0.88);color:#d1fae5;font-family:'Quicksand',sans-serif;font-size:13px;padding:10px 18px;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:999;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;max-width:280px;text-align:center;line-height:1.5}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast strong{display:block;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:#86efac;margin-bottom:3px}
-#mute-btn{position:fixed;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.55);border:1px solid rgba(180,220,180,0.7);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);font-size:15px;line-height:1;padding:0}
-</style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
-<canvas id="bg-canvas"></canvas>
+/* ── Light mode (default) ── */
+:root{
+  --cell-size:clamp(28px, 8vmin, 40px);
+  --gap:clamp(2px, 0.5vmin, 4px);
+  --font-cell:clamp(11px, 3.2vmin, 16px);
+
+  --bg-grad-a:hsl(125,40%,82%);
+  --bg-grad-b:hsl(150,35%,87%);
+  --bg-grad-c:hsl(170,38%,79%);
+  --color-text:#2d4a2d;
+  --color-text-sub:#4a6a6a;
+  --color-accent:#16a34a;
+  --color-accent-bg:rgba(34,197,94,.8);
+
+  --panel-bg:rgba(255,255,255,.5);
+  --panel-border:rgba(255,255,255,.7);
+  --chip-bg:rgba(255,255,255,.8);
+  --chip-border:rgba(200,220,200,.8);
+  --chip-color:#4a6a4a;
+  --chip-found-bg:rgba(187,247,208,.9);
+  --chip-found-border:#16a34a;
+  --chip-found-color:#14532d;
+
+  --cell-bg:rgba(255,255,255,.6);
+  --cell-border:rgba(180,220,180,.5);
+  --cell-color:#2d4a2d;
+
+  --btn-bg:rgba(255,255,255,.65);
+  --btn-border:rgba(180,220,180,.8);
+  --btn-color:#2d4a2d;
+
+  --win-bg:rgba(220,252,231,.92);
+  --win-border:#16a34a;
+  --win-color:#15803d;
+
+  --toast-bg:rgba(20,40,20,.88);
+  --toast-color:#d1fae5;
+  --toast-word-color:#86efac;
+
+  --mute-bg:rgba(255,255,255,.55);
+  --mute-border:rgba(180,220,180,.7);
+
+  --orb-color:rgba(255,255,255,.22);
+  --status-color:#4a6a6a;
+  --next-color:#16a34a;
+  --title-shadow:rgba(255,255,255,.5);
+}
+
+/* ── Dark mode ── */
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg-grad-a:hsl(145,30%,14%);
+    --bg-grad-b:hsl(160,25%,18%);
+    --bg-grad-c:hsl(175,28%,12%);
+    --color-text:#a7f3c2;
+    --color-text-sub:#6ab58a;
+    --color-accent:#22c55e;
+    --color-accent-bg:rgba(22,163,74,.85);
+
+    --panel-bg:rgba(0,30,15,.45);
+    --panel-border:rgba(50,120,70,.4);
+    --chip-bg:rgba(0,40,20,.7);
+    --chip-border:rgba(50,130,80,.5);
+    --chip-color:#86efac;
+    --chip-found-bg:rgba(20,83,45,.8);
+    --chip-found-border:#22c55e;
+    --chip-found-color:#4ade80;
+
+    --cell-bg:rgba(0,35,18,.65);
+    --cell-border:rgba(40,120,70,.4);
+    --cell-color:#a7f3c2;
+
+    --btn-bg:rgba(0,40,20,.6);
+    --btn-border:rgba(50,130,80,.6);
+    --btn-color:#86efac;
+
+    --win-bg:rgba(5,46,22,.88);
+    --win-border:#22c55e;
+    --win-color:#4ade80;
+
+    --toast-bg:rgba(2,20,10,.92);
+    --toast-color:#bbf7d0;
+    --toast-word-color:#4ade80;
+
+    --mute-bg:rgba(0,40,20,.6);
+    --mute-border:rgba(50,130,80,.5);
+
+    --orb-color:rgba(0,80,40,.18);
+    --status-color:#6ab58a;
+    --next-color:#22c55e;
+    --title-shadow:rgba(0,0,0,.4);
+  }
+}
+
+html,body{
+  width:100%;
+  height:100dvh; /* dynamic viewport — accounts for mobile browser chrome */
+  overflow:hidden;
+  font-family:'Quicksand',sans-serif;
+  background:var(--bg-grad-a);
+  touch-action:none;
+}
+
+/* Animated gradient background — CSS only, no canvas overhead */
+body::before{
+  content:'';
+  position:fixed;inset:0;z-index:0;
+  background:linear-gradient(135deg,var(--bg-grad-a) 0%,var(--bg-grad-b) 50%,var(--bg-grad-c) 100%);
+  animation:bgShift 8s ease-in-out infinite alternate;
+}
+@keyframes bgShift{
+  0%{filter:hue-rotate(0deg) brightness(1)}
+  100%{filter:hue-rotate(18deg) brightness(1.04)}
+}
+
+/* Floating orbs — replaces particle canvas */
+.orb{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,var(--orb-color) 0%,transparent 70%);
+  animation:float linear infinite;
+}
+@keyframes float{
+  0%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-20px) scale(1.05)}
+  66%{transform:translate(-15px,25px) scale(0.95)}
+  100%{transform:translate(0,0) scale(1)}
+}
+
+#app{
+  position:relative;z-index:1;
+  width:100%;
+  /* Use dvh so mobile browser chrome doesn't clip bottom */
+  height:100dvh;
+  display:flex;flex-direction:column;
+  padding:
+    max(env(safe-area-inset-top,0px),6px)
+    max(env(safe-area-inset-right,0px),6px)
+    max(env(safe-area-inset-bottom,0px),10px)
+    max(env(safe-area-inset-left,0px),6px);
+  gap:3px;
+  /* Allow flex children to shrink so nothing is clipped */
+  overflow:hidden;
+  min-height:0;
+}
+
+/* ── Header ── */
+#header{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  flex-shrink:0;
+  padding:4px 8px;
+}
+#theme-badge{
+  background:var(--color-accent-bg);color:#fff;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;letter-spacing:2px;
+  padding:2px 10px;border-radius:20px;
+  backdrop-filter:blur(4px);
+  flex-shrink:0;
+}
+#theme-title{
+  font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:clamp(16px,4.5vw,24px);
+  color:var(--color-text);
+  text-shadow:0 1px 8px var(--title-shadow);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ── Word list ── */
+#word-list{
+  display:flex;flex-wrap:wrap;gap:4px;justify-content:center;
+  flex-shrink:0;
+  padding:4px 8px;
+  background:var(--panel-bg);
+  backdrop-filter:blur(8px);
+  border-radius:10px;
+  border:.5px solid var(--panel-border);
+  max-height:72px;overflow-y:auto;
+}
+.word-chip{
+  font-family:'Nunito',sans-serif;font-weight:700;
+  font-size:clamp(10px,2.5vw,13px);
+  padding:2px 8px;border-radius:20px;
+  background:var(--chip-bg);border:1.5px solid var(--chip-border);
+  color:var(--chip-color);transition:all .25s;
+}
+.word-chip.found{
+  background:var(--chip-found-bg);border-color:var(--chip-found-border);color:var(--chip-found-color);
+  text-decoration:line-through;opacity:.75;
+}
+
+/* ── Grid area — takes all remaining space ── */
+#grid-wrap{
+  flex:1 1 auto;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  min-height:0;
+}
+#grid{
+  display:inline-grid;
+  gap:var(--gap);
+  user-select:none;
+  touch-action:none;
+  cursor:pointer;
+}
+
+/* Cell size is computed dynamically in JS; CSS sets appearance */
+.cell{
+  width:var(--cell-size);height:var(--cell-size);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;font-weight:800;
+  font-size:var(--font-cell);
+  border-radius:6px;
+  background:var(--cell-bg);
+  border:1.5px solid var(--cell-border);
+  color:var(--cell-color);
+  will-change:background-color,border-color;
+}
+.cell.selecting{background:#fef08a!important;border-color:#ca8a04!important;color:#713f12!important;transform:scale(1.08)}
+.cell.found-0{background:rgba(187,247,208,.85)!important;border-color:#16a34a!important;color:#14532d!important}
+.cell.found-1{background:rgba(191,219,254,.85)!important;border-color:#2563eb!important;color:#1e3a8a!important}
+.cell.found-2{background:rgba(254,205,170,.85)!important;border-color:#ea580c!important;color:#431407!important}
+.cell.found-3{background:rgba(233,213,255,.85)!important;border-color:#9333ea!important;color:#4a044e!important}
+.cell.found-4{background:rgba(165,243,252,.85)!important;border-color:#0891b2!important;color:#083344!important}
+.cell.found-5{background:rgba(254,215,170,.85)!important;border-color:#d97706!important;color:#451a03!important}
+.cell.found-6{background:rgba(249,168,212,.85)!important;border-color:#db2777!important;color:#500724!important}
+.cell.found-7{background:rgba(167,243,208,.85)!important;border-color:#059669!important;color:#064e3b!important}
+.cell.hint{animation:pulse .9s ease-in-out 3;background:rgba(251,191,36,.9)!important;border-color:#d97706!important;color:#78350f!important}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ── Controls ── */
+#controls{
+  display:flex;gap:6px;justify-content:center;flex-wrap:wrap;
+  flex-shrink:0;padding:2px 0;
+}
+button{
+  font-family:'Nunito',sans-serif;font-weight:700;
+  font-size:clamp(10px,2.5vw,12px);
+  padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--btn-border);
+  background:var(--btn-bg);
+  color:var(--btn-color);cursor:pointer;
+  backdrop-filter:blur(4px);
+  -webkit-tap-highlight-color:transparent;
+}
+button:active{opacity:.85;transform:scale(.97)}
+button.primary{background:var(--color-accent-bg);border-color:var(--color-accent);color:#fff}
+button.primary:active{opacity:.9}
+
+#status{
+  text-align:center;font-size:11px;color:var(--status-color);
+  flex-shrink:0;min-height:14px;line-height:1.2;
+}
+
+/* ── Win message — overlays grid-wrap so it doesn't push controls off-screen ── */
+#win-msg{
+  display:none;
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  z-index:20;
+  white-space:nowrap;
+  text-align:center;
+  background:var(--win-bg);border:1.5px solid var(--win-border);
+  border-radius:16px;padding:14px 20px;
+  color:var(--win-color);font-family:'Nunito',sans-serif;font-weight:800;
+  font-size:clamp(13px,3.5vw,16px);
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:max(env(safe-area-inset-bottom,16px),16px);
+  left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--toast-bg);color:var(--toast-color);
+  font-family:'Quicksand',sans-serif;font-size:12px;
+  padding:9px 16px;border-radius:14px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 4px 24px rgba(0,0,0,.25);
+  z-index:999;opacity:0;
+  transition:opacity .3s,transform .3s;
+  pointer-events:none;max-width:min(280px,90vw);
+  text-align:center;line-height:1.5;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast strong{display:block;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;color:var(--toast-word-color);margin-bottom:2px}
+
+/* ── Mute button ── */
+#mute-btn{
+  position:fixed;top:max(env(safe-area-inset-top,8px),8px);right:10px;z-index:10;
+  background:var(--mute-bg);border:1px solid var(--mute-border);
+  border-radius:50%;width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;backdrop-filter:blur(4px);font-size:14px;padding:0;
+}
+
+/* ── Loading overlay ── */
+#loading-overlay{
+  position:absolute;inset:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.08);backdrop-filter:blur(6px);
+  font-family:'Nunito',sans-serif;font-weight:700;
+  color:var(--color-text);font-size:15px;gap:8px;
+  border-radius:12px;
+}
+.spinner{
+  width:18px;height:18px;
+  border:2px solid rgba(100,180,100,.3);
+  border-top-color:var(--color-accent);
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#next-badge{text-align:center;font-size:10px;color:var(--next-color);flex-shrink:0;min-height:12px;line-height:1.2}
+
+/* ── Landscape adjustments ── */
+@media (orientation:landscape) and (max-height:500px){
+  #app{flex-direction:row;flex-wrap:wrap;padding:4px 6px;gap:4px}
+  #header{width:100%;margin:0}
+  #word-list{max-height:none;flex:0 0 130px;flex-direction:column;align-items:flex-start;overflow-y:auto;align-self:flex-start;max-height:calc(100dvh - 80px)}
+  #grid-wrap{flex:1;height:calc(100dvh - 80px)}
+  #controls{flex:0 0 130px;flex-direction:column;align-items:stretch;align-self:flex-end}
+  #status,#win-msg,#next-badge{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- Decorative orbs (CSS animation — zero JS overhead) -->
+<div class="orb" style="width:220px;height:220px;top:-60px;left:-60px;animation-duration:18s"></div>
+<div class="orb" style="width:160px;height:160px;bottom:-40px;right:-30px;animation-duration:22s;animation-delay:-7s"></div>
+<div class="orb" style="width:100px;height:100px;top:40%;left:70%;animation-duration:15s;animation-delay:-4s"></div>
+
 <button id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
 <div id="toast"><strong id="toast-word"></strong><span id="toast-def"></span></div>
 
@@ -51,707 +348,337 @@ button.primary:hover{background:rgba(22,163,74,0.9)}
     <div id="theme-badge">WORD SEARCH</div>
     <div id="theme-title">Loading...</div>
   </div>
-  <div id="loading-overlay"><span class="spinner"></span>Getting ready...</div>
-  <div id="game-area" style="display:none">
-    <div id="word-list"></div>
-    <div id="source-tag"></div>
-    <div id="status"></div>
-    <div id="grid-wrap"><div id="grid"></div></div>
-    <div id="win-msg">
-      🎉 You found all the words! Well done!
-      <div style="margin-top:8px">
-        <button onclick="loadNextLevel()" style="background:#16a34a;color:white;border:none;padding:5px 15px;font-size:12px">Next Level →</button>
-      </div>
-    </div>
-    <div id="controls">
-      <button onclick="resetSelection()">Restart Level</button>
-      <button onclick="giveHint()">💡 Hint</button>
-    </div>
-    <div id="next-badge"></div>
+
+  <div id="word-list"></div>
+  <div id="status"></div>
+
+  <div id="grid-wrap" style="position:relative">
+    <div id="loading-overlay"><div class="spinner"></div>Getting ready...</div>
+    <div id="grid" style="display:none"></div>
   </div>
+
+  <div id="win-msg">
+    🎉 You found all the words! Well done!
+    <div style="margin-top:6px">
+      <button class="primary" onclick="loadNextLevel()">Next Level →</button>
+    </div>
+  </div>
+
+  <div id="controls" style="display:none">
+    <button onclick="resetSelection()">↺ Restart</button>
+    <button onclick="giveHint()">💡 Hint</button>
+  </div>
+
+  <div id="next-badge"></div>
 </div>
 
 <script>
-/* ── Embedded mini-dictionary (fallback only) ── */
-const DICT = {
-  BALLET:{pos:"n.",def:"Classical dance form with precise, graceful movements"},
-  SALSA:{pos:"n.",def:"Lively Latin dance of Cuban origin"},
-  TANGO:{pos:"n.",def:"Passionate Argentine partner dance with dramatic pauses"},
-  WALTZ:{pos:"n.",def:"Smooth ballroom dance in triple time"},
-  SWING:{pos:"n.",def:"Energetic jazz-based dance from the 1930s"},
-  FOXTROT:{pos:"n.",def:"Ballroom dance with slow and quick steps"},
-  JIVE:{pos:"n.",def:"Fast, lively dance associated with rock and roll"},
-  SAMBA:{pos:"n.",def:"Brazilian carnival dance with a syncopated rhythm"},
-  RUMBA:{pos:"n.",def:"Cuban dance known for hip movements"},
-  POLKA:{pos:"n.",def:"Fast Bohemian dance in duple time"},
-  LION:{pos:"n.",def:"Large African big cat; the 'king of beasts'"},
-  TIGER:{pos:"n.",def:"Largest wild cat, known for its striped coat"},
-  ELEPHANT:{pos:"n.",def:"Largest land animal with a long trunk and tusks"},
-  GIRAFFE:{pos:"n.",def:"Tallest living animal with an exceptionally long neck"},
-  ZEBRA:{pos:"n.",def:"African equid with distinctive black-and-white stripes"},
-  PENGUIN:{pos:"n.",def:"Flightless seabird native to the Southern Hemisphere"},
-  DOLPHIN:{pos:"n.",def:"Highly intelligent marine mammal that lives in groups"},
-  EAGLE:{pos:"n.",def:"Large bird of prey with keen eyesight and powerful wings"},
-  WOLF:{pos:"n.",def:"Social carnivorous mammal that hunts in packs"},
-  PANDA:{pos:"n.",def:"Bear native to China, known for eating bamboo"},
-  FRANCE:{pos:"n.",def:"Country in Western Europe, capital Paris"},
-  BRAZIL:{pos:"n.",def:"Largest country in South America"},
-  JAPAN:{pos:"n.",def:"Island nation in East Asia known for its culture"},
-  INDIA:{pos:"n.",def:"South Asian nation, world's most populous country"},
-  EGYPT:{pos:"n.",def:"North African country famous for ancient pyramids"},
-  CANADA:{pos:"n.",def:"World's second-largest country, north of the USA"},
-  ITALY:{pos:"n.",def:"Mediterranean country shaped like a boot"},
-  PERU:{pos:"n.",def:"South American country, home of Machu Picchu"},
-  SPAIN:{pos:"n.",def:"Iberian Peninsula country known for flamenco"},
-  KENYA:{pos:"n.",def:"East African nation known for the Great Rift Valley"},
-  SOCCER:{pos:"n.",def:"World's most popular sport, played with a round ball"},
-  TENNIS:{pos:"n.",def:"Racket sport played on a court divided by a net"},
-  RUGBY:{pos:"n.",def:"Team sport played with an oval ball, full contact"},
-  BOXING:{pos:"n.",def:"Combat sport where two fighters punch each other"},
-  CRICKET:{pos:"n.",def:"Bat-and-ball game popular in Commonwealth nations"},
-  HOCKEY:{pos:"n.",def:"Sport played on ice or grass with a stick and puck"},
-  GOLF:{pos:"n.",def:"Sport of hitting a ball into holes using clubs"},
-  SWIM:{pos:"v.",def:"To move through water using the body"},
-  ROWING:{pos:"n.",def:"Sport of propelling a boat with oars"},
-  CYCLING:{pos:"n.",def:"Sport or activity of riding a bicycle"},
-  APPLE:{pos:"n.",def:"Round fruit with red, green or yellow skin"},
-  MANGO:{pos:"n.",def:"Sweet tropical fruit with yellow flesh and a stone"},
-  GRAPE:{pos:"n.",def:"Small sweet fruit growing in clusters on a vine"},
-  PEACH:{pos:"n.",def:"Soft juicy fruit with fuzzy golden-red skin"},
-  LEMON:{pos:"n.",def:"Sour yellow citrus fruit rich in vitamin C"},
-  MELON:{pos:"n.",def:"Large sweet fruit with thick rind and juicy flesh"},
-  PAPAYA:{pos:"n.",def:"Tropical fruit with orange flesh and black seeds"},
-  PLUM:{pos:"n.",def:"Small oval fruit with smooth skin and sweet flesh"},
-  GUAVA:{pos:"n.",def:"Tropical fruit with pink flesh and a sweet aroma"},
-  KIWI:{pos:"n.",def:"Small brown fruit with bright green flesh and tiny seeds"},
-  MARS:{pos:"n.",def:"The fourth planet from the Sun; the Red Planet"},
-  VENUS:{pos:"n.",def:"Hottest planet in the solar system, second from the Sun"},
-  SATURN:{pos:"n.",def:"Sixth planet, famous for its beautiful ring system"},
-  EARTH:{pos:"n.",def:"Our home planet; the only known planet with life"},
-  URANUS:{pos:"n.",def:"Seventh planet, rotates on its side"},
-  NEPTUNE:{pos:"n.",def:"Eighth and farthest planet in the solar system"},
-  MOON:{pos:"n.",def:"Earth's only natural satellite"},
-  SUN:{pos:"n.",def:"The star at the centre of our solar system"},
-  COMET:{pos:"n.",def:"Icy body that develops a tail when near the Sun"},
-  NEBULA:{pos:"n.",def:"Cloud of gas and dust in outer space"},
-  PIANO:{pos:"n.",def:"Keyboard instrument with hammers striking strings"},
-  GUITAR:{pos:"n.",def:"Six-stringed instrument plucked or strummed"},
-  VIOLIN:{pos:"n.",def:"Bowed string instrument with a high, rich tone"},
-  FLUTE:{pos:"n.",def:"Wind instrument played by blowing across a hole"},
-  DRUMS:{pos:"n.",def:"Percussion instruments struck to create rhythm"},
-  CELLO:{pos:"n.",def:"Large bowed string instrument with deep warm tones"},
-  HARP:{pos:"n.",def:"Large plucked string instrument with a triangular frame"},
-  LUTE:{pos:"n.",def:"Ancient plucked string instrument with a pear-shaped body"},
-  OBOE:{pos:"n.",def:"Double-reed woodwind with a distinctive nasal tone"},
-  BANJO:{pos:"n.",def:"Plucked string instrument with a circular drum body"},
-  RED:{pos:"adj.",def:"Colour of blood and ripe cherries; a primary colour"},
-  BLUE:{pos:"adj.",def:"Colour of the sky and sea; a primary colour"},
-  GREEN:{pos:"adj.",def:"Colour of grass and leaves; mixed from blue and yellow"},
-  YELLOW:{pos:"adj.",def:"Bright colour of the sun; a primary colour"},
-  ORANGE:{pos:"adj.",def:"Warm colour between red and yellow"},
-  PURPLE:{pos:"adj.",def:"Deep colour between red and blue"},
-  PINK:{pos:"adj.",def:"Light, warm colour; pale red"},
-  TEAL:{pos:"adj.",def:"Blue-green colour resembling the teal duck"},
-  CORAL:{pos:"adj.",def:"Warm pinkish-orange colour"},
-  AMBER:{pos:"adj.",def:"Warm golden-yellow colour like fossilised resin"},
-  WHALE:{pos:"n.",def:"Largest animal on Earth; a marine mammal"},
-  SHARK:{pos:"n.",def:"Cartilaginous fish known for sharp teeth and speed"},
-  CORAL2:{pos:"n.",def:"Marine invertebrates that build reef structures"},
-  KELP:{pos:"n.",def:"Large brown seaweed forming underwater forests"},
-  SQUID:{pos:"n.",def:"Ten-limbed marine mollusc capable of squirting ink"},
-  OCTOPUS:{pos:"n.",def:"Eight-armed intelligent mollusc of the deep sea"},
-  SEAL:{pos:"n.",def:"Marine mammal with flippers; excellent swimmer"},
-  TIDE:{pos:"n.",def:"Rise and fall of sea levels due to lunar gravity"},
-  REEF:{pos:"n.",def:"Ridge of coral near the ocean surface"},
-  WAVE:{pos:"n.",def:"Ridge of water moving across the ocean surface"},
-  RAIN:{pos:"n.",def:"Water falling from clouds in liquid drops"},
-  SNOW:{pos:"n.",def:"Frozen water that falls as white crystalline flakes"},
-  STORM:{pos:"n.",def:"Violent weather with strong wind, rain or thunder"},
-  CLOUD:{pos:"n.",def:"Visible mass of water droplets floating in the sky"},
-  FROST:{pos:"n.",def:"Thin layer of ice that forms on cold surfaces"},
-  HAIL:{pos:"n.",def:"Frozen rain that falls as small balls of ice"},
-  FOG:{pos:"n.",def:"Thick mist close to the ground reducing visibility"},
-  WIND:{pos:"n.",def:"Natural movement of air from high to low pressure"},
-  SLEET:{pos:"n.",def:"Rain mixed with snow or partially melted snowflakes"},
-  THUNDER:{pos:"n.",def:"Loud sound caused by lightning heating the air rapidly"}
-};
+/* ════════════════════════════════════════════
+   DICTIONARY (fallback)
+════════════════════════════════════════════ */
+const DICT={BALLET:{pos:"n.",def:"Classical dance form with precise, graceful movements"},SALSA:{pos:"n.",def:"Lively Latin dance of Cuban origin"},TANGO:{pos:"n.",def:"Passionate Argentine partner dance with dramatic pauses"},WALTZ:{pos:"n.",def:"Smooth ballroom dance in triple time"},SWING:{pos:"n.",def:"Energetic jazz-based dance from the 1930s"},FOXTROT:{pos:"n.",def:"Ballroom dance with slow and quick steps"},JIVE:{pos:"n.",def:"Fast, lively dance associated with rock and roll"},SAMBA:{pos:"n.",def:"Brazilian carnival dance with a syncopated rhythm"},RUMBA:{pos:"n.",def:"Cuban dance known for hip movements"},POLKA:{pos:"n.",def:"Fast Bohemian dance in duple time"},LION:{pos:"n.",def:"Large African big cat; the king of beasts"},TIGER:{pos:"n.",def:"Largest wild cat, known for its striped coat"},ELEPHANT:{pos:"n.",def:"Largest land animal with a long trunk and tusks"},GIRAFFE:{pos:"n.",def:"Tallest living animal with an exceptionally long neck"},ZEBRA:{pos:"n.",def:"African equid with distinctive black-and-white stripes"},PENGUIN:{pos:"n.",def:"Flightless seabird native to the Southern Hemisphere"},DOLPHIN:{pos:"n.",def:"Highly intelligent marine mammal"},EAGLE:{pos:"n.",def:"Large bird of prey with keen eyesight"},WOLF:{pos:"n.",def:"Social carnivorous mammal that hunts in packs"},PANDA:{pos:"n.",def:"Bear native to China, known for eating bamboo"},FRANCE:{pos:"n.",def:"Country in Western Europe, capital Paris"},BRAZIL:{pos:"n.",def:"Largest country in South America"},JAPAN:{pos:"n.",def:"Island nation in East Asia"},INDIA:{pos:"n.",def:"South Asian nation, world's most populous country"},EGYPT:{pos:"n.",def:"North African country famous for ancient pyramids"},CANADA:{pos:"n.",def:"World's second-largest country, north of the USA"},ITALY:{pos:"n.",def:"Mediterranean country shaped like a boot"},PERU:{pos:"n.",def:"South American country, home of Machu Picchu"},SPAIN:{pos:"n.",def:"Iberian Peninsula country known for flamenco"},KENYA:{pos:"n.",def:"East African nation known for the Great Rift Valley"},SOCCER:{pos:"n.",def:"World's most popular sport, played with a round ball"},TENNIS:{pos:"n.",def:"Racket sport played on a court divided by a net"},RUGBY:{pos:"n.",def:"Team sport played with an oval ball"},BOXING:{pos:"n.",def:"Combat sport where two fighters punch each other"},CRICKET:{pos:"n.",def:"Bat-and-ball game popular in Commonwealth nations"},HOCKEY:{pos:"n.",def:"Sport played on ice or grass with stick and puck"},GOLF:{pos:"n.",def:"Sport of hitting a ball into holes using clubs"},SWIM:{pos:"v.",def:"To move through water using the body"},ROWING:{pos:"n.",def:"Sport of propelling a boat with oars"},CYCLING:{pos:"n.",def:"Sport or activity of riding a bicycle"},APPLE:{pos:"n.",def:"Round fruit with red, green or yellow skin"},MANGO:{pos:"n.",def:"Sweet tropical fruit with yellow flesh"},GRAPE:{pos:"n.",def:"Small sweet fruit growing in clusters on a vine"},PEACH:{pos:"n.",def:"Soft juicy fruit with fuzzy golden-red skin"},LEMON:{pos:"n.",def:"Sour yellow citrus fruit rich in vitamin C"},MELON:{pos:"n.",def:"Large sweet fruit with thick rind"},PAPAYA:{pos:"n.",def:"Tropical fruit with orange flesh and black seeds"},PLUM:{pos:"n.",def:"Small oval fruit with smooth skin"},GUAVA:{pos:"n.",def:"Tropical fruit with pink flesh and a sweet aroma"},KIWI:{pos:"n.",def:"Small brown fruit with bright green flesh"},MARS:{pos:"n.",def:"The fourth planet from the Sun; the Red Planet"},VENUS:{pos:"n.",def:"Hottest planet, second from the Sun"},SATURN:{pos:"n.",def:"Sixth planet, famous for its ring system"},EARTH:{pos:"n.",def:"Our home planet; the only known planet with life"},URANUS:{pos:"n.",def:"Seventh planet, rotates on its side"},NEPTUNE:{pos:"n.",def:"Eighth and farthest planet in the solar system"},MOON:{pos:"n.",def:"Earth's only natural satellite"},SUN:{pos:"n.",def:"The star at the centre of our solar system"},COMET:{pos:"n.",def:"Icy body that develops a tail when near the Sun"},NEBULA:{pos:"n.",def:"Cloud of gas and dust in outer space"},PIANO:{pos:"n.",def:"Keyboard instrument with hammers striking strings"},GUITAR:{pos:"n.",def:"Six-stringed instrument plucked or strummed"},VIOLIN:{pos:"n.",def:"Bowed string instrument with a high, rich tone"},FLUTE:{pos:"n.",def:"Wind instrument played by blowing across a hole"},DRUMS:{pos:"n.",def:"Percussion instruments struck to create rhythm"},CELLO:{pos:"n.",def:"Large bowed string instrument with deep warm tones"},HARP:{pos:"n.",def:"Large plucked string instrument with triangular frame"},LUTE:{pos:"n.",def:"Ancient plucked string instrument, pear-shaped body"},OBOE:{pos:"n.",def:"Double-reed woodwind with a distinctive nasal tone"},BANJO:{pos:"n.",def:"Plucked string instrument with a circular drum body"},RED:{pos:"adj.",def:"Colour of blood and ripe cherries; a primary colour"},BLUE:{pos:"adj.",def:"Colour of the sky and sea; a primary colour"},GREEN:{pos:"adj.",def:"Colour of grass and leaves"},YELLOW:{pos:"adj.",def:"Bright colour of the sun; a primary colour"},ORANGE:{pos:"adj.",def:"Warm colour between red and yellow"},PURPLE:{pos:"adj.",def:"Deep colour between red and blue"},PINK:{pos:"adj.",def:"Light, warm colour; pale red"},TEAL:{pos:"adj.",def:"Blue-green colour resembling the teal duck"},CORAL:{pos:"adj.",def:"Warm pinkish-orange colour"},AMBER:{pos:"adj.",def:"Warm golden-yellow colour like fossilised resin"},WHALE:{pos:"n.",def:"Largest animal on Earth; a marine mammal"},SHARK:{pos:"n.",def:"Cartilaginous fish known for sharp teeth"},SQUID:{pos:"n.",def:"Ten-limbed marine mollusc"},OCTOPUS:{pos:"n.",def:"Eight-armed intelligent mollusc of the deep sea"},SEAL:{pos:"n.",def:"Marine mammal with flippers; excellent swimmer"},TIDE:{pos:"n.",def:"Rise and fall of sea levels due to lunar gravity"},REEF:{pos:"n.",def:"Ridge of coral near the ocean surface"},WAVE:{pos:"n.",def:"Ridge of water moving across the ocean surface"},RAIN:{pos:"n.",def:"Water falling from clouds in liquid drops"},SNOW:{pos:"n.",def:"Frozen water that falls as white crystalline flakes"},STORM:{pos:"n.",def:"Violent weather with strong wind and rain"},CLOUD:{pos:"n.",def:"Visible mass of water droplets floating in the sky"},FROST:{pos:"n.",def:"Thin layer of ice that forms on cold surfaces"},HAIL:{pos:"n.",def:"Frozen rain that falls as small balls of ice"},FOG:{pos:"n.",def:"Thick mist close to the ground"},WIND:{pos:"n.",def:"Natural movement of air from high to low pressure"},SLEET:{pos:"n.",def:"Rain mixed with snow or partially melted snowflakes"},THUNDER:{pos:"n.",def:"Loud sound caused by lightning heating air"}};
 
+const ALL_THEMES=["Dance","Animals","Countries","Sports","Fruits","Space","Instruments","Colours","Ocean","Weather","Movies","Music","Technology","Nature","Transport"];
+const FALLBACK={Dance:["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"],Animals:["LION","TIGER","ELEPHANT","GIRAFFE","ZEBRA","PENGUIN","DOLPHIN","EAGLE"],Countries:["FRANCE","BRAZIL","JAPAN","INDIA","EGYPT","CANADA","ITALY","PERU"],Sports:["SOCCER","TENNIS","RUGBY","BOXING","CRICKET","HOCKEY","GOLF","SWIM"],Fruits:["APPLE","MANGO","GRAPE","PEACH","LEMON","MELON","PAPAYA","PLUM"],Space:["MARS","VENUS","SATURN","EARTH","URANUS","NEPTUNE","MOON","COMET"],Instruments:["PIANO","GUITAR","VIOLIN","FLUTE","DRUMS","CELLO","HARP","OBOE"],Colours:["RED","BLUE","GREEN","YELLOW","ORANGE","PURPLE","PINK","TEAL"],Ocean:["WHALE","SHARK","SQUID","OCTOPUS","SEAL","TIDE","REEF","WAVE"],Weather:["RAIN","SNOW","STORM","CLOUD","FROST","HAIL","FOG","WIND"]};
 
-/* ── Available themes (for random selection) ── */
-const ALL_THEMES = [
-  "Dance", "Animals", "Countries", "Sports", "Fruits", 
-  "Space", "Instruments", "Colours", "Ocean", "Weather",
-  "Movies", "Music", "Technology", "Nature", "Transport"
-];
-
-/* ── Fallback word sets ── */
-const FALLBACK = {
-  Dance:["BALLET","SALSA","TANGO","WALTZ","SWING","FOXTROT","JIVE","SAMBA"],
-  Animals:["LION","TIGER","ELEPHANT","GIRAFFE","ZEBRA","PENGUIN","DOLPHIN","EAGLE"],
-  Countries:["FRANCE","BRAZIL","JAPAN","INDIA","EGYPT","CANADA","ITALY","PERU"],
-  Sports:["SOCCER","TENNIS","RUGBY","BOXING","CRICKET","HOCKEY","GOLF","SWIM"],
-  Fruits:["APPLE","MANGO","GRAPE","PEACH","LEMON","MELON","PAPAYA","PLUM"],
-  Space:["MARS","VENUS","SATURN","EARTH","URANUS","NEPTUNE","MOON","COMET"],
-  Instruments:["PIANO","GUITAR","VIOLIN","FLUTE","DRUMS","CELLO","HARP","OBOE"],
-  Colours:["RED","BLUE","GREEN","YELLOW","ORANGE","PURPLE","PINK","TEAL"],
-  Ocean:["WHALE","SHARK","SQUID","OCTOPUS","SEAL","TIDE","REEF","WAVE"],
-  Weather:["RAIN","SNOW","STORM","CLOUD","FROST","HAIL","FOG","WIND"],
-};
-
-/* ── Audio engine ── */
-let audioCtx = null, muted = false;
+/* ════════════════════════════════════════════
+   AUDIO
+════════════════════════════════════════════ */
+let audioCtx=null,muted=false;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
-function playTone(freq,dur,type='sine',vol=0.08){
-  if(muted)return;
-  try{
-    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);
-    o.type=type;o.frequency.value=freq;
-    g.gain.setValueAtTime(0,c.currentTime);
-    g.gain.linearRampToValueAtTime(vol,c.currentTime+0.04);
-    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
-    o.start(c.currentTime);o.stop(c.currentTime+dur);
-  }catch(e){}
-}
+function playTone(freq,dur,type='sine',vol=0.08){if(muted)return;try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(vol,c.currentTime+0.04);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
 function playFound(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.25,'sine',.1),i*100))}
 function playWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.4,'sine',.12),i*120))}
 function playSelect(){playTone(880,.05,'sine',.04)}
 function playHint(){[523,523,659,659].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'sine',.08),i*120))}
-
 let ambInterval=null;
-function startAmbience(){
-  if(muted||ambInterval)return;
-  const notes=[261,294,329,349,392,440,494,523];
-  ambInterval=setInterval(()=>{
-    if(muted)return;
-    const f=notes[Math.floor(Math.random()*notes.length)];
-    playTone(f,1.5,'sine',0.03);
-  },2200);
-}
+function startAmbience(){if(muted||ambInterval)return;const notes=[261,294,329,349,392,440,494,523];ambInterval=setInterval(()=>{if(muted)return;playTone(notes[Math.floor(Math.random()*notes.length)],1.5,'sine',0.03)},2200)}
 function stopAmbience(){clearInterval(ambInterval);ambInterval=null}
-function toggleMute(){
-  muted=!muted;
-  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
-  if(!muted)startAmbience(); else stopAmbience();
-}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';if(!muted)startAmbience();else stopAmbience()}
 
-/* ── Background canvas ── */
-const cvs=document.getElementById('bg-canvas');
-const ctx2=cvs.getContext('2d');
-let W,H,particles=[];
-function resizeCvs(){W=cvs.width=window.innerWidth;H=cvs.height=window.innerHeight}
-resizeCvs();window.addEventListener('resize',()=>{resizeCvs();initParticles()});
-
-function initParticles(){
-  particles=Array.from({length:38},()=>({
-    x:Math.random()*W,y:Math.random()*H,
-    r:1+Math.random()*3,
-    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
-    alpha:0.08+Math.random()*0.18,
-    hue:120+Math.random()*60
-  }));
-}
-initParticles();
-
-let t=0;
-function drawBg(){
-  t+=0.003;
-  const g=ctx2.createLinearGradient(0,0,W,H);
-  const h1=120+Math.sin(t)*20, h2=160+Math.cos(t*.7)*20;
-  g.addColorStop(0,`hsl(${h1},45%,82%)`);
-  g.addColorStop(.5,`hsl(${(h1+h2)/2},35%,88%)`);
-  g.addColorStop(1,`hsl(${h2},40%,78%)`);
-  ctx2.fillStyle=g;
-  ctx2.fillRect(0,0,W,H);
-  particles.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
-    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-    ctx2.beginPath();
-    ctx2.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx2.fillStyle=`hsla(${p.hue},60%,60%,${p.alpha})`;
-    ctx2.fill();
-  });
-  requestAnimationFrame(drawBg);
-}
-drawBg();
-
-/* ── Toast ── */
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
 let toastTimer=null;
 function showToast(word,def){
   const t=document.getElementById('toast');
   document.getElementById('toast-word').textContent=word;
-  let formattedDef = (def || "Great word!").trim();
-  if (formattedDef && !formattedDef.endsWith('.') && !formattedDef.endsWith('!') && !formattedDef.endsWith('?')) {
-    formattedDef += '.';
-  }
-  if (formattedDef) {
-    formattedDef = formattedDef.charAt(0).toUpperCase() + formattedDef.slice(1);
-  }
-  document.getElementById('toast-def').textContent = formattedDef;
+  let d=(def||'Great word!').trim();
+  if(d&&!/[.!?]$/.test(d))d+='.';
+  d=d.charAt(0).toUpperCase()+d.slice(1);
+  document.getElementById('toast-def').textContent=d;
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-/* ── Word search logic ── */
+/* ════════════════════════════════════════════
+   GRID LOGIC
+════════════════════════════════════════════ */
 const GRID_SIZE=11;
 const DIRS=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
 let grid=[],words=[],placed=[],found=[],foundColors={},currentDefinitions={};
 let selecting=false,selStart=null,selCells=[];
+let cellEls=[]; // flat array cache [r*GRID_SIZE+c]
 
-// 预加载数据
-let preloadedLevel = null;
-let isPreloading = false;
-let currentTheme = "";
-
-// AI 获取单词和定义
-async function fetchWords(theme){
-    const prompt = `Give me exactly 8 words related to the theme: "${theme}". 
-Rules: 
-- Each word: 3-8 letters, UPPERCASE, no spaces/hyphens, all different, common words
-- For each word, provide a short definition (one sentence, 5-15 words)
-
-Return ONLY a JSON array where each element has: {"word": "WORD", "def": "Short definition"}
-Example: [{"word":"BALLET","def":"Classical dance form with precise movements"},{"word":"SALSA","def":"Lively Latin dance of Cuban origin"}]
-
-Return ONLY the JSON array, no other text.`;
-    
-    try {
-        const res = await fetch("https://text.pollinations.ai/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                model: "openai",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 800
-            })
-        });
-
-        if (!res.ok) throw new Error("API 请求失败");
-        const data = await res.json();
-        const text = data.choices[0].message.content;
-        const cleanedText = text.replace(/```json|```/g, "").trim();
-        const wordDefArray = JSON.parse(cleanedText);
-        
-        const words = [];
-        const definitions = {};
-        
-        for (const item of wordDefArray) {
-            const word = item.word.toUpperCase().replace(/[^A-Z]/g, "");
-            const def = item.def || "A great word!";
-            if (word.length >= 3 && word.length <= 8) {
-                words.push(word);
-                definitions[word] = def;
-            }
-        }
-        
-        if (words.length < 4) throw new Error("Not enough words");
-        return { words: words.slice(0, 8), definitions: definitions, theme: theme };
-    } catch (error) {
-        console.error("获取单词失败:", error);
-        return null;
-    }
+/* Compute ideal cell size from available container space */
+function computeCellSize(){
+  const wrap=document.getElementById('grid-wrap');
+  const W=wrap.clientWidth-8;
+  const H=wrap.clientHeight-8;
+  const byW=Math.floor((W-(GRID_SIZE-1)*3)/GRID_SIZE);
+  const byH=Math.floor((H-(GRID_SIZE-1)*3)/GRID_SIZE);
+  const sz=Math.max(22,Math.min(byW,byH,42));
+  document.documentElement.style.setProperty('--cell-size',sz+'px');
+  document.documentElement.style.setProperty('--font-cell',Math.round(sz*0.45)+'px');
+  document.documentElement.style.setProperty('--gap', sz>30 ? '3px' : '2px');
+  return sz;
 }
 
-// 预加载下一关
-async function preloadNextLevel(currentThemeName) {
-  if (isPreloading) return;
-  isPreloading = true;
-  
-  // 随机选择下一个主题（不与当前相同）
-  let availableThemes = ALL_THEMES.filter(t => t !== currentThemeName);
-  if (availableThemes.length === 0) availableThemes = [...ALL_THEMES];
-  const nextTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
-  
-  try {
-    const result = await fetchWords(nextTheme);
-    if (result && result.words && result.words.length >= 4) {
-      preloadedLevel = result;
-      document.getElementById("next-badge").innerHTML = `✨ Next: ${nextTheme} (ready) ✨`;
-    } else {
-      // 使用 fallback
-      preloadedLevel = {
-        words: [...(FALLBACK[nextTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5),
-        definitions: {},
-        theme: nextTheme
-      };
-      document.getElementById("next-badge").innerHTML = `📚 Next: ${nextTheme} (from dictionary)`;
-    }
-  } catch (e) {
-    console.warn("Preload failed, using fallback");
-    preloadedLevel = {
-      words: [...(FALLBACK[nextTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5),
-      definitions: {},
-      theme: nextTheme
-    };
-    document.getElementById("next-badge").innerHTML = `📚 Next: ${nextTheme} (ready)`;
-  }
-  isPreloading = false;
-}
-
-// 加载下一关
-async function loadNextLevel() {
-  if (!preloadedLevel) {
-    // 如果没有预加载，立即加载
-    await loadNewRandomTheme(1);
-    return;
-  }
-  
-  // 使用预加载的数据
-  currentTheme = preloadedLevel.theme;
-  words = preloadedLevel.words;
-  currentDefinitions = preloadedLevel.definitions;
-  found = [];
-  foundColors = {};
-  
-  makeGrid();
-  
-  document.getElementById("win-msg").style.display = "none";
-  document.getElementById("theme-title").textContent = currentTheme.toUpperCase();
-  document.getElementById("source-tag").textContent = `Theme: ${currentTheme} | Ready to play!`;
-  renderWordList();
-  renderGrid();
-  startAmbience();
-  
-  // 清除提示并开始预加载下一关
-  document.getElementById("next-badge").innerHTML = "🔄 Loading next level...";
-  preloadedLevel = null;
-  
-  // 后台预加载下一关
-  setTimeout(() => preloadNextLevel(currentTheme), 100);
-}
-
-// 加载随机主题（初次启动或 fallback）
-async function loadNewRandomTheme(n) {
-  const randomTheme = ALL_THEMES[Math.floor(Math.random() * ALL_THEMES.length)];
-  
-  document.getElementById("theme-title").textContent = randomTheme.toUpperCase();
-  document.getElementById("game-area").style.display = "none";
-  document.getElementById("loading-overlay").innerHTML = '<span class="spinner"></span>Loading level...';
-  document.getElementById("loading-overlay").style.display = "block";
-  
-  let source = "AI";
-  let result = null;
-  if(n == 1){
-  try {
-    result = await fetchWords(randomTheme);
-    if (result && result.words && result.words.length >= 4) {
-      words = result.words;
-      currentDefinitions = result.definitions;
-      currentTheme = randomTheme;
-    } else {
-      throw new Error("AI failed");
-    }
-  } catch(e) {
-    console.warn("Using fallback dictionary:", e);
-    words = [...(FALLBACK[randomTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
-    currentDefinitions = {};
-    currentTheme = randomTheme;
-    source = "built-in dictionary";
-  }
-}else{
-    words = [...(FALLBACK[randomTheme] || FALLBACK.Dance)].sort(() => Math.random() - 0.5);
-    currentDefinitions = {};
-    currentTheme = randomTheme;
-    source = "built-in dictionary";
-
-}
-
-  found = [];
-  foundColors = {};
-  makeGrid();
-  
-  document.getElementById("loading-overlay").style.display = "none";
-  document.getElementById("game-area").style.display = "block";
-  document.getElementById("win-msg").style.display = "none";
-  document.getElementById("status").textContent = "";
-  document.getElementById("source-tag").textContent = `Theme: ${currentTheme} | Source: ${source}`;
-  document.getElementById("next-badge").innerHTML = "🔄 Preparing next level...";
-  
-  renderWordList();
-  renderGrid();
-  startAmbience();
-  
-  // 后台预加载下一关
-  preloadedLevel = null;
-  setTimeout(() => preloadNextLevel(currentTheme), 500);
-}
-
-// 先放置单词，再填充随机字母
 function makeGrid(){
-  grid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(""));
-  placed = [];
-  
-  const shuffled = [...words].sort(() => Math.random() - 0.5);
-  let success = true;
-  
-  for (const word of shuffled) {
-    if (!placeWord(word)) {
-      success = false;
-      break;
-    }
-  }
-  
-  if (!success) {
-    makeGrid();
-    return;
-  }
-  
-  for (let r = 0; r < GRID_SIZE; r++) {
-    for (let c = 0; c < GRID_SIZE; c++) {
-      if (!grid[r][c]) {
-        grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      }
-    }
-  }
+  grid=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(''));
+  placed=[];
+  const shuffled=[...words].sort(()=>Math.random()-.5);
+  for(const w of shuffled){if(!placeWord(w)){makeGrid();return}}
+  for(let r=0;r<GRID_SIZE;r++)for(let c=0;c<GRID_SIZE;c++)if(!grid[r][c])grid[r][c]=String.fromCharCode(65+Math.floor(Math.random()*26));
 }
-
 function placeWord(word){
-  const candidates = [];
-  for (const dir of DIRS) {
-    for (let r = 0; r < GRID_SIZE; r++) {
-      for (let c = 0; c < GRID_SIZE; c++) {
-        if (canPlace(word, r, c, dir)) {
-          candidates.push({dir, r, c});
-        }
-      }
-    }
-  }
-  
-  for (let i = candidates.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-  }
-  
-  for (const {dir, r, c} of candidates) {
-    const cells = [];
-    for (let i = 0; i < word.length; i++) {
-      const nr = r + dir[0] * i;
-      const nc = c + dir[1] * i;
-      cells.push([nr, nc]);
-      grid[nr][nc] = word[i];
-    }
-    placed.push({word, cells});
-    return true;
+  const cands=[];
+  for(const dir of DIRS)for(let r=0;r<GRID_SIZE;r++)for(let c=0;c<GRID_SIZE;c++)if(canPlace(word,r,c,dir))cands.push({dir,r,c});
+  for(let i=cands.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cands[i],cands[j]]=[cands[j],cands[i]]}
+  for(const {dir,r,c} of cands){
+    const cells=[];
+    for(let i=0;i<word.length;i++){const nr=r+dir[0]*i,nc=c+dir[1]*i;cells.push([nr,nc]);grid[nr][nc]=word[i]}
+    placed.push({word,cells});return true;
   }
   return false;
 }
-
-function canPlace(word, r, c, dir){
-  for (let i = 0; i < word.length; i++) {
-    const nr = r + dir[0] * i;
-    const nc = c + dir[1] * i;
-    if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) return false;
-    if (grid[nr][nc] && grid[nr][nc] !== word[i]) return false;
-  }
+function canPlace(word,r,c,dir){
+  for(let i=0;i<word.length;i++){const nr=r+dir[0]*i,nc=c+dir[1]*i;if(nr<0||nr>=GRID_SIZE||nc<0||nc>=GRID_SIZE)return false;if(grid[nr][nc]&&grid[nr][nc]!==word[i])return false}
   return true;
 }
 
+/* ── Fast DOM rendering: build once, update via classList ── */
 function renderGrid(){
-  const el = document.getElementById("grid");
-  el.style.gridTemplateColumns = `repeat(${GRID_SIZE},36px)`;
-  el.innerHTML = "";
-  for(let r = 0; r < GRID_SIZE; r++) {
-    for(let c = 0; c < GRID_SIZE; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.textContent = grid[r][c];
-      cell.dataset.r = r;
-      cell.dataset.c = c;
-      el.appendChild(cell);
+  const el=document.getElementById('grid');
+  computeCellSize();
+  el.style.gridTemplateColumns=`repeat(${GRID_SIZE},var(--cell-size))`;
+  el.innerHTML='';
+  cellEls=[];
+  for(let r=0;r<GRID_SIZE;r++){
+    for(let c=0;c<GRID_SIZE;c++){
+      const d=document.createElement('div');
+      d.className='cell';
+      d.textContent=grid[r][c];
+      d.dataset.r=r;d.dataset.c=c;
+      el.appendChild(d);
+      cellEls[r*GRID_SIZE+c]=d;
     }
   }
   applyFoundColors();
-  el.onmousedown = startSel;
-  el.onmousemove = moveSel;
-  el.onmouseup = endSel;
-  el.ontouchstart = e => { e.preventDefault(); startSel(e.touches[0]); };
-  el.ontouchmove = e => { e.preventDefault(); moveSel(e.touches[0]); };
-  el.ontouchend = e => { e.preventDefault(); endSel(); };
+  bindEvents(el);
+}
+
+/* ── Bind pointer events once on the grid container ── */
+function bindEvents(el){
+  // Remove old listeners by cloning (fast and clean)
+  const fresh=el.cloneNode(true);
+  el.parentNode.replaceChild(fresh,el);
+  // Rebuild cellEls references from fresh DOM
+  fresh.querySelectorAll('.cell').forEach(d=>{
+    cellEls[parseInt(d.dataset.r)*GRID_SIZE+parseInt(d.dataset.c)]=d;
+  });
+
+  fresh.addEventListener('pointerdown',e=>{e.preventDefault();const rc=cellFromPoint(e.clientX,e.clientY);if(!rc)return;fresh.setPointerCapture(e.pointerId);selecting=true;selStart=rc;selCells=[rc];highlight();playSelect();},{passive:false});
+  fresh.addEventListener('pointermove',e=>{if(!selecting)return;e.preventDefault();const rc=cellFromPoint(e.clientX,e.clientY);if(!rc)return;computeSelCells(rc);highlight();},{passive:false});
+  fresh.addEventListener('pointerup',e=>{e.preventDefault();if(!selecting)return;selecting=false;checkWord();selCells=[];highlight();},{passive:false});
+  fresh.addEventListener('pointercancel',()=>{selecting=false;selCells=[];highlight();});
+}
+
+function cellFromPoint(x,y){
+  const t=document.elementFromPoint(x,y);
+  if(!t||!t.classList.contains('cell'))return null;
+  return[parseInt(t.dataset.r),parseInt(t.dataset.c)];
+}
+function computeSelCells(rc){
+  if(!selStart)return;
+  const[r0,c0]=selStart,[r1,c1]=rc;
+  const dr=r1-r0,dc=c1-c0;
+  if(dr===0&&dc===0){selCells=[selStart];return}
+  let sR=dr===0?0:dr/Math.abs(dr),sC=dc===0?0:dc/Math.abs(dc);
+  if(Math.abs(dr)!==Math.abs(dc)&&dr!==0&&dc!==0){if(Math.abs(dr)>Math.abs(dc))sC=0;else sR=0}
+  selCells=[];
+  const steps=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
+  for(let i=0;i<=steps;i++){const nr=r0+sR*i,nc=c0+sC*i;if(nr>=0&&nr<GRID_SIZE&&nc>=0&&nc<GRID_SIZE)selCells.push([nr,nc])}
+}
+
+/* ── Ultra-fast highlight: use a Set for O(1) lookup, touch only changed cells ── */
+let prevSel=new Set();
+function highlight(){
+  const nextSel=new Set(selCells.map(([r,c])=>r*GRID_SIZE+c));
+  // Clear old selections
+  for(const k of prevSel){if(!nextSel.has(k)){const d=cellEls[k];if(d)d.classList.remove('selecting')}}
+  // Add new selections
+  for(const k of nextSel){if(!prevSel.has(k)){const d=cellEls[k];if(d)d.classList.add('selecting')}}
+  prevSel=nextSel;
+}
+function applyFoundColors(){
+  for(const [word,ci] of Object.entries(foundColors)){
+    const p=placed.find(p=>p.word===word);
+    if(!p)continue;
+    for(const [r,c] of p.cells){
+      const d=cellEls[r*GRID_SIZE+c];
+      if(d){for(let i=0;i<8;i++)d.classList.remove(`found-${i}`);d.classList.remove('selecting');d.classList.add(`found-${ci}`)}
+    }
+  }
 }
 
 function renderWordList(){
-  document.getElementById("word-list").innerHTML = words.map(w => 
-    `<span class="word-chip${found.includes(w) ? " found" : ""}" id="chip-${w}">${w}</span>`
-  ).join("");
-}
-
-function cellAt(e){
-  const t = document.elementFromPoint(e.clientX, e.clientY);
-  if(!t || !t.classList.contains("cell")) return null;
-  return [parseInt(t.dataset.r), parseInt(t.dataset.c)];
-}
-
-function startSel(e){
-  const rc = cellAt(e);
-  if(!rc) return;
-  selecting = true;
-  selStart = rc;
-  selCells = [rc];
-  highlight();
-  playSelect();
-}
-
-function moveSel(e){
-  if(!selecting || !selStart) return;
-  const rc = cellAt(e);
-  if(!rc) return;
-  const [r0,c0] = selStart;
-  const [r1,c1] = rc;
-  const dr = r1 - r0, dc = c1 - c0;
-  
-  if(dr === 0 && dc === 0) {
-    selCells = [selStart];
-    highlight();
-    return;
-  }
-  
-  let sR = dr === 0 ? 0 : dr / Math.abs(dr);
-  let sC = dc === 0 ? 0 : dc / Math.abs(dc);
-  
-  if(Math.abs(dr) !== Math.abs(dc) && dr !== 0 && dc !== 0) {
-    if(Math.abs(dr) > Math.abs(dc)) sC = 0;
-    else sR = 0;
-  }
-  
-  selCells = [];
-  const steps = Math.max(Math.abs(r1 - r0), Math.abs(c1 - c0));
-  for(let i = 0; i <= steps; i++) {
-    const nr = r0 + sR * i;
-    const nc = c0 + sC * i;
-    if(nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
-      selCells.push([nr, nc]);
-    }
-  }
-  highlight();
-}
-
-function endSel(){
-  if(!selecting) return;
-  selecting = false;
-  checkWord();
-  selCells = [];
-  highlight();
-}
-
-function highlight(){
-  document.querySelectorAll(".cell").forEach(c => {
-    const r = parseInt(c.dataset.r);
-    const col = parseInt(c.dataset.c);
-    const isSel = selCells.some(([sr,sc]) => sr === r && sc === col);
-    c.classList.toggle("selecting", isSel);
-    for(let i = 0; i < 8; i++) c.classList.remove(`found-${i}`);
-    if(!isSel) {
-      for(const [word, ci] of Object.entries(foundColors)) {
-        const p = placed.find(p => p.word === word);
-        if(p && p.cells.some(([pr,pc]) => pr === r && pc === col)) {
-          c.classList.add(`found-${ci}`);
-        }
-      }
-    }
-  });
-}
-
-function applyFoundColors(){
-  document.querySelectorAll(".cell").forEach(c => {
-    const r = parseInt(c.dataset.r);
-    const col = parseInt(c.dataset.c);
-    for(let i = 0; i < 8; i++) c.classList.remove(`found-${i}`);
-    for(const [word, ci] of Object.entries(foundColors)) {
-      const p = placed.find(p => p.word === word);
-      if(p && p.cells.some(([pr,pc]) => pr === r && pc === col)) {
-        c.classList.add(`found-${ci}`);
-      }
-    }
-  });
+  document.getElementById('word-list').innerHTML=words.map(w=>
+    `<span class="word-chip${found.includes(w)?' found':''}" id="chip-${w}">${w}</span>`
+  ).join('');
 }
 
 function checkWord(){
-  const letters = selCells.map(([r,c]) => grid[r][c]).join("");
-  const rev = letters.split("").reverse().join("");
-  
-  for(const {word, cells} of placed) {
-    if(found.includes(word)) continue;
-    if(letters === word || rev === word) {
-      const ci = found.length % 8;
-      found.push(word);
-      foundColors[word] = ci;
-      
-      const chip = document.getElementById(`chip-${word}`);
-      if(chip) chip.className = "word-chip found";
-      applyFoundColors();
-      
-      let def;
-      if(currentDefinitions && currentDefinitions[word]) {
-        def = currentDefinitions[word];
-      } else if(DICT[word]) {
-        def = `${DICT[word].pos} ${DICT[word].def}`;
-      } else {
-        def = "A wonderful word from your theme!";
-      }
-      showToast(word, def);
-      
-      if(found.length === placed.length) {
-        document.getElementById("win-msg").style.display = "block";
-        document.getElementById("status").textContent = "";
-        playWin();
-        stopAmbience();
-      } else {
-        document.getElementById("status").textContent = `✓ Found: ${word}`;
-        playFound();
-      }
-      return;
-    }
-  }
-  document.getElementById("status").textContent = "";
-}
+  if(selCells.length<2)return; // single cell can't be a word
+  const letters=selCells.map(([r,c])=>grid[r][c]).join('');
+  const rev=letters.split('').reverse().join('');
 
-function giveHint() {
-  if (!placed.length || found.length === placed.length) {
-    if (found.length === placed.length && placed.length > 0) {
-      showToast("🎉", "You already found all words! Click Next Level to continue!");
+  // Match against every word in the list (forward or backward)
+  // This allows accidental valid paths through fill letters to also score
+  for(const word of words){
+    if(found.includes(word))continue;
+    if(letters!==word&&rev!==word)continue;
+
+    // Word matched by actual selection — record which cells were used
+    const ci=found.length%8;
+    found.push(word);
+    // Store the actually-selected cells (not the pre-placed ones)
+    // so the coloring reflects what the player drew
+    foundColors[word]=ci;
+    // Also update placed entry's cells to the actual selection for color rendering
+    const placedEntry=placed.find(p=>p.word===word);
+    if(placedEntry){
+      // Use selected cells; handle reversed match
+      placedEntry.cells=rev===word&&letters!==word
+        ? [...selCells].reverse()
+        : [...selCells];
+    }
+
+    const chip=document.getElementById(`chip-${word}`);
+    if(chip)chip.className='word-chip found';
+    applyFoundColors();
+    const def=currentDefinitions[word]||(DICT[word]?`${DICT[word].pos} ${DICT[word].def}`:'A wonderful word!');
+    showToast(word,def);
+    if(found.length===words.length){
+      document.getElementById('win-msg').style.display='block';
+      document.getElementById('status').textContent='';
+      playWin();stopAmbience();
     } else {
-      showToast("No words", "Loading or no words available yet");
+      document.getElementById('status').textContent=`✓ Found: ${word}`;
+      playFound();
     }
     return;
   }
-  
-  const unfound = placed.filter(p => !found.includes(p.word));
-  if (unfound.length === 0) {
-    showToast("Complete!", "All words found! Click Next Level!");
-    return;
-  }
-  
-  const hintWord = unfound[Math.floor(Math.random() * unfound.length)];
-  
-  for (const [r, c] of hintWord.cells) {
-    const cellDiv = document.querySelector(`.cell[data-r='${r}'][data-c='${c}']`);
-    if (cellDiv) {
-      cellDiv.classList.add('hint');
-      setTimeout(() => {
-        cellDiv.classList.remove('hint');
-      }, 1500);
-    }
-  }
-  
-  const def = currentDefinitions[hintWord.word] || 
-              (DICT[hintWord.word] ? `${DICT[hintWord.word].pos} ${DICT[hintWord.word].def}` : null) ||
-              "Try to find this word!";
-  showToast(`💡 Hint: ${hintWord.word}`, def);
-  playHint();
+  document.getElementById('status').textContent='';
 }
 
+function giveHint(){
+  const unfound=placed.filter(p=>!found.includes(p.word));
+  if(!unfound.length){showToast('🎉','You found all words! Click Next Level!');return}
+  const hw=unfound[Math.floor(Math.random()*unfound.length)];
+  for(const [r,c] of hw.cells){const d=cellEls[r*GRID_SIZE+c];if(d){d.classList.add('hint');setTimeout(()=>d.classList.remove('hint'),2800)}}
+  const def=currentDefinitions[hw.word]||(DICT[hw.word]?`${DICT[hw.word].pos} ${DICT[hw.word].def}`:'Try to find this word!');
+  showToast(`💡 Hint: ${hw.word}`,def);playHint();
+}
 function resetSelection(){
-  found = [];
-  foundColors = {};
-  document.getElementById("win-msg").style.display = "none";
-  document.getElementById("status").textContent = "";
-  renderGrid();
-  renderWordList();
-  startAmbience();
+  found=[];foundColors={};prevSel=new Set();
+  document.getElementById('win-msg').style.display='none';
+  document.getElementById('status').textContent='';
+  renderGrid();renderWordList();startAmbience();
 }
 
-// 启动游戏 - 使用随机主题并开始预加载
-loadNewRandomTheme(0);
+/* ════════════════════════════════════════════
+   LEVEL LOADING
+════════════════════════════════════════════ */
+let preloadedLevel=null,isPreloading=false,currentTheme='';
+
+async function fetchWords(theme){
+  const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: Each word 3-8 letters, UPPERCASE, no spaces/hyphens. For each word provide a short definition (one sentence, 5-15 words). Return ONLY a JSON array: [{"word":"WORD","def":"Short definition"}]. No other text.`;
+  try{
+    const res=await fetch('https://text.pollinations.ai/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'openai',messages:[{role:'user',content:prompt}],max_tokens:800})});
+    if(!res.ok)throw new Error('API fail');
+    const data=await res.json();
+    const text=data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    const arr=JSON.parse(text);
+    const ws=[],defs={};
+    for(const item of arr){const w=item.word.toUpperCase().replace(/[^A-Z]/g,'');if(w.length>=3&&w.length<=8){ws.push(w);defs[w]=item.def||''}}
+    if(ws.length<4)throw new Error('Too few words');
+    return{words:ws.slice(0,8),definitions:defs,theme};
+  }catch(e){return null}
+}
+
+async function preloadNextLevel(curTheme){
+  if(isPreloading)return;isPreloading=true;
+  const avail=ALL_THEMES.filter(t=>t!==curTheme);
+  const next=avail[Math.floor(Math.random()*avail.length)];
+  const result=await fetchWords(next);
+  if(result&&result.words.length>=4)preloadedLevel=result;
+  else preloadedLevel={words:[...(FALLBACK[next]||FALLBACK.Dance)].sort(()=>Math.random()-.5),definitions:{},theme:next};
+  document.getElementById('next-badge').textContent=`✨ Next: ${preloadedLevel.theme} ready`;
+  isPreloading=false;
+}
+
+function applyLevel(data,source){
+  words=data.words;currentDefinitions=data.definitions;currentTheme=data.theme;
+  found=[];foundColors={};prevSel=new Set();
+  makeGrid();
+  // Show game
+  document.getElementById('loading-overlay').style.display='none';
+  document.getElementById('grid').style.display='inline-grid';
+  document.getElementById('win-msg').style.display='none';
+  document.getElementById('status').textContent='';
+  document.getElementById('controls').style.display='flex';
+  document.getElementById('theme-title').textContent=currentTheme.toUpperCase();
+  renderWordList();renderGrid();startAmbience();
+  setTimeout(()=>preloadNextLevel(currentTheme),400);
+}
+
+async function loadNewRandomTheme(){
+  const theme=ALL_THEMES[Math.floor(Math.random()*ALL_THEMES.length)];
+  document.getElementById('theme-title').textContent=theme.toUpperCase();
+  document.getElementById('loading-overlay').style.display='flex';
+  document.getElementById('grid').style.display='none';
+  document.getElementById('controls').style.display='none';
+  const result=await fetchWords(theme);
+  if(result&&result.words.length>=4)applyLevel(result,'AI');
+  else applyLevel({words:[...(FALLBACK[theme]||FALLBACK.Dance)].sort(()=>Math.random()-.5),definitions:{},theme},'built-in');
+}
+
+function loadNextLevel(){
+  if(!preloadedLevel){loadNewRandomTheme();return}
+  const data=preloadedLevel;preloadedLevel=null;
+  document.getElementById('next-badge').textContent='';
+  applyLevel(data,'preloaded');
+}
+
+/* ════════════════════════════════════════════
+   RESIZE: recompute cell size on orientation change
+════════════════════════════════════════════ */
+let resizeTimeout;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimeout);
+  resizeTimeout=setTimeout(()=>{
+    if(cellEls.length){
+      computeCellSize();
+      const el=document.getElementById('grid');
+      el.style.gridTemplateColumns=`repeat(${GRID_SIZE},var(--cell-size))`;
+    }
+  },150);
+});
+
+/* ── Boot ── */
+loadNewRandomTheme();
 </script>
+</body>
+</html>
