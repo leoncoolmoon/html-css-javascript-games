@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
-    <title>Game List</title>
+    <title>Game Collection</title>
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -28,7 +28,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 {
@@ -37,11 +37,21 @@
             margin-bottom: 10px;
         }
 
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .meta-info {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 15px;
         }
 
         .btn {
@@ -53,11 +63,35 @@
             border-radius: 20px;
             font-size: 0.9rem;
             transition: var(--transition);
+            border: none;
+            cursor: pointer;
         }
 
         .btn:hover {
             background-color: var(--primary-dark);
             transform: translateY(-2px);
+        }
+
+        .search-container {
+            width: 100%;
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
         }
 
         .game-grid {
@@ -82,6 +116,10 @@
         .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .game-card.hidden {
+            display: none;
         }
 
         .game-card h3 {
@@ -114,15 +152,96 @@
                 grid-template-columns: 1fr;
             }
         }
-</style>
+    </style>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Game List">
+    <meta name="apple-mobile-web-app-title" content="Game Collection">
     <link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+    <header>
+        <h1 id="main-title">Game Collection</h1>
+        <div class="controls">
+            <div class="meta-info">
+                <button id="lang-toggle" class="btn">中文</button>
+                <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn" id="github-link">GitHub</a>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search games...">
+            </div>
+        </div>
+    </header>
+    <main class="game-grid" id="game-grid">
+        <!-- Games will be injected here -->
+    </main>
+
+    <script src="games_data.js"></script>
     <script>
+        let currentLang = localStorage.getItem('lang') || 'en';
+        const searchInput = document.getElementById('search-input');
+        const langToggle = document.getElementById('lang-toggle');
+        const gameGrid = document.getElementById('game-grid');
+        const mainTitle = document.getElementById('main-title');
+
+        const translations = {
+            en: {
+                title: "Game Collection",
+                searchPlaceholder: "Search games...",
+                langToggle: "中文",
+                github: "GitHub"
+            },
+            zh: {
+                title: "游戏集合",
+                searchPlaceholder: "搜索游戏...",
+                langToggle: "English",
+                github: "GitHub"
+            }
+        };
+
+        function renderGames() {
+            const searchTerm = searchInput.value.toLowerCase();
+            gameGrid.innerHTML = '';
+
+            games.forEach(game => {
+                const name = game[currentLang].name;
+                const desc = game[currentLang].desc;
+
+                if (name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm)) {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <h3><a href="${game.href}">${game.num}. ${name}</a></h3>
+                        <p>${desc}</p>
+                    `;
+                    gameGrid.appendChild(card);
+                }
+            });
+        }
+
+        function updateUI() {
+            const t = translations[currentLang];
+            mainTitle.textContent = t.title;
+            searchInput.placeholder = t.searchPlaceholder;
+            langToggle.textContent = t.langToggle;
+            document.documentElement.lang = currentLang;
+            renderGames();
+        }
+
+        langToggle.addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            localStorage.setItem('lang', currentLang);
+            updateUI();
+        });
+
+        searchInput.addEventListener('input', renderGames);
+
+        // Initial render
+        updateUI();
+
+        // PWA registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -131,164 +250,5 @@
             });
         }
     </script>
-</head>
-<body>
-    <header>
-        <h1>Game List</h1>
-        <div class="meta-info">
-            <a href="indexCN.html" class="btn">中文版</a>
-            <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn">GitHub Repository</a>
-        </div>
-    </header>
-    <main class="game-grid">
-        <div class="game-card">
-            <h3><a href="01-Candy-Crush-Game/">01. Candy Crush Game</a></h3>
-            <p>Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="02-Archery-Game/">02. Archery Game</a></h3>
-            <p>Test your aim in this challenging archery game where precision and timing are key to hitting the bullseye. 🏹</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="03-Speed-Typing-Game/">03. Speed Typing Game</a></h3>
-            <p>Improve your typing speed and accuracy with this game that challenges you to type words quickly under time pressure. ⌨️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="04-Breakout-Game/">04. Breakout Game</a></h3>
-            <p>Relive the arcade classic where you use a paddle to bounce a ball and break bricks, aiming for a high score. 🎮</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="05-Minesweeper-Game/">05. Minesweeper Game</a></h3>
-            <p>Exercise your logical thinking with this puzzle game where you avoid hidden mines and uncover safe tiles. 💣</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="06-Tower-Blocks/">06. Tower Blocks Game</a></h3>
-            <p>Build a tower by stacking blocks as high as possible without letting them topple over in this physics-based game. 🏗️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="07-Ping-Pong-Game/">07. Ping Pong Game</a></h3>
-            <p>Experience the thrill of table tennis as you compete against an AI opponent in this classic sports game. 🏓</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="08-Tetris-Game/">08. Tetris Game</a></h3>
-            <p>Arrange falling tetrominoes to create complete lines and score points in this addictive puzzle game. 🧱</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="09-Tilting-Maze-Game/">09. Tilting Maze Game</a></h3>
-            <p>Navigate a ball through a tilting maze, avoiding traps and reaching the goal in this challenging game of skill. 🌀</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="10-Memory-Card-Game/">10. Memory Card Game</a></h3>
-            <p>Test your memory by matching pairs of cards in this classic concentration game. 🃏</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="11-Rock-Paper-Scissors/">11. Rock Paper Scissors Game</a></h3>
-            <p>Play the timeless hand game against the computer and see who comes out victorious. ✂️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="12-Type-Number-Guessing-Game/">12. Type Number Guessing Game</a></h3>
-            <p>Guess the hidden number based on clues provided after each guess in this number guessing game. 🔢</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="13-Tic-Tac-Toe/">13. Tic Tac Toe Game</a></h3>
-            <p>Challenge a friend in this simple yet strategic game of placing Xs and Os in a 3x3 grid. ⭕❌</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="14-Snake-Game/">14. Snake Game</a></h3>
-            <p>Control a growing snake, eat food, and avoid collisions with walls and your own tail in this nostalgic arcade game. 🐍</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="15-Connect-Four-Game/">15. Connect discs Game</a></h3>
-            <p>Strategically drop colored discs to connect them in a row vertically, horizontally, or diagonally in this classic board game. you can challenge your friends or AI with this game. 🔴🔵🔴</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="16-Insect-Catch-Game/">16. Insect Catch Game</a></h3>
-            <p>Test your reflexes by clicking on randomly appearing insects to catch them before they disappear. 🐞</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="17-Typing-Game/">17. Typing Game</a></h3>
-            <p>Sharpen your typing skills by typing specific words or sentences as quickly and accurately as possible. ⌨️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="18-Hangman-Game/">18. Hangman Game</a></h3>
-            <p>Guess the hidden word by suggesting letters within a certain number of guesses in this word-guessing game. You can also check the definitions of the words with internet 🎩</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="19-Flappy-Bird-Game/">19. Flappy Bird Game</a></h3>
-            <p>Guide a bird through gaps in pipes by tapping to flap its wings, avoiding obstacles and aiming for a high score. 🐦</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="20-Crossy-Road-Game/">20. Crossy Road Game</a></h3>
-            <p>Help a character cross roads, rivers, and other obstacles in this endless hopping game with a retro arcade feel. 🚦</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="21-2048-Game/">21. 2048 Game</a></h3>
-            <p>Slide numbered tiles on a grid to combine them and create a tile with the number 2048 in this addictive puzzle game. 🧩</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="22-Dice-Roll-Simulator/">22. Dice Roll Simulator</a></h3>
-            <p>Simulate rolling dice to achieve different combinations or outcomes in this virtual dice rolling game. 🎲</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="23-Shape-Clicker-Game/">23. Shape Clicker Game</a></h3>
-            <p>Click on various shapes appearing on the screen within a time limit to score points in this clicker game. 🔷🔶</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="24-Typing-Game/">24. Typing Game</a></h3>
-            <p>Improve your typing speed and accuracy by typing specific words or sentences under time pressure. ⌨️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="25-Speak-Number-Guessing-Game/">25. Speak Number Guessing Game</a></h3>
-            <p>Guess the hidden number by speaking your guesses aloud in this voice-activated number guessing game. 🗣️🔢</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="26-Fruit-Slicer-Game/">26. Fruit Slicer Game</a></h3>
-            <p>Swipe across the screen to slice falling fruits while avoiding bombs in this fast-paced fruit-slicing game. 🍉🔪</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="27-Quiz-Game/">27. Quiz Game</a></h3>
-            <p>Test your knowledge on various topics by answering trivia questions and aiming for a high score in this quiz game. 🧠📚</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="28-Emoji-Catcher-Game/">28. Emoji Catcher Game</a></h3>
-            <p>Catch falling emojis with a basket or container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="29-Whack-A-Mole-Game/">29. Whack A Mole Game</a></h3>
-            <p>Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="30-Guess-Number-Game/">30. Guess Number Game</a></h3>
-            <p>Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="31-Air-Hockey-Game/">31. Air Hockey Game</a></h3>
-            <p>A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="32-24-Point-Poker-Game/">32. 24 Point Poker Game</a></h3>
-            <p>A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="33-Snakes_ladders/">33. Snakes & Ladders</a></h3>
-            <p>The Classic Board Game Experience Enjoy the timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead, but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="34-helicopter-Game/">34. Helicopter Game</a></h3>
-            <p>A simple helicopter shooting games (still under developing)</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="35-RubikCube-Game/">35. Rubik's Cube Game</a></h3>
-            <p>A virtual rubik's cube game. (still under developing)🎲🃏</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="36-Cross-River-Game/">36. River crossing Game</a></h3>
-            <p>Classic river puzzle. Boat holds two. Avoid zombies eating survivors. 🧟‍♂️🚣</p>
-        </div>
-        <div class="game-card">
-            <h3><a href="37-Word-Search-Relaxed/">37. Word Search Relaxed</a></h3>
-            <p>Discover hidden words in a dynamic grid with smooth animations and fade-in background music. A relaxing yet engaging puzzle experience. 🔍✨🎶</p>
-        </div>
-    </main>
 </body>
 </html>

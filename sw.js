@@ -1,10 +1,9 @@
-const CACHE_NAME = 'game-list-v1';
+const CACHE_NAME = 'game-list-v2';
 const ASSETS = [
     './',
     './index.html',
-    './indexCN.html',
+    './games_data.js',
     './manifest.json',
-
     './icon.svg'
 ];
 
