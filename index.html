@@ -1,259 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="icon.png">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
     <title>Game List</title>
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #388E3C;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --text-muted: #666;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
         h1 {
-            text-align: center;
-            color: #333;
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background-color: #fff;
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
         }
 
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #4CAF50;
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: var(--primary-color);
             color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: var(--transition);
         }
 
-        a {
-            color: #4CAF50;
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .game-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .game-card a {
+            color: var(--primary-color);
             text-decoration: none;
         }
 
-        a:hover {
+        .game-card a:hover {
             text-decoration: underline;
         }
-    </style>
+
+        .game-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            flex-grow: 1;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+</style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Game List">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.error('Service Worker registration failed', err));
+            });
+        }
+    </script>
 </head>
-
 <body>
-    <h1>Game List</h1> </br>
-    <a href="indexCN.html">中文</a></br>
-    Github address: <a
-        href="https://github.com/leoncoolmoon/html-css-javascript-games/">leoncoolmoon/html-css-javascript-games</a>;</br>
-    Fork from: he-is-talha
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Game: description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>01</td>
-                <td><a href="01-Candy-Crush-Game/">Candy Crush Game</a>: Enjoy the classic match-three puzzle game where
-                    you swap colored candies to create matches and clear levels. 🍬🍭</td>
-            </tr>
-            <tr>
-                <td>02</td>
-                <td><a href="02-Archery-Game/">Archery Game</a>: Test your aim in this challenging archery game where
-                    precision and timing are key to hitting the bullseye. 🏹</td>
-            </tr>
-            <tr>
-                <td>03</td>
-                <td><a href="03-Speed-Typing-Game/">Speed Typing Game</a>: Improve your typing speed and accuracy with
-                    this game that challenges you to type words quickly under time pressure. ⌨️</td>
-            </tr>
-            <tr>
-                <td>04</td>
-                <td><a href="04-Breakout-Game/">Breakout Game</a>: Relive the arcade classic where you use a paddle to
-                    bounce a ball and break bricks, aiming for a high score. 🎮</td>
-            </tr>
-            <tr>
-                <td>05</td>
-                <td><a href="05-Minesweeper-Game/">Minesweeper Game</a>: Exercise your logical thinking with this puzzle
-                    game where you avoid hidden mines and uncover safe tiles. 💣</td>
-            </tr>
-            <tr>
-                <td>06</td>
-                <td><a href="06-Tower-Blocks/">Tower Blocks Game</a>: Build a tower by stacking blocks as high as
-                    possible without letting them topple over in this physics-based game. 🏗️</td>
-            </tr>
-            <tr>
-                <td>07</td>
-                <td><a href="07-Ping-Pong-Game/">Ping Pong Game</a>: Experience the thrill of table tennis as you
-                    compete against an AI opponent in this classic sports game. 🏓</td>
-            </tr>
-            <tr>
-                <td>08</td>
-                <td><a href="08-Tetris-Game/">Tetris Game</a>: Arrange falling tetrominoes to create complete lines and
-                    score points in this addictive puzzle game. 🧱</td>
-            </tr>
-            <tr>
-                <td>09</td>
-                <td><a href="09-Tilting-Maze-Game/">Tilting Maze Game</a>: Navigate a ball through a tilting maze,
-                    avoiding traps and reaching the goal in this challenging game of skill. 🌀</td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td><a href="10-Memory-Card-Game/">Memory Card Game</a>: Test your memory by matching pairs of cards in
-                    this classic concentration game. 🃏</td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td><a href="11-Rock-Paper-Scissors/">Rock Paper Scissors Game</a>: lay the timeless hand game against
-                    the computer and see who comes out victorious. ✂️</td>
-            </tr>
-            <tr>
-                <td>12</td>
-                <td><a href="12-Type-Number-Guessing-Game/">Type Number Guessing Game</a>: Guess the hidden number based
-                    on clues provided after each guess in this number guessing game. 🔢</td>
-            </tr>
-            <tr>
-                <td>13</td>
-                <td><a href="13-Tic-Tac-Toe/">Tic Tac Toe Game</a>: Challenge a friend in this simple yet strategic game
-                    of placing Xs and Os in a 3x3 grid. ⭕❌</td>
-            </tr>
-            <tr>
-                <td>14</td>
-                <td><a href="14-Snake-Game/">Snake Game</a>: Control a growing snake, eat food, and avoid collisions
-                    with walls and your own tail in this nostalgic arcade game. 🐍</td>
-            </tr>
-            <tr>
-                <td>15</td>
-                <td><a href="15-Connect-Four-Game/">Connect discs Game</a>: Strategically drop colored discs to connect
-                    them in a row vertically, horizontally, or diagonally in this classic board game. you can challenge
-                    your friends or AI with this game. 🔴🔵🔴</td>
-            </tr>
-            <tr>
-                <td>16</td>
-                <td><a href="16-Insect-Catch-Game/">Insect Catch Game</a>: Test your reflexes by clicking on randomly
-                    appearing insects to catch them before they disappear. 🐞</td>
-            </tr>
-            <tr>
-                <td>17</td>
-                <td><a href="17-Typing-Game/">Typing Game</a>: Sharpen your typing skills by typing specific words or
-                    sentences as quickly and accurately as possible. ⌨️</td>
-            </tr>
-            <tr>
-                <td>18</td>
-                <td><a href="18-Hangman-Game/">Hangman Game</a>: Guess the hidden word by suggesting letters within a
-                    certain number of guesses in this word-guessing game. You can also check the definitions of the
-                    words with internet 🎩</td>
-            </tr>
-            <tr>
-                <td>19</td>
-                <td><a href="19-Flappy-Bird-Game/">Flappy Bird Game</a>: Guide a bird through gaps in pipes by tapping
-                    to flap its wings, avoiding obstacles and aiming for a high score. 🐦</td>
-            </tr>
-            <tr>
-                <td>20</td>
-                <td><a href="20-Crossy-Road-Game/">Crossy Road Game</a>: Help a character cross roads, rivers, and other
-                    obstacles in this endless hopping game with a retro arcade feel. 🚦</td>
-            </tr>
-            <tr>
-                <td>21</td>
-                <td><a href="21-2048-Game/">2048 Game</a>: Slide numbered tiles on a grid to combine them and create a
-                    tile with the number 2048 in this addictive puzzle game. 🧩</td>
-            </tr>
-            <tr>
-                <td>22</td>
-                <td><a href="22-Dice-Roll-Simulator/">Dice Roll Simulator</a>: Simulate rolling dice to achieve
-                    different combinations or outcomes in this virtual dice rolling game. 🎲</td>
-            </tr>
-            <tr>
-                <td>23</td>
-                <td><a href="23-Shape-Clicker-Game/">Shape Clicker Game</a>: Click on various shapes appearing on the
-                    screen within a time limit to score points in this clicker game. 🔷🔶</td>
-            </tr>
-            <tr>
-                <td>24</td>
-                <td><a href="24-Typing-Game/">Typing Game</a>: Improve your typing speed and accuracy by typing specific
-                    words or sentences under time pressure. ⌨️</td>
-            </tr>
-            <tr>
-                <td>25</td>
-                <td><a href="25-Speak-Number-Guessing-Game/">Speak Number Guessing Game</a>: Guess the hidden number by
-                    speaking your guesses aloud in this voice-activated number guessing game. 🗣️🔢</td>
-            </tr>
-            <tr>
-                <td>26</td>
-                <td><a href="26-Fruit-Slicer-Game/">Fruit Slicer Game</a>: Swipe across the screen to slice falling
-                    fruits while avoiding bombs in this fast-paced fruit-slicing game. 🍉🔪</td>
-            </tr>
-            <tr>
-                <td>27</td>
-                <td><a href="27-Quiz-Game/">Quiz Game</a>: Test your knowledge on various topics by answering trivia
-                    questions and aiming for a high score in this quiz game. 🧠📚</td>
-            </tr>
-            <tr>
-                <td>28</td>
-                <td><a href="28-Emoji-Catcher-Game/">Emoji Catcher Game</a>: Catch falling emojis with a basket or
-                    container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄</td>
-            </tr>
-            <tr>
-                <td>29</td>
-                <td><a href="29-Whack-A-Mole-Game/">Whack A Mole Game</a>: Test your reaction speed by hitting randomly
-                    appearing moles with a mallet before they disappear in this classic arcade game. 🕹️</td>
-            </tr>
-            <tr>
-                <td>30</td>
-                <td><a href="30-Guess-Number-Game/">Guess Number Game</a>: Guess a 4-digit number with A for right
-                    position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖</td>
-            </tr>
-            <tr>
-                <td>31</td>
-                <td><a href="31-Air-Hockey-Game/">Air Hockey Game</a>: A ping-pong like game with two players. control
-                    with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑</td>
-            </tr>
-            <tr>
-                <td>32</td>
-                <td><a href="32-24-Point-Poker-Game/">24 Point Poker Game</a>: A classic 24 point poker game. Get four
-                    random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏</td>
-            </tr>
-            <tr>
-                <td>33</td>
-                <td><a href="33-Snakes_ladders/">Snakes & Ladders</a>: The Classic Board Game Experience Enjoy the
-                    timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead,
-                    but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜</td>
-            </tr>
-            <tr>
-                <td>34</td>
-                <td><a href="34-helicopter-Game/">Helicopter Game</a>: A simple helicopter shooting games (still under
-                    developing)</td>
-            </tr>
-            <tr>
-                <td>35</td>
-                <td><a href="35-RubikCube-Game/">Rubik's Cube Game</a>: A virtual rubik's cube game. (still under
-                    developing)🎲🃏</td>
-            </tr>
-            <tr>
-                <td>36</td>
-                <td><a href="36-Cross-River-Game/">River crossing Game</a>: Classic river puzzle. Boat holds two. Avoid
-                        zombies eating survivors. 🧟‍♂️🚣</td>
-            </tr>
-            <tr>
-                <td>37</td>
-                <td><a href="37-Word-Search-Relaxed/">Word Search Relaxed</a>: Discover hidden words in a dynamic grid
-                    with smooth animations and fade-in background music. A relaxing yet engaging puzzle experience.
-                    🔍✨🎶</td>
-            </tr>
-        </tbody>
-    </table>
+    <header>
+        <h1>Game List</h1>
+        <div class="meta-info">
+            <a href="indexCN.html" class="btn">中文版</a>
+            <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn">GitHub Repository</a>
+        </div>
+    </header>
+    <main class="game-grid">
+        <div class="game-card">
+            <h3><a href="01-Candy-Crush-Game/">01. Candy Crush Game</a></h3>
+            <p>Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="02-Archery-Game/">02. Archery Game</a></h3>
+            <p>Test your aim in this challenging archery game where precision and timing are key to hitting the bullseye. 🏹</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="03-Speed-Typing-Game/">03. Speed Typing Game</a></h3>
+            <p>Improve your typing speed and accuracy with this game that challenges you to type words quickly under time pressure. ⌨️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="04-Breakout-Game/">04. Breakout Game</a></h3>
+            <p>Relive the arcade classic where you use a paddle to bounce a ball and break bricks, aiming for a high score. 🎮</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="05-Minesweeper-Game/">05. Minesweeper Game</a></h3>
+            <p>Exercise your logical thinking with this puzzle game where you avoid hidden mines and uncover safe tiles. 💣</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="06-Tower-Blocks/">06. Tower Blocks Game</a></h3>
+            <p>Build a tower by stacking blocks as high as possible without letting them topple over in this physics-based game. 🏗️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="07-Ping-Pong-Game/">07. Ping Pong Game</a></h3>
+            <p>Experience the thrill of table tennis as you compete against an AI opponent in this classic sports game. 🏓</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="08-Tetris-Game/">08. Tetris Game</a></h3>
+            <p>Arrange falling tetrominoes to create complete lines and score points in this addictive puzzle game. 🧱</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="09-Tilting-Maze-Game/">09. Tilting Maze Game</a></h3>
+            <p>Navigate a ball through a tilting maze, avoiding traps and reaching the goal in this challenging game of skill. 🌀</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="10-Memory-Card-Game/">10. Memory Card Game</a></h3>
+            <p>Test your memory by matching pairs of cards in this classic concentration game. 🃏</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="11-Rock-Paper-Scissors/">11. Rock Paper Scissors Game</a></h3>
+            <p>Play the timeless hand game against the computer and see who comes out victorious. ✂️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="12-Type-Number-Guessing-Game/">12. Type Number Guessing Game</a></h3>
+            <p>Guess the hidden number based on clues provided after each guess in this number guessing game. 🔢</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="13-Tic-Tac-Toe/">13. Tic Tac Toe Game</a></h3>
+            <p>Challenge a friend in this simple yet strategic game of placing Xs and Os in a 3x3 grid. ⭕❌</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="14-Snake-Game/">14. Snake Game</a></h3>
+            <p>Control a growing snake, eat food, and avoid collisions with walls and your own tail in this nostalgic arcade game. 🐍</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="15-Connect-Four-Game/">15. Connect discs Game</a></h3>
+            <p>Strategically drop colored discs to connect them in a row vertically, horizontally, or diagonally in this classic board game. you can challenge your friends or AI with this game. 🔴🔵🔴</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="16-Insect-Catch-Game/">16. Insect Catch Game</a></h3>
+            <p>Test your reflexes by clicking on randomly appearing insects to catch them before they disappear. 🐞</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="17-Typing-Game/">17. Typing Game</a></h3>
+            <p>Sharpen your typing skills by typing specific words or sentences as quickly and accurately as possible. ⌨️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="18-Hangman-Game/">18. Hangman Game</a></h3>
+            <p>Guess the hidden word by suggesting letters within a certain number of guesses in this word-guessing game. You can also check the definitions of the words with internet 🎩</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="19-Flappy-Bird-Game/">19. Flappy Bird Game</a></h3>
+            <p>Guide a bird through gaps in pipes by tapping to flap its wings, avoiding obstacles and aiming for a high score. 🐦</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="20-Crossy-Road-Game/">20. Crossy Road Game</a></h3>
+            <p>Help a character cross roads, rivers, and other obstacles in this endless hopping game with a retro arcade feel. 🚦</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="21-2048-Game/">21. 2048 Game</a></h3>
+            <p>Slide numbered tiles on a grid to combine them and create a tile with the number 2048 in this addictive puzzle game. 🧩</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="22-Dice-Roll-Simulator/">22. Dice Roll Simulator</a></h3>
+            <p>Simulate rolling dice to achieve different combinations or outcomes in this virtual dice rolling game. 🎲</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="23-Shape-Clicker-Game/">23. Shape Clicker Game</a></h3>
+            <p>Click on various shapes appearing on the screen within a time limit to score points in this clicker game. 🔷🔶</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="24-Typing-Game/">24. Typing Game</a></h3>
+            <p>Improve your typing speed and accuracy by typing specific words or sentences under time pressure. ⌨️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="25-Speak-Number-Guessing-Game/">25. Speak Number Guessing Game</a></h3>
+            <p>Guess the hidden number by speaking your guesses aloud in this voice-activated number guessing game. 🗣️🔢</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="26-Fruit-Slicer-Game/">26. Fruit Slicer Game</a></h3>
+            <p>Swipe across the screen to slice falling fruits while avoiding bombs in this fast-paced fruit-slicing game. 🍉🔪</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="27-Quiz-Game/">27. Quiz Game</a></h3>
+            <p>Test your knowledge on various topics by answering trivia questions and aiming for a high score in this quiz game. 🧠📚</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="28-Emoji-Catcher-Game/">28. Emoji Catcher Game</a></h3>
+            <p>Catch falling emojis with a basket or container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="29-Whack-A-Mole-Game/">29. Whack A Mole Game</a></h3>
+            <p>Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="30-Guess-Number-Game/">30. Guess Number Game</a></h3>
+            <p>Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="31-Air-Hockey-Game/">31. Air Hockey Game</a></h3>
+            <p>A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="32-24-Point-Poker-Game/">32. 24 Point Poker Game</a></h3>
+            <p>A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="33-Snakes_ladders/">33. Snakes & Ladders</a></h3>
+            <p>The Classic Board Game Experience Enjoy the timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead, but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="34-helicopter-Game/">34. Helicopter Game</a></h3>
+            <p>A simple helicopter shooting games (still under developing)</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="35-RubikCube-Game/">35. Rubik's Cube Game</a></h3>
+            <p>A virtual rubik's cube game. (still under developing)🎲🃏</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="36-Cross-River-Game/">36. River crossing Game</a></h3>
+            <p>Classic river puzzle. Boat holds two. Avoid zombies eating survivors. 🧟‍♂️🚣</p>
+        </div>
+        <div class="game-card">
+            <h3><a href="37-Word-Search-Relaxed/">37. Word Search Relaxed</a></h3>
+            <p>Discover hidden words in a dynamic grid with smooth animations and fade-in background music. A relaxing yet engaging puzzle experience. 🔍✨🎶</p>
+        </div>
+    </main>
 </body>
-
 </html>
