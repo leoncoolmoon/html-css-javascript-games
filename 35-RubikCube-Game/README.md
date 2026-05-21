@@ -1,3 +1,19 @@
+# Rubik's Cube Game / 魔方游戏
+
+A virtual 3D Rubik's Cube game. Solve the classic puzzle with multiple themes and difficulty settings.
+
+虚拟3D魔方游戏。解决经典的拼图，支持多种主题和难度设置。
+
+<!--
+GAME_META:
+{
+  "num": "35",
+  "en": { "name": "Rubik's Cube Game", "desc": "A virtual 3D Rubik's Cube game. Solve the classic puzzle with multiple themes and difficulty settings." },
+  "zh": { "name": "魔方游戏", "desc": "虚拟3D魔方游戏。解决经典的拼图，支持多种主题和难度设置。" }
+}
+-->
+
+---
 # mofang
 
 #### 介绍

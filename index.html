@@ -144,6 +144,13 @@
             flex-grow: 1;
         }
 
+        #loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-top: 50px;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 2rem;
@@ -174,38 +181,70 @@
             </div>
         </div>
     </header>
-    <main class="game-grid" id="game-grid">
+    <div id="loading">Loading games...</div>
+    <main class="game-grid" id="game-grid" style="display: none;">
         <!-- Games will be injected here -->
     </main>
 
-    <script src="games_data.js"></script>
+    <script src="path.js"></script>
     <script>
         let currentLang = localStorage.getItem('lang') || 'en';
+        let allGames = [];
         const searchInput = document.getElementById('search-input');
         const langToggle = document.getElementById('lang-toggle');
         const gameGrid = document.getElementById('game-grid');
         const mainTitle = document.getElementById('main-title');
+        const loadingIndicator = document.getElementById('loading');
 
         const translations = {
             en: {
                 title: "Game Collection",
                 searchPlaceholder: "Search games...",
                 langToggle: "中文",
+                loading: "Loading games...",
                 github: "GitHub"
             },
             zh: {
                 title: "游戏集合",
                 searchPlaceholder: "搜索游戏...",
                 langToggle: "English",
+                loading: "正在加载游戏...",
                 github: "GitHub"
             }
         };
+
+        async function fetchGameMeta(path) {
+            try {
+                const response = await fetch(`${path}README.md`);
+                const text = await response.text();
+                const match = text.match(/<!--\s*GAME_META:(.*?)-->/s);
+                if (match && match[1]) {
+                    const meta = JSON.parse(match[1].trim());
+                    meta.href = path;
+                    return meta;
+                }
+            } catch (e) {
+                console.error(`Failed to load meta for ${path}`, e);
+            }
+            return null;
+        }
+
+        async function init() {
+            loadingIndicator.textContent = translations[currentLang].loading;
+            const metaPromises = gamePaths.map(path => fetchGameMeta(path));
+            const results = await Promise.all(metaPromises);
+            allGames = results.filter(g => g !== null);
+
+            loadingIndicator.style.display = 'none';
+            gameGrid.style.display = 'grid';
+            updateUI();
+        }
 
         function renderGames() {
             const searchTerm = searchInput.value.toLowerCase();
             gameGrid.innerHTML = '';
 
-            games.forEach(game => {
+            allGames.forEach(game => {
                 const name = game[currentLang].name;
                 const desc = game[currentLang].desc;
 
@@ -238,8 +277,7 @@
 
         searchInput.addEventListener('input', renderGames);
 
-        // Initial render
-        updateUI();
+        init();
 
         // PWA registration
         if ('serviceWorker' in navigator) {
