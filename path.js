@@ -35,5 +35,13 @@ const gamePaths = [
     "34-helicopter-Game/",
     "35-RubikCube-Game/",
     "36-Cross-River-Game/",
-    "37-Word-Search-Relaxed/"
+    "37-Word-Search-Relaxed/",
+    "38-Pac-Man-Game/",
+    "39-Chess-Game/",
+    "40-Doodle-Jump-Game/",
+    "41-Solitaire-Game/",
+    "42-Sudoku-Game/",
+    "43-Wordle-Game/",
+    "44-Simon-Says-Game/",
+    "45-Sliding-Puzzle-Game/"
 ];

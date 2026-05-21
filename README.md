@@ -58,6 +58,14 @@ The project uses a data-driven approach:
 | 35 | Rubik's Cube Game | EN/ZH |
 | 36 | River crossing Game | EN/ZH |
 | 37 | Word Search Relaxed | EN/ZH |
+| 38 | Pac-Man Game | EN/ZH |
+| 39 | Chess Game | EN/ZH |
+| 40 | Doodle Jump Game | EN/ZH |
+| 41 | Solitaire Game | EN/ZH |
+| 42 | Sudoku Game | EN/ZH |
+| 43 | Wordle Game | EN/ZH |
+| 44 | Simon Says Game | EN/ZH |
+| 45 | Sliding Puzzle Game | EN/ZH |
 
 ## Forked From
 Original project by [he-is-talha](https://github.com/he-is-talha/html-css-javascript-games).
