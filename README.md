@@ -1,103 +1,66 @@
-# HTML/CSS and JavaScript Games 🎮
+# HTML/CSS and JavaScript Games Collection 🎮
 
-This repository contains a collection of HTML, CSS, and JavaScript games. 🎯🕹</br>
-fork from https://github.com/he-is-talha/html-css-javascript-games
+A modernized, decentralized, and Progressive Web App (PWA) collection of 37+ interactive games. 🎯🕹
 
-|  #  | Game                                           | Live Demo |
-| :-: | ---------------------------------------------- | --------- |
-| 01  | [Candy Crush Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/01-Candy-Crush-Game)     | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/01-Candy-Crush-Game/) |
-| 02  | [Archery Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/02-Archery-Game)     | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/02-Archery-Game/) |
-| 03  | [Speed Typing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/03-Speed-Typing-Game) | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/03-Speed-Typing-Game/) |
-| 04  | [Breakout Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/04-Breakout-Game)           | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/04-Breakout-Game/) |
-| 05  | [Minesweeper Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/05-Minesweeper-Game)       | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/05-Minesweeper-Game/) |
-| 06  | [Tower Blocks Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/06-Tower-Blocks) | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/06-Tower-Blocks/) |
-| 07  | [Ping Pong Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/07-Ping-Pong-Game) | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/07-Ping-Pong-Game/) |
-| 08  | [Tetris Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/08-Tetris-Game) | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/08-Tetris-Game/) |
-| 09  | [Tilting Maze Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/09-Tilting-Maze-Game)       | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/09-Tilting-Maze-Game/) |
-| 10  | [Memory Card Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/10-Memory-Card-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/10-Memory-Card-Game/) |
-| 11  | [Rock Paper Scissors Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/11-Rock-Paper-Scissors)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/11-Rock-Paper-Scissors/) |
-| 12  | [Type Number Guessing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/12-Type-Number-Guessing-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/12-Type-Number-Guessing-Game/) |
-| 13  | [Tic Tac Toe Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/13-Tic-Tac-Toe)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/13-Tic-Tac-Toe/) |
-| 14  | [Snake Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/14-Snake-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/14-Snake-Game/) |
-| 15  | [Connect Four Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/15-Connect-Four-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/15-Connect-Four-Game/) |
-| 16  | [Insect Catch Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/16-Insect-Catch-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/16-Insect-Catch-Game/) |
-| 17  | [Typing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/17-Typing-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/17-Typing-Game/) |
-| 18  | [Hangman Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/18-Hangman-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/18-Hangman-Game/) |
-| 19  | [Flappy Bird Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/19-Flappy-Bird-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/19-Flappy-Bird-Game/) |
-| 20  | [Crossy Road Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/20-Crossy-Road-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/20-Crossy-Road-Game/) |
-| 21  | [2048 Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/21-2048-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/21-2048-Game/) |
-| 22  | [Dice Roll Simulator](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/22-Dice-Roll-Simulator)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/22-Dice-Roll-Simulator/) |
-| 23  | [Shape Clicker Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/23-Shape-Clicker-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/23-Shape-Clicker-Game/) |
-| 24  | [Typing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/24-Typing-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/24-Typing-Game/) |
-| 25  | [Speak Number Guessing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/25-Speak-Number-Guessing-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/25-Speak-Number-Guessing-Game/) |
-| 26  | [Fruit Slicer Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/26-Fruit-Slicer-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/26-Fruit-Slicer-Game/) |
-| 27  | [Quiz Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/27-Quiz-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/27-Quiz-Game/) |
-| 28  | [Emoji Catcher Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/28-Emoji-Catcher-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/28-Emoji-Catcher-Game/) |
-| 29  | [Whack A Mole Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/29-Whack-A-Mole-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/29-Whack-A-Mole-Game/) |
-| 30  | [Guess Number Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/30-Guess-Number-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/30-Guess-Number-Game/) |
-| 31  | [Air Hockey Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/31-Air-Hockey-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/31-Air-Hockey-Game/) |
-| 32  | [24 Point Poker Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/32-24-Point-Poker-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/32-24-Point-Poker-Game/) |
-| 33  | [Snakes and ladders](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/33-Snakes_ladders)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/33-Snakes_ladders/) |
-| 34  | [Helicopter Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/34-helicopter-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/34-helicopter-Game/) |
-| 35  | [RubikCube Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/35-RubikCube-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/35-RubikCube-Game/) |
-| 36  | [River crossing Game](https://github.com/leoncoolmoon/html-css-javascript-games/tree/main/36-Cross-River-Game)                   | [Live Demo](https://leoncoolmoon.github.io/html-css-javascript-games/36-Cross-River-Game/) |
-## Games Description
+## Key Features 🚀
 
-1. **Candy Crush Game**: Enjoy the classic match-three puzzle game where you swap colored candies to create matches and clear levels. 🍬🍭
-2. **Archery Game**: Test your aim in this challenging archery game where precision and timing are key to hitting the bullseye. 🏹
-3. **Speed Typing Game**: Improve your typing speed and accuracy with this game that challenges you to type words quickly under time pressure. ⌨️
-4. **Breakout Game**: Relive the arcade classic where you use a paddle to bounce a ball and break bricks, aiming for a high score. 🎮
-5. **Minesweeper Game**: Exercise your logical thinking with this puzzle game where you avoid hidden mines and uncover safe tiles. 💣
-6. **Tower Blocks**: Build a tower by stacking blocks as high as possible without letting them topple over in this physics-based game. 🏗️
-7. **Ping Pong Game**: Experience the thrill of table tennis as you compete against an AI opponent in this classic sports game. 🏓
-8. **Tetris Game**: Arrange falling tetrominoes to create complete lines and score points in this addictive puzzle game. 🧱
-9. **Tilting Maze Game**: Navigate a ball through a tilting maze, avoiding traps and reaching the goal in this challenging game of skill. 🌀
-10. **Memory Card Game**: Test your memory by matching pairs of cards in this classic concentration game. 🃏
-11. **Rock Paper Scissors**: Play the timeless hand game against the computer and see who comes out victorious. ✂️
-12. **Type Number Guessing Game**: Guess the hidden number based on clues provided after each guess in this number guessing game. 🔢
-13. **Tic Tac Toe**: Challenge a friend or AI in this simple yet strategic game of placing Xs and Os in a 3x3 grid. ⭕❌
-14. **Snake Game**: Control a growing snake, eat food, and avoid collisions with walls and your own tail in this nostalgic arcade game. 🐍
-15. **Connect Four Game**: Strategically drop colored discs to connect four in a row vertically, horizontally, or diagonally in this classic board game. 🔵🔴
-16. **Insect Catch Game**: Test your reflexes by clicking on randomly appearing insects to catch them before they disappear. 🐞
-17. **Typing Game**: Sharpen your typing skills by typing specific words or sentences as quickly and accurately as possible. ⌨️
-18. **Hangman Game**: Guess the hidden word by suggesting letters within a certain number of guesses in this word-guessing game. 🎩
-19. **Flappy Bird Game**: Guide a bird through gaps in pipes by tapping to flap its wings, avoiding obstacles and aiming for a high score. 🐦
-20. **Crossy Road Game**: Help a character cross roads, rivers, and other obstacles in this endless hopping game with a retro arcade feel. 🚦
-21. **2048 Game**: Slide numbered tiles on a grid to combine them and create a tile with the number 2048 in this addictive puzzle game. 🧩
-22. **Dice Roll Simulator**: Simulate rolling dice to achieve different combinations or outcomes in this virtual dice rolling game. 🎲
-23. **Shape Clicker Game**: Click on various shapes appearing on the screen within a time limit to score points in this clicker game. 🔷🔶
-24. **Typing Game**: Improve your typing speed and accuracy by typing specific words or sentences under time pressure. ⌨️
-25. **Speak Number Guessing Game**: Guess the hidden number by speaking your guesses aloud in this voice-activated number guessing game. 🗣️🔢
-26. **Fruit Slicer Game**: Swipe across the screen to slice falling fruits while avoiding bombs in this fast-paced fruit-slicing game. 🍉🔪
-27. **Quiz Game**: Test your knowledge on various topics by answering trivia questions and aiming for a high score in this quiz game. 🧠📚
-28. **Emoji Catcher Game**: Catch falling emojis with a basket or container while avoiding bombs and other obstacles in this emoji-catching game. 🎯😄
-29. **Whack a Mole Game**: Test your reaction speed by hitting randomly appearing moles with a mallet before they disappear in this classic arcade game. 🕹️
-30. **Guess Number Game**: Guess a 4-digit number with A for right position and B for right number. Only eight chances. A good game for logical thinking.🧠🤖
-31. **Air Hockey Game**: A ping-pong like game with two players. control with mouse or keyboard or multi-touch screen. Play with your friends in this classic game. 🏀🏑
-32. **24 Point Poker Game**: A classic 24 point poker game. Get four random cards to start. Use Add or Subtract or Multiply or Divide to calculate 24. 🎲🃏
-33. **Snakes and ladders**: A Classic Board Game Experience Enjoy the timeless family favorite where luck meets strategy! Roll the dice, climb the ladders to race ahead, but watch out for slippery snakes that might send you sliding back. 🎲🐍🪜
-34. **Helicopter Game**: A simple helicopter shooting game. Control your helicopter to avoid obstacles and shoot enemies. (still under developing) 🚁💥
-35. **Rubik's Cube Game**: A virtual Rubik's cube game that lets you solve the classic puzzle in 3D. Rotate and twist to align all colors on each face. (still under developing) 🎲🧩
-36. **River crossing Game**: Classic river puzzle. Boat holds two. Avoid zombies eating survivors. 🧟‍♂️🚣
-37. **Word Search Relaxed**: Discover hidden words in a dynamic grid with smooth animations and fade-in background music. A relaxing yet engaging puzzle experience.🔍✨🎶
+- **Modern UI**: A responsive, card-based grid layout built with CSS Grid and Flexbox.
+- **Multilingual**: Unified English and Chinese support with seamless switching.
+- **Decentralized Architecture**: Game metadata (names and descriptions) is stored locally within each game's `README.md` for easier maintenance.
+- **PWA Support**: Installable on mobile and desktop with offline caching capabilities.
+- **Search Functionality**: Real-time filtering to find your favorite games instantly.
+
+## How it Works 🛠
+
+The project uses a data-driven approach:
+1. Each game directory contains a `README.md` with an embedded JSON metadata block (`GAME_META`).
+2. The root `path.js` defines the list of available games.
+3. The main `index.html` dynamically aggregates this data to render the home page.
+
+## Game List 📋
+
+| # | Game | Language |
+| :--- | :--- | :--- |
+| 01 | Candy Crush Game | EN/ZH |
+| 02 | Archery Game | EN/ZH |
+| 03 | Speed Typing Game | EN/ZH |
+| 04 | Breakout Game | EN/ZH |
+| 05 | Minesweeper Game | EN/ZH |
+| 06 | Tower Blocks | EN/ZH |
+| 07 | Ping Pong Game | EN/ZH |
+| 08 | Tetris Game | EN/ZH |
+| 09 | Tilting Maze Game | EN/ZH |
+| 10 | Memory Card Game | EN/ZH |
+| 11 | Rock Paper Scissors | EN/ZH |
+| 12 | Type Number Guessing Game | EN/ZH |
+| 13 | Tic Tac Toe | EN/ZH |
+| 14 | Snake Game | EN/ZH |
+| 15 | Connect Four Game | EN/ZH |
+| 16 | Insect Catch Game | EN/ZH |
+| 17 | Typing Game | EN/ZH |
+| 18 | Hangman Game | EN/ZH |
+| 19 | Flappy Bird Game | EN/ZH |
+| 20 | Crossy Road Game | EN/ZH |
+| 21 | 2048 Game | EN/ZH |
+| 22 | Dice Roll Simulator | EN/ZH |
+| 23 | Shape Clicker Game | EN/ZH |
+| 24 | Typing Game | EN/ZH |
+| 25 | Speak Number Guessing Game | EN/ZH |
+| 26 | Fruit Slicer Game | EN/ZH |
+| 27 | Quiz Game | EN/ZH |
+| 28 | Emoji Catcher Game | EN/ZH |
+| 29 | Whack A Mole Game | EN/ZH |
+| 30 | Guess Number Game | EN/ZH |
+| 31 | Air Hockey Game | EN/ZH |
+| 32 | 24 Point Poker Game | EN/ZH |
+| 33 | Snakes & Ladders | EN/ZH |
+| 34 | Helicopter Game | EN/ZH |
+| 35 | Rubik's Cube Game | EN/ZH |
+| 36 | River crossing Game | EN/ZH |
+| 37 | Word Search Relaxed | EN/ZH |
+
+## Forked From
+Original project by [he-is-talha](https://github.com/he-is-talha/html-css-javascript-games).
+
 ## License
-
-The MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+The MIT License. See `LICENSE` for details.
