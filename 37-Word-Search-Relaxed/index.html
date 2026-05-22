@@ -604,18 +604,52 @@ function resetSelection(){
 let preloadedLevel=null,isPreloading=false,currentTheme='';
 
 async function fetchWords(theme){
-  const prompt=`Give me exactly 8 words related to the theme: "${theme}". Rules: Each word 3-8 letters, UPPERCASE, no spaces/hyphens. For each word provide a short definition (one sentence, 5-15 words). Return ONLY a JSON array: [{"word":"WORD","def":"Short definition"}]. No other text.`;
   try{
-    const res=await fetch('https://text.pollinations.ai/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'openai',messages:[{role:'user',content:prompt}],max_tokens:800})});
-    if(!res.ok)throw new Error('API fail');
-    const data=await res.json();
-    const text=data.choices[0].message.content.replace(/```json|```/g,'').trim();
-    const arr=JSON.parse(text);
-    const ws=[],defs={};
-    for(const item of arr){const w=item.word.toUpperCase().replace(/[^A-Z]/g,'');if(w.length>=3&&w.length<=8){ws.push(w);defs[w]=item.def||''}}
-    if(ws.length<4)throw new Error('Too few words');
-    return{words:ws.slice(0,8),definitions:defs,theme};
-  }catch(e){return null}
+    const [relRes, topRes] = await Promise.all([
+      fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(theme)}&max=40&md=dpsr`),
+      fetch(`https://api.datamuse.com/words?topics=${encodeURIComponent(theme)}&max=40&md=dpsr`)
+    ]);
+    const [relData, topData] = await Promise.all([relRes.json(), topRes.json()]);
+
+    let seen = new Set();
+    let merged = [];
+    const processData = (data) => {
+      for (const w of data) {
+        if (merged.length >= 12) break;
+        const rawWord = w.word.toUpperCase();
+        if (/[^A-Z]/.test(rawWord)) continue;
+        const word = rawWord;
+        if (word.length >= 3 && word.length <= 8 && !seen.has(word) && w.defs && w.defs.length > 0) {
+          seen.add(word);
+          const parts = w.defs[0].split('\t');
+          const pos = parts[0] ? parts[0] + '.' : 'u.';
+          const meaning = parts[1] || w.defs[0];
+          merged.push({ word, def: `${pos} ${meaning}` });
+        }
+      }
+    };
+
+    processData([...relData, ...topData]);
+
+    if (merged.length < 8) {
+      const extra = await fetch(`https://api.datamuse.com/words?rel_trg=${encodeURIComponent(theme)}&max=40&md=dpsr`);
+      const extraData = await extra.json();
+      processData(extraData);
+    }
+
+    if (merged.length < 4) throw new Error('Too few words');
+
+    const finalWords = merged.slice(0, 8);
+    const ws = [], defs = {};
+    for (const item of finalWords) {
+      ws.push(item.word);
+      defs[item.word] = item.def;
+    }
+
+    return { words: ws, definitions: defs, theme };
+  } catch(e) {
+    return null;
+  }
 }
 
 async function preloadNextLevel(curTheme){
