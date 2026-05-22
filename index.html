@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="system">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +15,39 @@
             --text-muted: #666;
             --shadow: 0 4px 6px rgba(0,0,0,0.1);
             --transition: all 0.3s ease;
+            --tab-border: #4CAF50;
+            --tab-bg: white;
+            --tab-text: #4CAF50;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --tab-border: #4CAF50;
+            --tab-bg: #2d2d2d;
+            --tab-text: #4CAF50;
+            --input-bg: #333;
+            --input-border: #444;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="system"] {
+                --bg-color: #1a1a1a;
+                --card-bg: #2d2d2d;
+                --text-color: #e0e0e0;
+                --text-muted: #aaaaaa;
+                --shadow: 0 4px 6px rgba(0,0,0,0.3);
+                --tab-border: #4CAF50;
+                --tab-bg: #2d2d2d;
+                --tab-text: #4CAF50;
+                --input-bg: #333;
+                --input-border: #444;
+            }
         }
 
         body {
@@ -24,6 +57,7 @@
             margin: 0;
             padding: 20px;
             line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         header {
@@ -58,7 +92,7 @@
             display: inline-block;
             padding: 8px 16px;
             background-color: var(--primary-color);
-            color: white;
+            color: white !important;
             text-decoration: none;
             border-radius: 20px;
             font-size: 0.9rem;
@@ -89,9 +123,9 @@
         .tab-btn {
             padding: 8px 20px;
             border-radius: 20px;
-            border: 2px solid var(--primary-color);
-            background: white;
-            color: var(--primary-color);
+            border: 2px solid var(--tab-border);
+            background: var(--tab-bg);
+            color: var(--tab-text);
             cursor: pointer;
             font-weight: 600;
             transition: var(--transition);
@@ -100,21 +134,20 @@
         .tab-btn.active {
             background-color: var(--primary-color);
             color: white;
+            border-color: var(--primary-color);
         }
 
         .tab-btn:hover {
-            background-color: #e8f5e9;
-        }
-
-        .tab-btn.active:hover {
-            background-color: var(--primary-dark);
+            opacity: 0.8;
         }
 
         #search-input {
             width: 100%;
             padding: 12px 20px;
             border-radius: 25px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-color);
             box-shadow: var(--shadow);
             font-size: 1rem;
             outline: none;
@@ -154,7 +187,7 @@
 
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
         }
 
         .game-card::after {
@@ -169,10 +202,6 @@
             transition: var(--transition);
         }
 
-        .game-card:hover::after {
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%);
-        }
-
         .game-card-content {
             position: relative;
             z-index: 2;
@@ -183,10 +212,6 @@
             height: 100%;
             box-sizing: border-box;
             flex-grow: 1;
-        }
-
-        .game-card.hidden {
-            display: none;
         }
 
         .game-card h3 {
@@ -238,6 +263,7 @@
         <h1 id="main-title">Game Collection</h1>
         <div class="controls">
             <div class="meta-info">
+                <button id="theme-toggle" class="btn" title="Toggle Theme">💻</button>
                 <button id="lang-toggle" class="btn">中文</button>
                 <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn" id="github-link">GitHub</a>
             </div>
@@ -263,10 +289,13 @@
     <script src="path.js"></script>
     <script>
         let currentLang = localStorage.getItem('lang') || 'en';
+        let currentTheme = localStorage.getItem('theme') || 'system';
         let currentCategory = 'All';
         let allGames = [];
+
         const searchInput = document.getElementById('search-input');
         const langToggle = document.getElementById('lang-toggle');
+        const themeToggle = document.getElementById('theme-toggle');
         const gameGrid = document.getElementById('game-grid');
         const mainTitle = document.getElementById('main-title');
         const loadingIndicator = document.getElementById('loading');
@@ -306,6 +335,26 @@
             }
         };
 
+        const themeIcons = {
+            light: "🌞",
+            dark: "🌚",
+            system: "💻"
+        };
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = themeIcons[theme];
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (currentTheme === 'system') currentTheme = 'light';
+            else if (currentTheme === 'light') currentTheme = 'dark';
+            else currentTheme = 'system';
+
+            localStorage.setItem('theme', currentTheme);
+            applyTheme(currentTheme);
+        });
+
         async function fetchGameMeta(gameObj) {
             try {
                 const response = await fetch(`${gameObj.path}README.md`);
@@ -324,6 +373,7 @@
         }
 
         async function init() {
+            applyTheme(currentTheme);
             loadingIndicator.textContent = translations[currentLang].loading;
             const metaPromises = gamePaths.map(gameObj => fetchGameMeta(gameObj));
             const results = await Promise.all(metaPromises);
@@ -380,7 +430,6 @@
             langToggle.textContent = t.langToggle;
             document.documentElement.lang = currentLang;
 
-            // Update Tab Text
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => {
                 tab.textContent = t.categories[tab.dataset.category];
@@ -399,7 +448,6 @@
 
         init();
 
-        // PWA registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
