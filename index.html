@@ -77,6 +77,39 @@
             position: relative;
         }
 
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .tab-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background-color: #e8f5e9;
+        }
+
+        .tab-btn.active:hover {
+            background-color: var(--primary-dark);
+        }
+
         #search-input {
             width: 100%;
             padding: 12px 20px;
@@ -176,6 +209,13 @@
                 <button id="lang-toggle" class="btn">中文</button>
                 <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn" id="github-link">GitHub</a>
             </div>
+            <div class="category-tabs" id="category-tabs">
+                <button class="tab-btn active" data-category="All">All</button>
+                <button class="tab-btn" data-category="Arcade">Arcade</button>
+                <button class="tab-btn" data-category="Puzzle">Puzzle</button>
+                <button class="tab-btn" data-category="Board">Board</button>
+                <button class="tab-btn" data-category="Typing">Typing</button>
+            </div>
             <div class="search-container">
                 <input type="text" id="search-input" placeholder="Search games...">
             </div>
@@ -189,6 +229,7 @@
     <script src="path.js"></script>
     <script>
         let currentLang = localStorage.getItem('lang') || 'en';
+        let currentCategory = 'All';
         let allGames = [];
         const searchInput = document.getElementById('search-input');
         const langToggle = document.getElementById('lang-toggle');
@@ -202,42 +243,70 @@
                 searchPlaceholder: "Search games...",
                 langToggle: "中文",
                 loading: "Loading games...",
-                github: "GitHub"
+                github: "GitHub",
+                categories: {
+                    All: "All",
+                    Arcade: "Arcade",
+                    Puzzle: "Puzzle",
+                    Board: "Board",
+                    Typing: "Typing"
+                }
             },
             zh: {
                 title: "游戏集合",
                 searchPlaceholder: "搜索游戏...",
                 langToggle: "English",
                 loading: "正在加载游戏...",
-                github: "GitHub"
+                github: "GitHub",
+                categories: {
+                    All: "全部",
+                    Arcade: "街机",
+                    Puzzle: "益智",
+                    Board: "棋牌",
+                    Typing: "打字"
+                }
             }
         };
 
-        async function fetchGameMeta(path) {
+        async function fetchGameMeta(gameObj) {
             try {
-                const response = await fetch(`${path}README.md`);
+                const response = await fetch(`${gameObj.path}README.md`);
                 const text = await response.text();
                 const match = text.match(/<!--\s*GAME_META:(.*?)-->/s);
                 if (match && match[1]) {
                     const meta = JSON.parse(match[1].trim());
-                    meta.href = path;
+                    meta.href = gameObj.path;
+                    meta.category = gameObj.category;
                     return meta;
                 }
             } catch (e) {
-                console.error(`Failed to load meta for ${path}`, e);
+                console.error(`Failed to load meta for ${gameObj.path}`, e);
             }
             return null;
         }
 
         async function init() {
             loadingIndicator.textContent = translations[currentLang].loading;
-            const metaPromises = gamePaths.map(path => fetchGameMeta(path));
+            const metaPromises = gamePaths.map(gameObj => fetchGameMeta(gameObj));
             const results = await Promise.all(metaPromises);
             allGames = results.filter(g => g !== null);
 
             loadingIndicator.style.display = 'none';
             gameGrid.style.display = 'grid';
+            setupTabs();
             updateUI();
+        }
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    renderGames();
+                });
+            });
         }
 
         function renderGames() {
@@ -247,8 +316,10 @@
             allGames.forEach(game => {
                 const name = game[currentLang].name;
                 const desc = game[currentLang].desc;
+                const matchesSearch = name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
+                const matchesCategory = currentCategory === 'All' || game.category === currentCategory;
 
-                if (name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm)) {
+                if (matchesSearch && matchesCategory) {
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
@@ -266,6 +337,13 @@
             searchInput.placeholder = t.searchPlaceholder;
             langToggle.textContent = t.langToggle;
             document.documentElement.lang = currentLang;
+
+            // Update Tab Text
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.textContent = t.categories[tab.dataset.category];
+            });
+
             renderGames();
         }
 
