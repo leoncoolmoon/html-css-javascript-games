@@ -143,25 +143,45 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border-top: 5px solid var(--primary-color);
+            position: relative;
+            min-height: 220px;
+            border: none;
+            background-size: cover;
+            background-position: center;
+            text-decoration: none;
+            color: white;
         }
 
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.3);
         }
 
-        .game-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-bottom: 1px solid #eee;
+        .game-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+            z-index: 1;
+            transition: var(--transition);
+        }
+
+        .game-card:hover::after {
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%);
         }
 
         .game-card-content {
-            padding: 15px;
+            position: relative;
+            z-index: 2;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+            box-sizing: border-box;
             flex-grow: 1;
         }
 
@@ -171,24 +191,22 @@
 
         .game-card h3 {
             margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        .game-card a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .game-card a:hover {
-            text-decoration: underline;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .game-card p {
-            color: var(--text-muted);
+            color: #ddd;
             font-size: 0.9rem;
             margin-bottom: 0;
-            flex-grow: 1;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
         #loading {
@@ -340,12 +358,13 @@
                 const matchesCategory = currentCategory === 'All' || game.category === currentCategory;
 
                 if (matchesSearch && matchesCategory) {
-                    const card = document.createElement('div');
+                    const card = document.createElement('a');
+                    card.href = game.href;
                     card.className = 'game-card';
+                    card.style.backgroundImage = `url('${game.href}snap.jpg')`;
                     card.innerHTML = `
-                        <img src="${game.href}snap.jpg" alt="${name}" onerror="this.style.display='none'">
                         <div class="game-card-content">
-                            <h3><a href="${game.href}">${game.num}. ${name}</a></h3>
+                            <h3>${game.num}. ${name}</h3>
                             <p>${desc}</p>
                         </div>
                     `;
