@@ -138,17 +138,31 @@
         .game-card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            padding: 20px;
             box-shadow: var(--shadow);
             transition: var(--transition);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             border-top: 5px solid var(--primary-color);
         }
 
         .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .game-card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .game-card.hidden {
@@ -158,7 +172,7 @@
         .game-card h3 {
             margin-top: 0;
             margin-bottom: 10px;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
         }
 
         .game-card a {
@@ -172,7 +186,7 @@
 
         .game-card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin-bottom: 0;
             flex-grow: 1;
         }
@@ -329,8 +343,11 @@
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
-                        <h3><a href="${game.href}">${game.num}. ${name}</a></h3>
-                        <p>${desc}</p>
+                        <img src="${game.href}snap.jpg" alt="${name}" onerror="this.style.display='none'">
+                        <div class="game-card-content">
+                            <h3><a href="${game.href}">${game.num}. ${name}</a></h3>
+                            <p>${desc}</p>
+                        </div>
                     `;
                     gameGrid.appendChild(card);
                 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'game-list-v4';
+const CACHE_NAME = 'game-list-v5';
 const ASSETS = [
     './',
     './index.html',
@@ -34,8 +34,8 @@ self.addEventListener('fetch', event => {
                     return response;
                 }
                 return fetch(event.request).then(networkResponse => {
-                    // Cache game metadata (README.md files)
-                    if (event.request.url.endsWith('README.md')) {
+                    // Cache game metadata and covers
+                    if (event.request.url.endsWith('README.md') || event.request.url.endsWith('snap.jpg')) {
                         return caches.open(CACHE_NAME).then(cache => {
                             cache.put(event.request, networkResponse.clone());
                             return networkResponse;
