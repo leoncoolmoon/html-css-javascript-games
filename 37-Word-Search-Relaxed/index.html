@@ -620,6 +620,9 @@ async function fetchWords(theme){
         if (/[^A-Z]/.test(rawWord)) continue;
         const word = rawWord;
         if (word.length >= 3 && word.length <= 8 && !seen.has(word) && w.defs && w.defs.length > 0) {
+          // Avoid words containing each other (e.g., FLAG and FLAGS)
+          if (merged.some(m => m.word.includes(word) || word.includes(m.word))) continue;
+
           seen.add(word);
           const parts = w.defs[0].split('\t');
           const pos = parts[0] ? parts[0] + '.' : 'u.';
