@@ -52,39 +52,63 @@ function candyCrushGame() {
         square.addEventListener("drageleave", dragLeave)
     );
     squares.forEach((square) => square.addEventListener("drop", dragDrop));
+
+    // Support for both click/touch to swap
+    let lastEventTime = 0;
     squares.forEach((square) =>
-        square.addEventListener("click", candyClicked)
+        square.addEventListener("mousedown", (e) => {
+            if (Date.now() - lastEventTime < 500) return;
+            candyTouchStart.call(square, e);
+        })
     );
-    function candyClicked() {
+    squares.forEach((square) =>
+        square.addEventListener("touchstart", (e) => {
+            lastEventTime = Date.now();
+            candyTouchStart.call(square, e);
+        }, {passive: true})
+    );
+
+    function candyTouchStart(e) {
         if (selectedCandy) {
+            const currentId = parseInt(this.id);
+            const draggedId = squareIdBeingDragged;
 
             colorBeingReplaced = this.style.backgroundImage;
-            squareIdBeingReplaced = parseInt(this.id);
-            this.style.backgroundImage = colorBeingDragged;
-            squares[
-                squareIdBeingDragged
-            ].style.backgroundImage = colorBeingReplaced;
+            squareIdBeingReplaced = currentId;
 
-            dragEnd();
+            let validMoves = [
+                draggedId - 1,
+                draggedId - width,
+                draggedId + 1,
+                draggedId + width
+            ];
 
-            squares[
-                squareIdBeingDragged
-            ].style.transform = "";
+            if (validMoves.includes(squareIdBeingReplaced)) {
+                this.style.backgroundImage = colorBeingDragged;
+                squares[draggedId].style.backgroundImage = colorBeingReplaced;
+                dragEnd();
+            }
+
+            if (squares[draggedId]) {
+                squares[draggedId].style.transform = "";
+            }
             selectedCandy = false;
         } else {
             colorBeingDragged = this.style.backgroundImage;
             squareIdBeingDragged = parseInt(this.id);
-            squares[
-                squareIdBeingDragged
-            ].style.transform = "scale(1.3 )";
+            squares[squareIdBeingDragged].style.transform = "scale(1.2)";
             selectedCandy = true;
         }
     }
+
+    function candyTouchEnd(e) {
+        // Reserved for future touch-drag implementation if needed
+    }
+
     // record the color and id of the candy being dragged
     function dragStart() {
         colorBeingDragged = this.style.backgroundImage;
         squareIdBeingDragged = parseInt(this.id);
-        // this.style.backgroundImage = ''
     }
 
     function dragOver(e) {
@@ -96,10 +120,8 @@ function candyCrushGame() {
     }
 
     function dragLeave() {
-        //this.style.backgroundImage = "";
     }
-    // record the color and id of the square being replaced
-    // change the color and id of the square being replaced to the color and id of the candy being dragged
+
     function dragDrop() {
         colorBeingReplaced = this.style.backgroundImage;
         squareIdBeingReplaced = parseInt(this.id);
@@ -120,9 +142,8 @@ function candyCrushGame() {
         let validMove = validMoves.includes(squareIdBeingReplaced);
 
         if (squareIdBeingReplaced && validMove) {
-            //squareIdBeingReplaced = null;
+            // Valid move
         } else if (squareIdBeingReplaced && !validMove) {
-            //if the move is not valid, change the color back
             squares[
                 squareIdBeingReplaced
             ].style.backgroundImage = colorBeingReplaced;
@@ -136,13 +157,16 @@ function candyCrushGame() {
         }
 
         if (!checkAll()) {
-            squares[
-                squareIdBeingReplaced
-            ].style.backgroundImage = colorBeingReplaced;
-            squares[
-                squareIdBeingDragged
-            ].style.backgroundImage = colorBeingDragged;
+            // If no match was made, swap back
+            if (squareIdBeingReplaced !== null && squareIdBeingReplaced !== undefined) {
+                squares[squareIdBeingReplaced].style.backgroundImage = colorBeingReplaced;
+                squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+            }
         }
+
+        // Reset
+        squareIdBeingDragged = null;
+        squareIdBeingReplaced = null;
     }
 
     //Dropping candies once some have been cleared
@@ -160,7 +184,6 @@ function candyCrushGame() {
                     squares[i].style.backgroundImage = squares[j].style.backgroundImage;
                     squares[j].style.backgroundImage = "";
 
-                    // 添加平滑的下落效果
                     squares[i].style.transform = `translateY(${(i - j) * 20}%)`;
                     setTimeout(() => {
                         squares[i].style.transform = "translateY(0)";
@@ -171,7 +194,6 @@ function candyCrushGame() {
             }
         }
 
-        // 仅处理所有糖果完成下落后的情况
         if (!moved) {
             for (let i = 0; i < width; i++) {
                 if (squares[i].style.backgroundImage === "") {
@@ -181,28 +203,23 @@ function candyCrushGame() {
             }
         }
     }
+
     function removeCandies(candies) {
         candies.forEach((index) => {
             const candy = squares[index];
-
-            // 逐渐缩小并淡出
             candy.style.transition = "transform 0.3s, opacity 0.3s";
             candy.style.transform = "scale(0)";
             candy.style.opacity = "0";
 
-            // 在动画结束后清空图案
             setTimeout(() => {
                 candy.style.backgroundImage = "";
                 candy.style.transform = "scale(1)";
                 candy.style.opacity = "1";
-            }, 200); // 这里的300ms应与动画时间相匹配
+            }, 200);
         });
     }
 
-
-
     ///-> Checking for Matches <-///
-    //For Row of Five
     function checkRowForFive() {
         var returnValue = false;
         for (i = 0; i < 59; i++) {
@@ -211,13 +228,13 @@ function candyCrushGame() {
             const isBlank = squares[i].style.backgroundImage === "";
 
             const notValid = [
-                4, 5, 6, 7,    // 第1行
-                12, 13, 14, 15, // 第2行
-                20, 21, 22, 23, // 第3行
-                28, 29, 30, 31, // 第4行
-                36, 37, 38, 39, // 第5行
-                44, 45, 46, 47, // 第6行
-                52, 53, 54, 55  // 第7行
+                4, 5, 6, 7,
+                12, 13, 14, 15,
+                20, 21, 22, 23,
+                28, 29, 30, 31,
+                36, 37, 38, 39,
+                44, 45, 46, 47,
+                52, 53, 54, 55
             ];
 
             if (notValid.includes(i)) continue;
@@ -236,7 +253,7 @@ function candyCrushGame() {
         }
         return returnValue;
     }
-    //For Column of Five
+
     function checkColumnForFive() {
         var returnValue = false;
         for (i = 0; i < 31; i++) {
@@ -261,7 +278,6 @@ function candyCrushGame() {
         return returnValue;
     }
 
-    //For Row of Four
     function checkRowForFour() {
         var returnValue = false;
         for (i = 0; i < 60; i++) {
@@ -296,7 +312,6 @@ function candyCrushGame() {
         return returnValue
     }
 
-    //For Column of Four
     function checkColumnForFour() {
         var returnValue = false;
         for (i = 0; i < 39; i++) {
@@ -320,7 +335,6 @@ function candyCrushGame() {
         return returnValue;
     }
 
-    //For Row of Three
     function checkRowForThree() {
         var returnValue = false;
         for (i = 0; i < 61; i++) {
@@ -355,7 +369,6 @@ function candyCrushGame() {
         return returnValue;
     }
 
-    //For Column of Three
     function checkColumnForThree() {
         var returnValue = false;
         for (i = 0; i < 47; i++) {
@@ -379,6 +392,7 @@ function candyCrushGame() {
         }
         return returnValue;
     }
+
     function checkAll() {
         let r5c = checkRowForFive();
         let r4c = checkRowForFour();
@@ -390,8 +404,8 @@ function candyCrushGame() {
         moveIntoSquareBelow();
         return r5c || c5c || r4c || r3c || c4c || c3c;
     }
+
     checkAll();
-    scoreDisplay.addEventListener("click", checkAll);
 
     window.setInterval(function () {
         checkAll();
