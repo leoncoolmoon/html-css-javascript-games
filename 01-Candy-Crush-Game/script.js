@@ -34,6 +34,16 @@ function candyCrushGame() {
     }
     createBoard();
 
+    function showScorePopup(points) {
+        const popup = document.createElement("div");
+        popup.classList.add("score-popup");
+        popup.innerText = `+${points}`;
+        document.body.appendChild(popup);
+        setTimeout(() => {
+            popup.remove();
+        }, 800);
+    }
+
     // Dragging the Candy
     let colorBeingDragged;
     let colorBeingReplaced;
@@ -247,6 +257,7 @@ function candyCrushGame() {
             ) {
                 score += score_five;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_five);
                 removeCandies(rowOfFive);
                 returnValue = true;
             }
@@ -270,6 +281,7 @@ function candyCrushGame() {
             ) {
                 score += score_five;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_five);
                 removeCandies(columnOfFive);
                 returnValue = true;
 
@@ -305,6 +317,7 @@ function candyCrushGame() {
             ) {
                 score += score_four;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_four);
                 removeCandies(rowOfFour);
                 returnValue = true;
             }
@@ -328,6 +341,7 @@ function candyCrushGame() {
             ) {
                 score += score_four;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_four);
                 removeCandies(columnOfFour);
                 returnValue = true;
             }
@@ -362,6 +376,7 @@ function candyCrushGame() {
             ) {
                 score += score_three;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_three);
                 removeCandies(rowOfThree);
                 returnValue = true;
             }
@@ -385,6 +400,7 @@ function candyCrushGame() {
             ) {
                 score += score_three;
                 scoreDisplay.innerHTML = score;
+                showScorePopup(score_three);
                 removeCandies(columnOfThree);
                 returnValue = true;
 
