@@ -45,6 +45,7 @@ function mergeQuestions(newQs) {
   return added;
 }
 
+
 async function fetchDynamicQuestions() {
   const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
   try {
@@ -67,21 +68,90 @@ async function fetchDynamicQuestions() {
   }
 }
 
+// function pickQuestions(count) {
+//   // 优先用动态题目（本地题库之后的部分），再用本地题库
+//   const dynamic = questionPool.slice(localQuestions.length);
+//   const local = questionPool.slice(0, localQuestions.length);
+//   const ordered = [...dynamic, ...local];
+
+//   const available = ordered.filter(q => !usedQuestions.has(q.question));
+//   if (available.length < count) usedQuestions.clear(); // 题目用完了就重置
+
+//   const fresh = ordered.filter(q => !usedQuestions.has(q.question));
+//   shuffleArray(fresh);
+//   const picked = fresh.slice(0, count);
+//   picked.forEach(q => usedQuestions.add(q.question));
+//   return picked;
+// }
+
 function pickQuestions(count) {
-  // 优先用动态题目（本地题库之后的部分），再用本地题库
-  const dynamic = questionPool.slice(localQuestions.length);
-  const local = questionPool.slice(0, localQuestions.length);
-  const ordered = [...dynamic, ...local];
+  const getQText = (q) => (q && q.question ? q.question.trim().toLowerCase() : '');
+  const dynamicRatio = 0.8;
+  // 1. Separate the baseline pools
+  const dynamicPool = questionPool.slice(localQuestions.length);
+  const localPool = questionPool.slice(0, localQuestions.length);
+  const totalPoolSize = dynamicPool.length + localPool.length;
 
-  const available = ordered.filter(q => !usedQuestions.has(q.question));
-  if (available.length < count) usedQuestions.clear(); // 题目用完了就重置
+  // Edge case: handle empty pool safely
+  if (totalPoolSize === 0) return [];
 
-  const fresh = ordered.filter(q => !usedQuestions.has(q.question));
-  shuffleArray(fresh);
-  const picked = fresh.slice(0, count);
-  picked.forEach(q => usedQuestions.add(q.question));
+  // 2. Filter out already used questions for both pools
+  let freshDynamic = dynamicPool.filter(q => !usedQuestions.has(getQText(q)));
+  let freshLocal = localPool.filter(q => !usedQuestions.has(getQText(q)));
+
+  // 3. Reset mechanism if global pool runs dry
+  if ((freshDynamic.length + freshLocal.length) < count) {
+    usedQuestions.clear();
+    freshDynamic = dynamicPool.filter(q => !usedQuestions.has(getQText(q)));
+    freshLocal = localPool.filter(q => !usedQuestions.has(getQText(q)));
+  }
+
+  // 4. Shuffle pools individually to ensure random selection
+  shuffleArray(freshDynamic);
+  shuffleArray(freshLocal);
+
+  // 5. Calculate target counts based on your ratio formula: 
+  // Target Dynamic = (Dynamic Pool Size / Total Pool Size) * Requested Count
+  
+  let targetDynamicCount = Math.round(dynamicRatio * count);
+  let targetLocalCount = count - targetDynamicCount;
+
+  // 6. Extract questions using a flexible fallback strategy
+  const picked = [];
+
+  // Step A: Draw from dynamic pool up to its target share
+  const dynamicSelection = freshDynamic.slice(0, targetDynamicCount);
+  picked.push(...dynamicSelection);
+
+  // Step B: Draw from local pool up to its target share
+  const localSelection = freshLocal.slice(0, targetLocalCount);
+  picked.push(...localSelection);
+
+  // Step C: Fallback Top-up (If one pool didn't have enough UNUSED items, borrow from the other)
+  if (picked.length < count) {
+    const shortage = count - picked.length;
+    
+    // Look for leftover unused questions in whichever pool has them
+    const leftovers = [
+      ...freshDynamic.slice(dynamicSelection.length),
+      ...freshLocal.slice(localSelection.length)
+    ];
+    
+    picked.push(...leftovers.slice(0, shortage));
+  }
+
+  // 7. Final Shuffle so the user doesn't see all dynamic items clustered first
+  shuffleArray(picked);
+
+  // 8. Commit selections to history tracking
+  picked.forEach(q => {
+    const text = getQText(q);
+    if (text) usedQuestions.add(text);
+  });
+
   return picked;
 }
+
 
 // ── 游戏模式配置 ───────────────────────────────────────
 const MODES = {
