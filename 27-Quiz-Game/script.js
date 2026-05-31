@@ -48,7 +48,7 @@ function mergeQuestions(newQs) {
 async function fetchDynamicQuestions() {
   const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
   try {
-    const res = await fetch(`${WORKER_URL}/quiz?topic=${encodeURIComponent(topic)}`);
+    const res = await fetch(`${WORKER_URL}/quiz?topic=${encodeURIComponent(topic)}&lang=${navigator.language}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (json.data && Array.isArray(json.data)) {
