@@ -1,4 +1,4 @@
-# HTML/CSS and JavaScript Games Collection 🎮
+# [HTML/CSS and JavaScript Games Collection](https://leoncoolmoon.github.io/html-css-javascript-games/) 🎮
 
 A modernized, decentralized, and Progressive Web App (PWA) collection of 37+ interactive games. 🎯🕹
 
