@@ -20,34 +20,80 @@
 
     const style = document.createElement('style');
     style.textContent = `
+        /* Global layout fixes to prevent vertical overflow */
+        html, body {
+            height: 100dvh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100vw !important;
+        }
+
+        /* Ensure all elements respect box-sizing */
+        * { box-sizing: border-box; }
+
+        /* Constrain common game containers and canvases */
+        canvas, #game-container, .container, .game-board, .grid, main, #board, .game-area, #canvas, .game {
+            max-height: 84dvh !important;
+            max-width: 100vw !important;
+            object-fit: contain !important;
+        }
+
+        /* Prevent large images from causing overflow */
+        img { max-height: 80dvh !important; object-fit: contain !important; }
+
+        /* Floating controls styling */
         .floating-controls {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 15px;
+            right: 15px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row-reverse;
             gap: 10px;
-            z-index: 9999;
+            z-index: 10000;
         }
         .floating-btn {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background-color: #4CAF50;
+            background-color: rgba(76, 175, 80, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: white;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .floating-btn:hover {
             transform: scale(1.1);
-            background-color: #45a049;
+            background-color: rgba(76, 175, 80, 0.9);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+        .floating-btn:active {
+            transform: scale(0.9);
+        }
+        @media (max-width: 600px), (max-height: 600px) {
+            .floating-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .floating-controls {
+                bottom: 12px;
+                right: 12px;
+                gap: 8px;
+            }
         }
         @media print {
             .floating-controls { display: none; }
@@ -86,7 +132,15 @@
         }
     };
 
-    container.appendChild(homeBtn);
     container.appendChild(shareBtn);
-    document.body.appendChild(container);
+    container.appendChild(homeBtn);
+
+    // Ensure body exists before appending
+    if (document.body) {
+        document.body.appendChild(container);
+    } else {
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.appendChild(container);
+        });
+    }
 })();
