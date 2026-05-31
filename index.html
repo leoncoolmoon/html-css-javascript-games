@@ -265,6 +265,7 @@
             <div class="meta-info">
                 <button id="theme-toggle" class="btn" title="Toggle Theme">💻</button>
                 <button id="lang-toggle" class="btn">中文</button>
+                <button id="share-btn" class="btn">Share</button>
                 <a href="https://github.com/leoncoolmoon/html-css-javascript-games/" class="btn" id="github-link">GitHub</a>
             </div>
             <div class="category-tabs" id="category-tabs">
@@ -296,6 +297,7 @@
         const searchInput = document.getElementById('search-input');
         const langToggle = document.getElementById('lang-toggle');
         const themeToggle = document.getElementById('theme-toggle');
+        const shareBtn = document.getElementById('share-btn');
         const gameGrid = document.getElementById('game-grid');
         const mainTitle = document.getElementById('main-title');
         const loadingIndicator = document.getElementById('loading');
@@ -307,6 +309,10 @@
                 langToggle: "中文",
                 loading: "Loading games...",
                 github: "GitHub",
+                share: "Share",
+                shareTitle: "Game Collection",
+                shareText: "Check out this awesome game collection!",
+                copied: "Link copied to clipboard!",
                 categories: {
                     All: "All",
                     Arcade: "Arcade",
@@ -323,6 +329,10 @@
                 langToggle: "English",
                 loading: "正在加载游戏...",
                 github: "GitHub",
+                share: "分享",
+                shareTitle: "游戏集合",
+                shareText: "来看看这些好玩的游戏！",
+                copied: "链接已复制到剪贴板！",
                 categories: {
                     All: "全部",
                     Arcade: "街机",
@@ -428,6 +438,7 @@
             mainTitle.textContent = t.title;
             searchInput.placeholder = t.searchPlaceholder;
             langToggle.textContent = t.langToggle;
+            shareBtn.textContent = t.share;
             document.documentElement.lang = currentLang;
 
             const tabs = document.querySelectorAll('.tab-btn');
@@ -445,6 +456,28 @@
         });
 
         searchInput.addEventListener('input', renderGames);
+
+        shareBtn.addEventListener('click', async () => {
+            const t = translations[currentLang];
+            const shareData = {
+                title: t.shareTitle,
+                text: t.shareText,
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert(t.copied);
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Error sharing:', err);
+                }
+            }
+        });
 
         init();
 

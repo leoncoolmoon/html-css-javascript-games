@@ -1,10 +1,11 @@
-const CACHE_NAME = 'game-list-v5';
+const CACHE_NAME = 'game-list-v6';
 const ASSETS = [
     './',
     './index.html',
     './path.js',
     './manifest.json',
-    './icon.svg'
+    './icon.svg',
+    './share.js'
 ];
 
 self.addEventListener('install', event => {
