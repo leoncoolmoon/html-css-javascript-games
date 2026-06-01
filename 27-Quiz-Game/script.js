@@ -1,286 +1,279 @@
-// ── 配置 ──────────────────────────────────────────────
+// ── 配置 ──────────────────────────────────────────────────────────────────────
 const WORKER_URL = "https://falling-hill-4472.leoncoolmoon.workers.dev";
 const TOPICS = ["general knowledge", "science and technology", "world history", "world geography"];
 
-// ── 本地题库（兜底） ──────────────────────────────────
+// ── i18n ──────────────────────────────────────────────────────────────────────
+const uiLang = (navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en";
+
+const T = {
+  en: {
+    title: "Quiz App",
+    subtitle: "Choose a mode to begin",
+    chooseMode: "Choose a Mode",
+    fetchingDynamic: "Fetching AI questions in background…",
+    dynamicReady: (n, topic) => `✓ ${n} AI questions ready (${topic})`,
+    localOnly: "⚠ Using local questions only",
+    disclaimer: "⚠ AI-generated questions may contain errors. Results are for entertainment only.",
+    submit: "Submit",
+    playAgain: "Play Again",
+    showAnswers: "Show Answers",
+    correct: "Correct!",
+    wrong: a => `Wrong. Correct: ${a}`,
+    timeout: "Time's up!",
+    timeoutCorrect: "(Time out)",
+    of: "of",
+    accuracy: "Accuracy",
+    avgTime: "Avg Time",
+    bestStreak: "Best Streak",
+    livesLeft: "Lives Left",
+    scoreLabel: "Score",
+    reviewTitle: "Review Incorrect Answers",
+    allCorrect: "All correct! 🎉",
+    yourAnswer: "Your answer",
+    correctAnswer: "Correct",
+    modes: {
+      classic:  { label: "Classic",     desc: "Answer all 20 questions, see how many you got right." },
+      timed:    { label: "⏱ Timed",     desc: "15 seconds per question. Bonus points for speed!" },
+      streak:   { label: "🔥 Streak",   desc: "Build a streak for bonus. One wrong breaks it!" },
+      survival: { label: "❤️ Survival", desc: "3 lives only. 30 questions. Don't run out!" },
+    },
+    grades: { S: "Flawless!", A: "Excellent!", B: "Good job!", C: "Not bad!", D: "Keep trying!" },
+  },
+  zh: {
+    title: "知识问答",
+    subtitle: "选择模式开始游戏",
+    chooseMode: "选择游戏模式",
+    fetchingDynamic: "后台加载 AI 题目中…",
+    dynamicReady: (n, topic) => `✓ 已加载 ${n} 道 AI 题目（${topic}）`,
+    localOnly: "⚠ 仅使用本地题目",
+    disclaimer: "⚠ AI 生成的题目可能包含错误，结果仅供娱乐参考。",
+    submit: "提交答案",
+    playAgain: "再来一局",
+    showAnswers: "查看解析",
+    correct: "正确！",
+    wrong: a => `错误。正确答案：${a}`,
+    timeout: "时间到！",
+    timeoutCorrect: "（超时）",
+    of: "/",
+    accuracy: "正确率",
+    avgTime: "平均用时",
+    bestStreak: "最高连击",
+    livesLeft: "剩余生命",
+    scoreLabel: "得分",
+    reviewTitle: "错题回顾",
+    allCorrect: "全部答对！🎉",
+    yourAnswer: "你的答案",
+    correctAnswer: "正确答案",
+    modes: {
+      classic:  { label: "经典模式",   desc: "共 20 题，看你能答对几道。" },
+      timed:    { label: "⏱ 限时模式", desc: "每题 15 秒，答得快加分高！" },
+      streak:   { label: "🔥 连击模式", desc: "连续答对有加成，答错连击清零！" },
+      survival: { label: "❤️ 生存模式", desc: "仅有 3 条命，30 题坚持到最后！" },
+    },
+    grades: { S: "完美！", A: "优秀！", B: "良好！", C: "还不错！", D: "继续加油！" },
+  },
+}[uiLang];
+
+// ── 本地题库（兜底，英文） ─────────────────────────────────────────────────────
 const localQuestions = [
-  { question: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], answer: "Paris" },
-  { question: "What is the largest planet in our solar system?", options: ["Mars", "Saturn", "Jupiter", "Neptune"], answer: "Jupiter" },
-  { question: "Which country won the FIFA World Cup in 2018?", options: ["Brazil", "Germany", "France", "Argentina"], answer: "France" },
-  { question: "What is the tallest mountain in the world?", options: ["Mount Everest", "K2", "Kangchenjunga", "Makalu"], answer: "Mount Everest" },
-  { question: "Which is the largest ocean on Earth?", options: ["Pacific Ocean", "Indian Ocean", "Atlantic Ocean", "Arctic Ocean"], answer: "Pacific Ocean" },
-  { question: "What is the chemical symbol for gold?", options: ["Au", "Ag", "Cu", "Fe"], answer: "Au" },
-  { question: "Who painted the Mona Lisa?", options: ["Pablo Picasso", "Vincent van Gogh", "Leonardo da Vinci", "Michelangelo"], answer: "Leonardo da Vinci" },
-  { question: "Which planet is known as the Red Planet?", options: ["Mars", "Venus", "Mercury", "Uranus"], answer: "Mars" },
-  { question: "What is the largest species of shark?", options: ["Great White Shark", "Whale Shark", "Tiger Shark", "Hammerhead Shark"], answer: "Whale Shark" },
-  { question: "Which animal is known as the King of the Jungle?", options: ["Lion", "Tiger", "Elephant", "Giraffe"], answer: "Lion" },
-  { question: "What is the capital of Japan?", options: ["Tokyo", "Kyoto", "Osaka", "Nagoya"], answer: "Tokyo" },
-  { question: "Which element has the atomic number 1?", options: ["Helium", "Oxygen", "Hydrogen", "Carbon"], answer: "Hydrogen" },
-  { question: "Who wrote 'Romeo and Juliet'?", options: ["Charles Dickens", "William Shakespeare", "Mark Twain", "Leo Tolstoy"], answer: "William Shakespeare" },
-  { question: "What is the smallest country in the world?", options: ["Monaco", "San Marino", "Liechtenstein", "Vatican City"], answer: "Vatican City" },
-  { question: "Which planet is known for its rings?", options: ["Venus", "Saturn", "Jupiter", "Neptune"], answer: "Saturn" },
-  { question: "Who discovered penicillin?", options: ["Marie Curie", "Alexander Fleming", "Louis Pasteur", "Isaac Newton"], answer: "Alexander Fleming" },
-  { question: "Which continent is the Sahara Desert located on?", options: ["Asia", "Africa", "Australia", "Europe"], answer: "Africa" },
-  { question: "What is the main ingredient in guacamole?", options: ["Tomato", "Avocado", "Onion", "Pepper"], answer: "Avocado" },
-  { question: "Which country is known as the Land of the Rising Sun?", options: ["China", "South Korea", "Thailand", "Japan"], answer: "Japan" },
-  { question: "What is the speed of light?", options: ["300,000 km/s", "150,000 km/s", "450,000 km/s", "100,000 km/s"], answer: "300,000 km/s" },
+  { question: "What is the capital of France?",             options: ["Paris","London","Berlin","Madrid"],                          answer: "Paris" },
+  { question: "What is the largest planet in our solar system?", options: ["Mars","Saturn","Jupiter","Neptune"],                   answer: "Jupiter" },
+  { question: "Which country won the FIFA World Cup in 2018?",   options: ["Brazil","Germany","France","Argentina"],               answer: "France" },
+  { question: "What is the tallest mountain in the world?",      options: ["Mount Everest","K2","Kangchenjunga","Makalu"],         answer: "Mount Everest" },
+  { question: "Which is the largest ocean on Earth?",            options: ["Pacific Ocean","Indian Ocean","Atlantic Ocean","Arctic Ocean"], answer: "Pacific Ocean" },
+  { question: "What is the chemical symbol for gold?",           options: ["Au","Ag","Cu","Fe"],                                  answer: "Au" },
+  { question: "Who painted the Mona Lisa?",                      options: ["Picasso","Van Gogh","Leonardo da Vinci","Michelangelo"], answer: "Leonardo da Vinci" },
+  { question: "Which planet is known as the Red Planet?",        options: ["Mars","Venus","Mercury","Uranus"],                    answer: "Mars" },
+  { question: "What is the largest species of shark?",           options: ["Great White","Whale Shark","Tiger Shark","Hammerhead"], answer: "Whale Shark" },
+  { question: "Which animal is known as the King of the Jungle?", options: ["Lion","Tiger","Elephant","Giraffe"],                 answer: "Lion" },
+  { question: "What is the capital of Japan?",                   options: ["Tokyo","Kyoto","Osaka","Nagoya"],                     answer: "Tokyo" },
+  { question: "Which element has the atomic number 1?",          options: ["Helium","Oxygen","Hydrogen","Carbon"],                answer: "Hydrogen" },
+  { question: "Who wrote 'Romeo and Juliet'?",                   options: ["Dickens","Shakespeare","Twain","Tolstoy"],            answer: "Shakespeare" },
+  { question: "What is the smallest country in the world?",      options: ["Monaco","San Marino","Liechtenstein","Vatican City"], answer: "Vatican City" },
+  { question: "Which planet is known for its rings?",            options: ["Venus","Saturn","Jupiter","Neptune"],                 answer: "Saturn" },
+  { question: "Who discovered penicillin?",                      options: ["Marie Curie","Alexander Fleming","Pasteur","Newton"], answer: "Alexander Fleming" },
+  { question: "Which continent is the Sahara Desert on?",        options: ["Asia","Africa","Australia","Europe"],                 answer: "Africa" },
+  { question: "What is the main ingredient in guacamole?",       options: ["Tomato","Avocado","Onion","Pepper"],                  answer: "Avocado" },
+  { question: "Which country is the Land of the Rising Sun?",    options: ["China","South Korea","Thailand","Japan"],             answer: "Japan" },
+  { question: "What is the speed of light?",                     options: ["300,000 km/s","150,000 km/s","450,000 km/s","100,000 km/s"], answer: "300,000 km/s" },
 ];
 
-// ── 题库管理 ──────────────────────────────────────────
-let questionPool = [...localQuestions];
-let usedQuestions = new Set();
+// ── 题库状态 ──────────────────────────────────────────────────────────────────
+let dynamicPool  = [];   // AI 拉取的题目
+let usedDynamic  = new Set();
+let usedLocal    = new Set();
 let dynamicFetched = false;
-let fetchStatusEl = null;
+let fetchStatusEl  = null;
 
-function mergeQuestions(newQs) {
-  const existing = new Set(questionPool.map(q => q.question.trim().toLowerCase()));
+function mergeIntoDynamic(newQs) {
+  const existing = new Set(dynamicPool.map(q => q.question.trim().toLowerCase()));
   let added = 0;
   for (const q of newQs) {
-    if (!existing.has(q.question.trim().toLowerCase())) {
-      questionPool.push(q);
-      existing.add(q.question.trim().toLowerCase());
-      added++;
-    }
+    const key = q.question.trim().toLowerCase();
+    if (!existing.has(key)) { dynamicPool.push(q); existing.add(key); added++; }
   }
   return added;
 }
 
-
 async function fetchDynamicQuestions() {
   const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
   try {
-    const res = await fetch(`${WORKER_URL}/quiz?topic=${encodeURIComponent(topic)}&lang=${navigator.language}`);
+    const res  = await fetch(`${WORKER_URL}/quiz?topic=${encodeURIComponent(topic)}&lang=${navigator.language}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (json.data && Array.isArray(json.data)) {
-      const added = mergeQuestions(json.data);
+      const added = mergeIntoDynamic(json.data);
       dynamicFetched = true;
       if (fetchStatusEl) {
-        fetchStatusEl.textContent = `✓ ${added} new questions loaded (${topic})`;
-        fetchStatusEl.style.color = "#4caf50";
+        fetchStatusEl.textContent = T.dynamicReady(added, topic);
+        fetchStatusEl.style.color = "var(--clr-ok)";
       }
     }
-  } catch (e) {
+  } catch (_) {
     if (fetchStatusEl) {
-      fetchStatusEl.textContent = "⚠ Using local questions only";
-      fetchStatusEl.style.color = "#ff9800";
+      fetchStatusEl.textContent = T.localOnly;
+      fetchStatusEl.style.color = "var(--clr-warn)";
     }
   }
 }
 
-// function pickQuestions(count) {
-//   // 优先用动态题目（本地题库之后的部分），再用本地题库
-//   const dynamic = questionPool.slice(localQuestions.length);
-//   const local = questionPool.slice(0, localQuestions.length);
-//   const ordered = [...dynamic, ...local];
-
-//   const available = ordered.filter(q => !usedQuestions.has(q.question));
-//   if (available.length < count) usedQuestions.clear(); // 题目用完了就重置
-
-//   const fresh = ordered.filter(q => !usedQuestions.has(q.question));
-//   shuffleArray(fresh);
-//   const picked = fresh.slice(0, count);
-//   picked.forEach(q => usedQuestions.add(q.question));
-//   return picked;
-// }
-
+// ── 抽题逻辑：80% dynamic，剩余用 local 随机插入补足 ─────────────────────────
 function pickQuestions(count) {
-  const getQText = (q) => (q && q.question ? q.question.trim().toLowerCase() : '');
-  const dynamicRatio = 0.8;
-  // 1. Separate the baseline pools
-  const dynamicPool = questionPool.slice(localQuestions.length);
-  const localPool = questionPool.slice(0, localQuestions.length);
-  const totalPoolSize = dynamicPool.length + localPool.length;
+  // 如果 dynamic 不够，重置已用集合
+  const freshDynamic = dynamicPool.filter(q => !usedDynamic.has(q.question));
+  if (freshDynamic.length < Math.ceil(count * 0.8)) usedDynamic.clear();
+  const freshLocal = localQuestions.filter(q => !usedLocal.has(q.question));
+  if (freshLocal.length < Math.ceil(count * 0.2) + 2) usedLocal.clear();
 
-  // Edge case: handle empty pool safely
-  if (totalPoolSize === 0) return [];
+  // 重新取 fresh 列表
+  const avDynamic = dynamicPool.filter(q => !usedDynamic.has(q.question));
+  const avLocal   = localQuestions.filter(q => !usedLocal.has(q.question));
 
-  // 2. Filter out already used questions for both pools
-  let freshDynamic = dynamicPool.filter(q => !usedQuestions.has(getQText(q)));
-  let freshLocal = localPool.filter(q => !usedQuestions.has(getQText(q)));
+  shuffleArray(avDynamic);
+  shuffleArray(avLocal);
 
-  // 3. Reset mechanism if global pool runs dry
-  if ((freshDynamic.length + freshLocal.length) < count) {
-    usedQuestions.clear();
-    freshDynamic = dynamicPool.filter(q => !usedQuestions.has(getQText(q)));
-    freshLocal = localPool.filter(q => !usedQuestions.has(getQText(q)));
+  const dynCount  = Math.min(Math.floor(count * 0.8), avDynamic.length);
+  const locCount  = count - dynCount;
+
+  const dynPicked = avDynamic.slice(0, dynCount);
+  const locPicked = avLocal.slice(0, locCount);
+
+  dynPicked.forEach(q => usedDynamic.add(q.question));
+  locPicked.forEach(q => usedLocal.add(q.question));
+
+  // 把 local 题插入到 dynPicked 的随机位置，然后合并
+  const result = [...dynPicked];
+  for (const lq of locPicked) {
+    const pos = Math.floor(Math.random() * (result.length + 1));
+    result.splice(pos, 0, lq);
   }
-
-  // 4. Shuffle pools individually to ensure random selection
-  shuffleArray(freshDynamic);
-  shuffleArray(freshLocal);
-
-  // 5. Calculate target counts based on your ratio formula: 
-  // Target Dynamic = (Dynamic Pool Size / Total Pool Size) * Requested Count
-  
-  let targetDynamicCount = Math.round(dynamicRatio * count);
-  let targetLocalCount = count - targetDynamicCount;
-
-  // 6. Extract questions using a flexible fallback strategy
-  const picked = [];
-
-  // Step A: Draw from dynamic pool up to its target share
-  const dynamicSelection = freshDynamic.slice(0, targetDynamicCount);
-  picked.push(...dynamicSelection);
-
-  // Step B: Draw from local pool up to its target share
-  const localSelection = freshLocal.slice(0, targetLocalCount);
-  picked.push(...localSelection);
-
-  // Step C: Fallback Top-up (If one pool didn't have enough UNUSED items, borrow from the other)
-  if (picked.length < count) {
-    const shortage = count - picked.length;
-    
-    // Look for leftover unused questions in whichever pool has them
-    const leftovers = [
-      ...freshDynamic.slice(dynamicSelection.length),
-      ...freshLocal.slice(localSelection.length)
-    ];
-    
-    picked.push(...leftovers.slice(0, shortage));
-  }
-
-  // 7. Final Shuffle so the user doesn't see all dynamic items clustered first
-  shuffleArray(picked);
-
-  // 8. Commit selections to history tracking
-  picked.forEach(q => {
-    const text = getQText(q);
-    if (text) usedQuestions.add(text);
-  });
-
-  return picked;
+  return result;
 }
 
-
-// ── 游戏模式配置 ───────────────────────────────────────
+// ── 游戏模式 ──────────────────────────────────────────────────────────────────
 const MODES = {
-  classic: { label: "Classic", desc: "Answer all 20 questions, see how many you got right.", questionCount: 20, timeLimit: 0, streakBonus: false, livesMode: false },
-  timed:   { label: "⏱ Timed",   desc: "15 seconds per question. Bonus points for speed!", questionCount: 20, timeLimit: 15, streakBonus: false, livesMode: false },
-  streak:  { label: "🔥 Streak",  desc: "Build a streak for bonus points. One wrong answer breaks it!", questionCount: 20, timeLimit: 0, streakBonus: true, livesMode: false },
-  survival:{ label: "❤️ Survival", desc: "3 lives only. Reach the end without running out!", questionCount: 30, timeLimit: 0, streakBonus: false, livesMode: true },
+  classic:  { questionCount: 20, timeLimit: 0,  streakBonus: false, livesMode: false },
+  timed:    { questionCount: 20, timeLimit: 15, streakBonus: false, livesMode: false },
+  streak:   { questionCount: 20, timeLimit: 0,  streakBonus: true,  livesMode: false },
+  survival: { questionCount: 30, timeLimit: 0,  streakBonus: false, livesMode: true  },
 };
 
-// ── 状态 ──────────────────────────────────────────────
-let currentMode = null;
-let quizData = [];
-let currentQuestion = 0;
-let score = 0;
-let incorrectAnswers = [];
-let streak = 0;
-let maxStreak = 0;
-let lives = 3;
-let timerInterval = null;
-let timeLeft = 0;
-let questionStartTime = 0;
-let totalTimeTaken = 0;
+// ── 游戏状态 ──────────────────────────────────────────────────────────────────
+let currentMode, quizData, currentQuestion, score, incorrectAnswers;
+let streak, maxStreak, lives, timerInterval, timeLeft, questionStartTime, totalTimeTaken;
 
-// ── DOM refs ──────────────────────────────────────────
-const quizContainer   = document.getElementById("quiz");
-const resultContainer = document.getElementById("result");
-const submitButton    = document.getElementById("submit");
-const retryButton     = document.getElementById("retry");
-const showAnswerButton= document.getElementById("showAnswer");
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const quizContainer    = document.getElementById("quiz");
+const resultContainer  = document.getElementById("result");
+const submitButton     = document.getElementById("submit");
+const retryButton      = document.getElementById("retry");
+const showAnswerButton = document.getElementById("showAnswer");
+const subtitleEl       = document.querySelector("h4");
+const titleEl          = document.querySelector("h1");
 
-// ── 工具函数 ──────────────────────────────────────────
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+titleEl.textContent    = T.title;
+subtitleEl.textContent = T.subtitle;
+submitButton.textContent    = T.submit;
+retryButton.textContent     = T.playAgain;
+showAnswerButton.textContent= T.showAnswers;
+
+// ── 工具 ──────────────────────────────────────────────────────────────────────
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
 
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-
-// ── 模式选择界面 ───────────────────────────────────────
+// ── 模式选择 ──────────────────────────────────────────────────────────────────
 function showModeSelect() {
   stopTimer();
   submitButton.style.display = "none";
-  retryButton.style.display = "none";
+  retryButton.style.display  = "none";
   showAnswerButton.style.display = "none";
-  resultContainer.innerHTML = "";
+  resultContainer.innerHTML  = "";
 
   quizContainer.innerHTML = `
     <div class="mode-select">
-      <p class="mode-title">Choose a Mode</p>
+      <p class="mode-title">${T.chooseMode}</p>
       <div class="mode-grid">
-        ${Object.entries(MODES).map(([key, m]) => `
+        ${Object.entries(MODES).map(([key]) => `
           <div class="mode-card" onclick="startMode('${key}')">
-            <div class="mode-label">${m.label}</div>
-            <div class="mode-desc">${m.desc}</div>
+            <div class="mode-label">${T.modes[key].label}</div>
+            <div class="mode-desc">${T.modes[key].desc}</div>
           </div>
         `).join("")}
       </div>
-      <div id="fetch-status" style="margin-top:14px;font-size:12px;color:#aaa;text-align:center;"></div>
+      <div class="disclaimer">${T.disclaimer}</div>
+      <div id="fetch-status" class="fetch-status"></div>
     </div>
   `;
 
   fetchStatusEl = document.getElementById("fetch-status");
-  if (dynamicFetched) {
-    fetchStatusEl.textContent = `✓ Dynamic questions ready (${questionPool.length - localQuestions.length} loaded)`;
-    fetchStatusEl.style.color = "#4caf50";
-  } else {
-    fetchStatusEl.textContent = "Fetching dynamic questions in background...";
-  }
+  fetchStatusEl.textContent = dynamicFetched
+    ? T.dynamicReady(dynamicPool.length, "")
+    : T.fetchingDynamic;
+  fetchStatusEl.style.color = dynamicFetched ? "var(--clr-ok)" : "";
 }
 
-// ── 开始游戏 ──────────────────────────────────────────
+// ── 开始游戏 ──────────────────────────────────────────────────────────────────
 function startMode(modeKey) {
-  currentMode = MODES[modeKey];
-  quizData = pickQuestions(currentMode.questionCount);
-  currentQuestion = 0;
-  score = 0;
-  incorrectAnswers = [];
-  streak = 0;
-  maxStreak = 0;
-  lives = 3;
-  totalTimeTaken = 0;
+  currentMode      = { key: modeKey, ...MODES[modeKey] };
+  quizData         = pickQuestions(currentMode.questionCount);
+  currentQuestion  = 0; score = 0; incorrectAnswers = [];
+  streak = 0; maxStreak = 0; lives = 3; totalTimeTaken = 0;
 
-  submitButton.style.display = "inline-block";
-  retryButton.style.display = "none";
+  submitButton.style.display     = "inline-block";
+  retryButton.style.display      = "none";
   showAnswerButton.style.display = "none";
-  resultContainer.innerHTML = "";
-
+  resultContainer.innerHTML      = "";
   displayQuestion();
 }
 
-// ── 显示题目 ──────────────────────────────────────────
+// ── 显示题目 ──────────────────────────────────────────────────────────────────
 function displayQuestion() {
   stopTimer();
-  const questionData = quizData[currentQuestion];
+  const q = quizData[currentQuestion];
   questionStartTime = Date.now();
 
-  const progress = `<div class="progress-bar"><div class="progress-fill" style="width:${(currentQuestion / quizData.length) * 100}%"></div></div>`;
+  const pct      = (currentQuestion / quizData.length) * 100;
+  const metaParts = [];
+  if (currentMode.livesMode)   metaParts.push(`<span class="lives">${"❤️".repeat(lives)}</span>`);
+  if (currentMode.streakBonus && streak > 1) metaParts.push(`<span class="streak-badge">🔥 ${streak}x</span>`);
+  metaParts.push(`<span class="q-counter">${currentQuestion + 1} ${T.of} ${quizData.length}</span>`);
 
-  const meta = [];
-  if (currentMode.livesMode) meta.push(`<span class="lives">${"❤️".repeat(lives)}</span>`);
-  if (currentMode.streakBonus && streak > 1) meta.push(`<span class="streak-badge">🔥 ${streak} streak</span>`);
-  meta.push(`<span class="q-counter">${currentQuestion + 1} / ${quizData.length}</span>`);
-
-  const timerHtml = currentMode.timeLimit
-    ? `<div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div><div id="timer-label" class="timer-label">${currentMode.timeLimit}s</div>`
-    : "";
-
-  const shuffledOptions = [...questionData.options];
-  shuffleArray(shuffledOptions);
+  const shuffled = [...q.options]; shuffleArray(shuffled);
 
   quizContainer.innerHTML = `
-    ${progress}
-    <div class="meta-row">${meta.join("")}</div>
-    ${timerHtml}
-    <div class="question">${currentQuestion + 1}. ${questionData.question}</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="meta-row">${metaParts.join("")}</div>
+    ${currentMode.timeLimit ? `<div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div><div id="timer-label" class="timer-label">${currentMode.timeLimit}s</div>` : ""}
+    <div class="question">${currentQuestion + 1}. ${q.question}</div>
     <div class="options">
-      ${shuffledOptions.map(o => `
-        <label class="option">
-          <input type="radio" name="quiz" value="${o}">
-          ${o}
-        </label>
-      `).join("")}
+      ${shuffled.map(o => `<label class="option"><input type="radio" name="quiz" value="${o}">${o}</label>`).join("")}
     </div>
   `;
-
   if (currentMode.timeLimit) startTimer();
 }
 
@@ -290,111 +283,81 @@ function startTimer() {
   timerInterval = setInterval(() => {
     timeLeft--;
     updateTimerUI();
-    if (timeLeft <= 0) {
-      stopTimer();
-      autoTimeOut();
-    }
+    if (timeLeft <= 0) { stopTimer(); autoTimeOut(); }
   }, 1000);
 }
 
 function updateTimerUI() {
-  const fill = document.getElementById("timer-fill");
+  const fill  = document.getElementById("timer-fill");
   const label = document.getElementById("timer-label");
-  if (fill) fill.style.width = `${(timeLeft / currentMode.timeLimit) * 100}%`;
-  if (fill) fill.style.background = timeLeft <= 5 ? "#e53935" : timeLeft <= 8 ? "#ff9800" : "#4caf50";
+  if (fill)  { fill.style.width = `${(timeLeft / currentMode.timeLimit) * 100}%`; fill.style.background = timeLeft <= 5 ? "var(--clr-wrong)" : timeLeft <= 8 ? "var(--clr-warn)" : "var(--clr-ok)"; }
   if (label) label.textContent = `${timeLeft}s`;
 }
 
 function autoTimeOut() {
-  // 时间到，算答错
   const q = quizData[currentQuestion];
-  incorrectAnswers.push({ question: q.question, incorrectAnswer: "(Time out)", correctAnswer: q.answer });
+  incorrectAnswers.push({ question: q.question, incorrectAnswer: T.timeoutCorrect, correctAnswer: q.answer });
   streak = 0;
-  if (currentMode.livesMode) {
-    lives--;
-    if (lives <= 0) { displayResult(); return; }
-  }
-  currentQuestion++;
-  if (currentQuestion < quizData.length) displayQuestion();
-  else displayResult();
+  if (currentMode.livesMode && --lives <= 0) { displayResult(); return; }
+  if (++currentQuestion < quizData.length) displayQuestion(); else displayResult();
 }
 
-// ── 检查答案 ──────────────────────────────────────────
+// ── 检查答案 ──────────────────────────────────────────────────────────────────
 function checkAnswer() {
-  const selected = document.querySelector('input[name="quiz"]:checked');
-  if (!selected) return;
-
+  const sel = document.querySelector('input[name="quiz"]:checked');
+  if (!sel) return;
   stopTimer();
-  const timeTaken = (Date.now() - questionStartTime) / 1000;
-  totalTimeTaken += timeTaken;
-  const answer = selected.value;
-  const q = quizData[currentQuestion];
-  const correct = answer === q.answer;
+  totalTimeTaken += (Date.now() - questionStartTime) / 1000;
+  const q       = quizData[currentQuestion];
+  const correct = sel.value === q.answer;
 
   if (correct) {
     let pts = 10;
-    if (currentMode.timeLimit) {
-      // 速度加分：剩余时间越多分越高
-      pts += Math.round((timeLeft / currentMode.timeLimit) * 10);
-    }
-    if (currentMode.streakBonus) {
-      streak++;
-      maxStreak = Math.max(maxStreak, streak);
-      if (streak >= 3) pts += streak * 2; // 连击加成
-    }
+    if (currentMode.timeLimit)   pts += Math.round((timeLeft / currentMode.timeLimit) * 10);
+    if (currentMode.streakBonus) { streak++; maxStreak = Math.max(maxStreak, streak); if (streak >= 3) pts += streak * 2; }
     score += pts;
   } else {
-    incorrectAnswers.push({ question: q.question, incorrectAnswer: answer, correctAnswer: q.answer });
+    incorrectAnswers.push({ question: q.question, incorrectAnswer: sel.value, correctAnswer: q.answer });
     streak = 0;
-    if (currentMode.livesMode) {
-      lives--;
-      if (lives <= 0) {
-        currentQuestion++;
-        displayResult();
-        return;
-      }
-    }
+    if (currentMode.livesMode && --lives <= 0) { currentQuestion++; displayResult(); return; }
   }
-
-  currentQuestion++;
-  if (currentQuestion < quizData.length) displayQuestion();
-  else displayResult();
+  if (++currentQuestion < quizData.length) displayQuestion(); else displayResult();
 }
 
-// ── 结果页 ────────────────────────────────────────────
+// ── 结果页 ────────────────────────────────────────────────────────────────────
 function displayResult() {
   stopTimer();
-  quizContainer.style.display = "none";
-  submitButton.style.display = "none";
-  retryButton.style.display = "inline-block";
+  quizContainer.style.display    = "none";
+  submitButton.style.display     = "none";
+  retryButton.style.display      = "inline-block";
   showAnswerButton.style.display = incorrectAnswers.length > 0 ? "inline-block" : "none";
 
-  const correct = quizData.length - incorrectAnswers.length;
+  const correct  = quizData.length - incorrectAnswers.length;
   const accuracy = Math.round((correct / quizData.length) * 100);
-  const avgTime = (totalTimeTaken / quizData.length).toFixed(1);
+  const avgTime  = (totalTimeTaken / quizData.length).toFixed(1);
 
-  // 综合评分（满分100）
   let finalScore = Math.round((correct / quizData.length) * 70);
-  if (currentMode.timeLimit) finalScore += Math.min(20, Math.round((1 - totalTimeTaken / (quizData.length * currentMode.timeLimit)) * 20));
+  if (currentMode.timeLimit)   finalScore += Math.min(20, Math.round((1 - totalTimeTaken / (quizData.length * currentMode.timeLimit)) * 20));
   if (currentMode.streakBonus) finalScore += Math.min(10, maxStreak);
   finalScore = Math.min(100, finalScore);
 
-  const grade = finalScore >= 90 ? "S" : finalScore >= 75 ? "A" : finalScore >= 60 ? "B" : finalScore >= 45 ? "C" : "D";
-  const gradeColor = { S: "#ffd700", A: "#4caf50", B: "#2196f3", C: "#ff9800", D: "#e53935" }[grade];
+  const grade      = finalScore >= 90 ? "S" : finalScore >= 75 ? "A" : finalScore >= 60 ? "B" : finalScore >= 45 ? "C" : "D";
+  const gradeColor = { S:"#ffd700", A:"var(--clr-ok)", B:"#2196f3", C:"var(--clr-warn)", D:"var(--clr-wrong)" }[grade];
 
   let extras = "";
-  if (currentMode.streakBonus) extras += `<div class="stat-item">🔥 Best Streak <strong>${maxStreak}</strong></div>`;
-  if (currentMode.livesMode) extras += `<div class="stat-item">❤️ Lives Left <strong>${Math.max(0, lives)}</strong></div>`;
-  if (currentMode.timeLimit || true) extras += `<div class="stat-item">⏱ Avg Time <strong>${avgTime}s</strong></div>`;
+  if (currentMode.streakBonus) extras += `<div class="stat-item">🔥 ${T.bestStreak}<strong>${maxStreak}</strong></div>`;
+  if (currentMode.livesMode)   extras += `<div class="stat-item">❤️ ${T.livesLeft}<strong>${Math.max(0,lives)}</strong></div>`;
+  extras += `<div class="stat-item">⏱ ${T.avgTime}<strong>${avgTime}s</strong></div>`;
 
   resultContainer.innerHTML = `
     <div class="result-card">
       <div class="grade-badge" style="color:${gradeColor}">${grade}</div>
-      <div class="result-score">${correct} / ${quizData.length} correct</div>
-      <div class="result-accuracy">Accuracy: ${accuracy}%</div>
+      <div class="grade-msg">${T.grades[grade]}</div>
+      <div class="result-score">${correct} ${T.of} ${quizData.length}</div>
+      <div class="result-accuracy">${T.accuracy}: ${accuracy}%</div>
       <div class="stats-row">
         ${extras}
-        <div class="stat-item">🏆 Score <strong>${score}</strong></div>
+        <div class="stat-item">🏆 ${T.scoreLabel}<strong>${score}</strong></div>
       </div>
     </div>
   `;
@@ -406,32 +369,32 @@ function retryQuiz() {
 }
 
 function showAnswer() {
-  quizContainer.style.display = "none";
-  submitButton.style.display = "none";
-  retryButton.style.display = "inline-block";
+  quizContainer.style.display    = "none";
+  submitButton.style.display     = "none";
+  retryButton.style.display      = "inline-block";
   showAnswerButton.style.display = "none";
 
   const items = incorrectAnswers.map(a => `
     <div class="answer-item">
       <p><strong>Q:</strong> ${a.question}</p>
-      <p class="wrong-ans">✗ Your answer: ${a.incorrectAnswer}</p>
-      <p class="correct-ans">✓ Correct: ${a.correctAnswer}</p>
+      <p class="wrong-ans">✗ ${T.yourAnswer}: ${a.incorrectAnswer}</p>
+      <p class="correct-ans">✓ ${T.correctAnswer}: ${a.correctAnswer}</p>
     </div>
   `).join("");
 
   resultContainer.innerHTML = `
     <div class="answer-review">
-      <p style="margin-bottom:12px;font-weight:600;">Review Incorrect Answers</p>
-      ${items || "<p>All correct! 🎉</p>"}
+      <p style="margin-bottom:12px;font-weight:600;">${T.reviewTitle}</p>
+      ${items || `<p>${T.allCorrect}</p>`}
     </div>
   `;
 }
 
-// ── 事件绑定 ──────────────────────────────────────────
+// ── 事件 ──────────────────────────────────────────────────────────────────────
 submitButton.addEventListener("click", checkAnswer);
 retryButton.addEventListener("click", retryQuiz);
 showAnswerButton.addEventListener("click", showAnswer);
 
-// ── 启动 ──────────────────────────────────────────────
-fetchDynamicQuestions(); // 后台静默 fetch
-showModeSelect();        // 立刻显示模式选择
+// ── 启动 ──────────────────────────────────────────────────────────────────────
+fetchDynamicQuestions();
+showModeSelect();
