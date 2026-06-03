@@ -5,12 +5,16 @@ body {
   font-family: "Press Start 2P", cursive;
   font-size: 2em;
   color: white;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 button {
   outline: none;
   cursor: pointer;
   border: none;
   box-shadow: 3px 5px 0px 0px rgba(0, 0, 0, 0.75);
+  touch-action: manipulation;
 }
 #counter {
   position: absolute;

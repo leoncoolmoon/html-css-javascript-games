@@ -43,6 +43,7 @@ let previousTimestamp;
 let startMoving;
 let moves;
 let stepStartTimestamp;
+let gameOver;
 
 const carFrontTexture = new Texture(40, 80, [{ x: 0, y: 10, w: 30, h: 60 }]);
 const carBackTexture = new Texture(40, 80, [{ x: 10, y: 10, w: 30, h: 60 }]);
@@ -120,6 +121,7 @@ const threeHeights = [20, 45, 60];
 const initaliseValues = () => {
   lanes = generateLanes();
 
+  gameOver = false;
   currentLane = 0;
   currentColumn = Math.floor(columns / 2);
 
@@ -523,6 +525,7 @@ window.addEventListener("keydown", (event) => {
 });
 
 function move(direction) {
+  if (gameOver) return;
   const finalPositions = moves.reduce(
     (position, move) => {
       if (move === "forward")
@@ -706,6 +709,7 @@ function animate(timestamp) {
       const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
       const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
       if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
+        gameOver = true;
         endDOM.style.visibility = "visible";
       }
     });
