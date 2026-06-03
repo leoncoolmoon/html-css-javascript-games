@@ -74,8 +74,8 @@ const T = {
   },
 }[uiLang];
 
-// ── 本地题库（兜底，英文） ─────────────────────────────────────────────────────
-const localQuestions = [
+// ── 本地题库（兜底） ─────────────────────────────────────────────────────
+const localQuestionsEn = [
   { question: "What is the capital of France?",             options: ["Paris","London","Berlin","Madrid"],                          answer: "Paris" },
   { question: "What is the largest planet in our solar system?", options: ["Mars","Saturn","Jupiter","Neptune"],                   answer: "Jupiter" },
   { question: "Which country won the FIFA World Cup in 2018?",   options: ["Brazil","Germany","France","Argentina"],               answer: "France" },
@@ -97,6 +97,31 @@ const localQuestions = [
   { question: "Which country is the Land of the Rising Sun?",    options: ["China","South Korea","Thailand","Japan"],             answer: "Japan" },
   { question: "What is the speed of light?",                     options: ["300,000 km/s","150,000 km/s","450,000 km/s","100,000 km/s"], answer: "300,000 km/s" },
 ];
+
+const localQuestionsZh = [
+  { question: "法国的首都是哪里？", options: ["巴黎", "伦敦", "柏林", "马德里"], answer: "巴黎" },
+  { question: "太阳系中最大的行星是哪一颗？", options: ["火星", "土星", "木星", "海王星"], answer: "木星" },
+  { question: "哪个国家赢得了2018年FIFA世界杯？", options: ["巴西", "德国", "法国", "阿根廷"], answer: "法国" },
+  { question: "世界上最高的山峰是哪一座？", options: ["珠穆朗玛峰", "乔戈里峰", "干城章嘉峰", "马卡鲁峰"], answer: "珠穆朗玛峰" },
+  { question: "地球上最大的海洋是哪个？", options: ["太平洋", "印度洋", "大西洋", "北冰洋"], answer: "太平洋" },
+  { question: "金的化学符号是什么？", options: ["Au", "Ag", "Cu", "Fe"], answer: "Au" },
+  { question: "《蒙娜丽莎》是谁画的？", options: ["毕加索", "梵高", "列奥纳多·达·芬奇", "米开朗基罗"], answer: "列奥纳多·达·芬奇" },
+  { question: "哪颗行星被称为红色星球？", options: ["火星", "金星", "水星", "天王星"], answer: "火星" },
+  { question: "体型最大的鲨鱼是什么？", options: ["大白鲨", "鲸鲨", "虎鲨", "双髻鲨"], answer: "鲸鲨" },
+  { question: "哪种动物被称为丛林之王？", options: ["狮子", "老虎", "大象", "长颈鹿"], answer: "狮子" },
+  { question: "日本的首都是哪里？", options: ["东京", "京都", "大阪", "名古屋"], answer: "东京" },
+  { question: "哪种元素的原子序数是1？", options: ["氦", "氧", "氢", "碳"], answer: "氢" },
+  { question: "谁写了《罗密欧与朱丽叶》？", options: ["狄更斯", "莎士比亚", "吐温", "托尔斯泰"], answer: "莎士比亚" },
+  { question: "世界上最小的国家是哪个？", options: ["摩纳哥", "圣马力诺", "列支敦士登", "梵蒂冈"], answer: "梵蒂冈" },
+  { question: "哪颗行星以其环而闻名？", options: ["金星", "土星", "木星", "海王星"], answer: "土星" },
+  { question: "谁发现了青霉素？", options: ["玛丽·居里", "亚历山大·弗莱明", "巴斯德", "牛顿"], answer: "亚历山大·弗莱明" },
+  { question: "撒哈拉沙漠在哪块大陆上？", options: ["亚洲", "非洲", "澳大利亚", "欧洲"], answer: "非洲" },
+  { question: "牛油果酱（Guacamole）的主要成分是什么？", options: ["西红柿", "牛油果", "洋葱", "胡椒"], answer: "牛油果" },
+  { question: "哪个国家被称为“旭日之国”？", options: ["中国", "韩国", "泰国", "日本"], answer: "日本" },
+  { question: "光速是多少？", options: ["300,000 公里/秒", "150,000 公里/秒", "450,000 公里/秒", "100,000 公里/秒"], answer: "300,000 公里/秒" },
+];
+
+const localQuestions = uiLang === "zh" ? localQuestionsZh : localQuestionsEn;
 
 // ── 题库状态 ──────────────────────────────────────────────────────────────────
 let dynamicPool  = [];   // AI 拉取的题目
@@ -128,6 +153,12 @@ async function fetchDynamicQuestions() {
         fetchStatusEl.textContent = T.dynamicReady(added, topic);
         fetchStatusEl.style.color = "var(--clr-ok)";
       }
+      // 如果游戏正在进行中，且当前还有未答题目，尝试用 dynamic 题目热替换后续题目
+      if (quizData && currentQuestion < quizData.length - 1) {
+        const remainingCount = quizData.length - 1 - currentQuestion;
+        const newQs = pickQuestions(remainingCount);
+        quizData.splice(currentQuestion + 1, remainingCount, ...newQs);
+      }
     }
   } catch (_) {
     if (fetchStatusEl) {
@@ -137,36 +168,37 @@ async function fetchDynamicQuestions() {
   }
 }
 
-// ── 抽题逻辑：80% dynamic，剩余用 local 随机插入补足 ─────────────────────────
+// ── 抽题逻辑：优先 dynamic，不够用 local 补足 ─────────────────────────
 function pickQuestions(count) {
-  // 如果 dynamic 不够，重置已用集合
-  const freshDynamic = dynamicPool.filter(q => !usedDynamic.has(q.question));
-  if (freshDynamic.length < Math.ceil(count * 0.8)) usedDynamic.clear();
-  const freshLocal = localQuestions.filter(q => !usedLocal.has(q.question));
-  if (freshLocal.length < Math.ceil(count * 0.2) + 2) usedLocal.clear();
+  // 1. 获取可用的 dynamic 题目
+  let avDynamic = dynamicPool.filter(q => !usedDynamic.has(q.question));
 
-  // 重新取 fresh 列表
-  const avDynamic = dynamicPool.filter(q => !usedDynamic.has(q.question));
-  const avLocal   = localQuestions.filter(q => !usedLocal.has(q.question));
-
-  shuffleArray(avDynamic);
-  shuffleArray(avLocal);
-
-  const dynCount  = Math.min(Math.floor(count * 0.8), avDynamic.length);
-  const locCount  = count - dynCount;
-
-  const dynPicked = avDynamic.slice(0, dynCount);
-  const locPicked = avLocal.slice(0, locCount);
-
-  dynPicked.forEach(q => usedDynamic.add(q.question));
-  locPicked.forEach(q => usedLocal.add(q.question));
-
-  // 把 local 题插入到 dynPicked 的随机位置，然后合并
-  const result = [...dynPicked];
-  for (const lq of locPicked) {
-    const pos = Math.floor(Math.random() * (result.length + 1));
-    result.splice(pos, 0, lq);
+  // 2. 如果 dynamic 已经全部用过且我们还是不够，重置 dynamic 使用记录
+  if (avDynamic.length < count && dynamicPool.length >= count) {
+    usedDynamic.clear();
+    avDynamic = [...dynamicPool];
   }
+
+  // 3. 抽选题目
+  shuffleArray(avDynamic);
+  const dynPicked = avDynamic.slice(0, count);
+  dynPicked.forEach(q => usedDynamic.add(q.question));
+
+  // 4. 如果 dynamic 还是不够，用 local 补足
+  let result = [...dynPicked];
+  if (result.length < count) {
+    let avLocal = localQuestions.filter(q => !usedLocal.has(q.question));
+    if (avLocal.length < (count - result.length)) {
+      usedLocal.clear();
+      avLocal = [...localQuestions];
+    }
+    shuffleArray(avLocal);
+    const locPicked = avLocal.slice(0, count - result.length);
+    locPicked.forEach(q => usedLocal.add(q.question));
+    result = [...result, ...locPicked];
+    shuffleArray(result);
+  }
+
   return result;
 }
 
