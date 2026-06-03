@@ -1,7 +1,5 @@
 const counterDOM = document.getElementById("counter");
 const endDOM = document.getElementById("end");
-const bloodOverlay = document.getElementById("blood-overlay");
-const finalScoreDOM = document.getElementById("final-score");
 
 const scene = new THREE.Scene();
 
@@ -119,8 +117,6 @@ const laneTypes = ["car", "truck", "forest"];
 const laneSpeeds = [2, 2.5, 3];
 const vechicleColors = [0xa52523, 0xbdb638, 0x78b14b];
 const threeHeights = [20, 45, 60];
-
-const speedIncreasePerLane = 0.05;
 
 const initaliseValues = () => {
   lanes = generateLanes();
@@ -373,11 +369,11 @@ function Road() {
   middle.receiveShadow = true;
   road.add(middle);
 
-  const left = createSection(0x454a59);
+  const left = createSection(0x393d49);
   left.position.x = -boardWidth * zoom;
   road.add(left);
 
-  const right = createSection(0x454a59);
+  const right = createSection(0x393d49);
   right.position.x = boardWidth * zoom;
   road.add(right);
 
@@ -401,11 +397,11 @@ function Grass() {
   middle.receiveShadow = true;
   grass.add(middle);
 
-  const left = createSection(0xbaf455);
+  const left = createSection(0x99c846);
   left.position.x = -boardWidth * zoom;
   grass.add(left);
 
-  const right = createSection(0xbaf455);
+  const right = createSection(0x99c846);
   right.position.x = boardWidth * zoom;
   grass.add(right);
 
@@ -437,21 +433,10 @@ function Lane(index) {
           position = Math.floor(Math.random() * columns);
         } while (this.occupiedPositions.has(position));
         this.occupiedPositions.add(position);
-        const x =
+        three.position.x =
           (position * positionWidth + positionWidth / 2) * zoom -
           (boardWidth * zoom) / 2;
-        three.position.x = x;
         this.mesh.add(three);
-
-        // Duplicate trees for visual continuity in left/right sections
-        const leftThree = three.clone();
-        leftThree.position.x = x - boardWidth * zoom;
-        this.mesh.add(leftThree);
-
-        const rightThree = three.clone();
-        rightThree.position.x = x + boardWidth * zoom;
-        this.mesh.add(rightThree);
-
         return three;
       });
       break;
@@ -505,14 +490,11 @@ function Lane(index) {
   }
 }
 
-function restartGame() {
+document.querySelector("#retry").addEventListener("click", () => {
   lanes.forEach((lane) => scene.remove(lane.mesh));
   initaliseValues();
   endDOM.style.visibility = "hidden";
-  bloodOverlay.classList.remove("show");
-}
-
-document.querySelector("#retry").addEventListener("click", restartGame);
+});
 
 document
   .getElementById("forward")
@@ -539,9 +521,6 @@ window.addEventListener("keydown", (event) => {
   } else if (event.keyCode == "39") {
     // right arrow
     move("right");
-  } else if (event.keyCode == "13") {
-    // enter key
-    if (gameOver) restartGame();
   }
 });
 
@@ -554,15 +533,9 @@ function move(direction) {
       if (move === "backward")
         return { lane: position.lane - 1, column: position.column };
       if (move === "left")
-        return {
-          lane: position.lane,
-          column: (position.column - 1 + columns) % columns,
-        };
+        return { lane: position.lane, column: position.column - 1 };
       if (move === "right")
-        return {
-          lane: position.lane,
-          column: (position.column + 1) % columns,
-        };
+        return { lane: position.lane, column: position.column + 1 };
     },
     { lane: currentLane, column: currentColumn }
   );
@@ -588,18 +561,22 @@ function move(direction) {
       return;
     if (!stepStartTimestamp) startMoving = true;
   } else if (direction === "left") {
-    const nextColumn = (finalPositions.column - 1 + columns) % columns;
+    if (finalPositions.column === 0) return;
     if (
       lanes[finalPositions.lane].type === "forest" &&
-      lanes[finalPositions.lane].occupiedPositions.has(nextColumn)
+      lanes[finalPositions.lane].occupiedPositions.has(
+        finalPositions.column - 1
+      )
     )
       return;
     if (!stepStartTimestamp) startMoving = true;
   } else if (direction === "right") {
-    const nextColumn = (finalPositions.column + 1) % columns;
+    if (finalPositions.column === columns - 1) return;
     if (
       lanes[finalPositions.lane].type === "forest" &&
-      lanes[finalPositions.lane].occupiedPositions.has(nextColumn)
+      lanes[finalPositions.lane].occupiedPositions.has(
+        finalPositions.column + 1
+      )
     )
       return;
     if (!stepStartTimestamp) startMoving = true;
@@ -621,20 +598,17 @@ function animate(timestamp) {
         (-boardWidth * zoom) / 2 - positionWidth * 2 * zoom;
       const aBitAfterTheEndOFLane =
         (boardWidth * zoom) / 2 + positionWidth * 2 * zoom;
-      const speedMultiplier = 1 + currentLane * speedIncreasePerLane;
       lane.vechicles.forEach((vechicle) => {
         if (lane.direction) {
           vechicle.position.x =
             vechicle.position.x < aBitBeforeTheBeginingOfLane
               ? aBitAfterTheEndOFLane
-              : (vechicle.position.x -=
-                  ((lane.speed * speedMultiplier) / 16) * delta);
+              : (vechicle.position.x -= (lane.speed / 16) * delta);
         } else {
           vechicle.position.x =
             vechicle.position.x > aBitAfterTheEndOFLane
               ? aBitBeforeTheBeginingOfLane
-              : (vechicle.position.x +=
-                  ((lane.speed * speedMultiplier) / 16) * delta);
+              : (vechicle.position.x += (lane.speed / 16) * delta);
         }
       });
     }
@@ -709,27 +683,11 @@ function animate(timestamp) {
           break;
         }
         case "left": {
-          const oldColumn = currentColumn;
-          currentColumn = (currentColumn - 1 + columns) % columns;
-          if (currentColumn > oldColumn) {
-            // Wrapped to the right
-            const offset = boardWidth * zoom;
-            camera.position.x += offset;
-            dirLight.position.x += offset;
-            chicken.position.x += offset;
-          }
+          currentColumn--;
           break;
         }
         case "right": {
-          const oldColumn = currentColumn;
-          currentColumn = (currentColumn + 1) % columns;
-          if (currentColumn < oldColumn) {
-            // Wrapped to the left
-            const offset = boardWidth * zoom;
-            camera.position.x -= offset;
-            dirLight.position.x -= offset;
-            chicken.position.x -= offset;
-          }
+          currentColumn++;
           break;
         }
       }
@@ -752,11 +710,7 @@ function animate(timestamp) {
       const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
       if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
         gameOver = true;
-        bloodOverlay.classList.add("show");
-        finalScoreDOM.innerHTML = `Score: ${currentLane}`;
-        setTimeout(() => {
-          endDOM.style.visibility = "visible";
-        }, 500);
+        endDOM.style.visibility = "visible";
       }
     });
   }
