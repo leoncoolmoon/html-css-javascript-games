@@ -64,15 +64,16 @@ const truckLeftSideTexture = new Texture(25, 30, [
   { x: 0, y: 5, w: 10, h: 10 },
 ]);
 
-const generateLanes = () =>
-  [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    .map((index) => {
-      const lane = new Lane(index);
-      lane.mesh.position.y = index * positionWidth * zoom;
-      scene.add(lane.mesh);
-      return lane;
-    })
-    .filter((lane) => lane.index >= 0);
+const generateLanes = () => {
+  const res = [];
+  for (let i = -20; i < 40; i++) {
+    const lane = new Lane(i);
+    lane.mesh.position.y = i * positionWidth * zoom;
+    scene.add(lane.mesh);
+    if (i >= 0) res.push(lane);
+  }
+  return res;
+};
 
 const addLane = () => {
   const index = lanes.length;
@@ -151,6 +152,16 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+window.addEventListener("resize", () => {
+  camera.left = window.innerWidth / -2;
+  camera.right = window.innerWidth / 2;
+  camera.top = window.innerHeight / 2;
+  camera.bottom = window.innerHeight / -2;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 function Texture(width, height, rects) {
   const canvas = document.createElement("canvas");
@@ -490,11 +501,15 @@ function Lane(index) {
   }
 }
 
-document.querySelector("#retry").addEventListener("click", () => {
+function restartGame() {
   lanes.forEach((lane) => scene.remove(lane.mesh));
   initaliseValues();
   endDOM.style.visibility = "hidden";
-});
+  endDOM.classList.remove("show");
+  counterDOM.innerHTML = 0;
+}
+
+document.querySelector("#retry").addEventListener("click", restartGame);
 
 document
   .getElementById("forward")
@@ -521,6 +536,11 @@ window.addEventListener("keydown", (event) => {
   } else if (event.keyCode == "39") {
     // right arrow
     move("right");
+  } else if (event.keyCode == "13") {
+    // enter
+    if (gameOver) {
+      restartGame();
+    }
   }
 });
 
@@ -710,7 +730,9 @@ function animate(timestamp) {
       const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
       if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
         gameOver = true;
+        document.getElementById("final-score").innerHTML = currentLane;
         endDOM.style.visibility = "visible";
+        endDOM.classList.add("show");
       }
     });
   }

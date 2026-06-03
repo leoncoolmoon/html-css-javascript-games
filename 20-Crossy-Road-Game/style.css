@@ -23,18 +23,64 @@ button {
 }
 #end {
   position: absolute;
-  min-width: 100%;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   visibility: hidden;
+  z-index: 10;
+  overflow: hidden;
 }
+
+#blood-screen {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #8b0000;
+  transition: top 1s steps(10);
+}
+
+#end.show #blood-screen {
+  top: 0;
+}
+
+#game-over-content {
+  position: relative;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.5s 1s;
+}
+
+#end.show #game-over-content {
+  opacity: 1;
+}
+
+#end h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-shadow: 4px 4px 0px #000;
+}
+
+#end p {
+  font-size: 1em;
+  margin-bottom: 30px;
+}
+
 #end button {
-  background-color: red;
-  padding: 20px 50px 20px 50px;
+  background-color: #fff;
+  color: #8b0000;
+  padding: 20px 50px;
   font-family: inherit;
-  font-size: inherit;
+  font-size: 1em;
+  border: 4px solid #000;
+  box-shadow: 6px 6px 0px 0px #000;
+}
+
+#end button:hover {
+  background-color: #eee;
 }
 #controlls {
   position: absolute;
