@@ -1,276 +1,175 @@
-let squares = [];
-const width = 4;
-let score = 0;
-var myTimer;
-var gridDisplay;
-var scoreDisplay;
-var resultDisplay;
+document.addEventListener('DOMContentLoaded', () => {
+  const gridDisplay = document.querySelector('.grid');
+  const scoreDisplay = document.getElementById('score');
+  const resultDisplay = document.getElementById('result');
+  const newGameButton = document.getElementById('new-game-button');
+  const width = 4;
+  let squares = [];
+  let score = 0;
+  let isGameOver = false;
 
-//create the playing board
-function createBoard() {
-  for (let i = 0; i < width * width; i++) {
-    var square = document.createElement("div");
-    square.innerHTML = 0;
-    gridDisplay.appendChild(square);
-    squares.push(square);
+  // Create the playing board
+  function createBoard() {
+    gridDisplay.innerHTML = '';
+    squares = [];
+    for (let i = 0; i < width * width; i++) {
+      const square = document.createElement('div');
+      square.innerHTML = '';
+      gridDisplay.appendChild(square);
+      squares.push(square);
+    }
+    addTile();
+    addTile();
+    updateBoard();
   }
-  generate();
-  generate();
-}
 
-//generate a new number
-function generate() {
-  checkForGameOver();
-  randomNumber = Math.floor(Math.random() * squares.length);
-  if (squares[randomNumber].innerHTML == 0) {
-    squares[randomNumber].innerHTML = 2;
-  } else generate();
-}
-
-function moveRight() {
-  for (let i = 0; i < 16; i++) {
-    if (i % 4 === 0) {
-      let totalOne = squares[i].innerHTML;
-      let totalTwo = squares[i + 1].innerHTML;
-      let totalThree = squares[i + 2].innerHTML;
-      let totalFour = squares[i + 3].innerHTML;
-      let row = [
-        parseInt(totalOne),
-        parseInt(totalTwo),
-        parseInt(totalThree),
-        parseInt(totalFour),
-      ];
-
-      let filteredRow = row.filter((num) => num);
-      let missing = 4 - filteredRow.length;
-      let zeros = Array(missing).fill(0);
-      let newRow = zeros.concat(filteredRow);
-
-      squares[i].innerHTML = newRow[0];
-      squares[i + 1].innerHTML = newRow[1];
-      squares[i + 2].innerHTML = newRow[2];
-      squares[i + 3].innerHTML = newRow[3];
+  // Add a new tile (2 or 4) to a random empty spot
+  function addTile() {
+    const emptySquares = squares.filter(s => s.innerHTML === '');
+    if (emptySquares.length > 0) {
+      const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+      randomSquare.innerHTML = Math.random() < 0.9 ? 2 : 4;
+      checkForGameOver();
     }
   }
-}
 
-function moveLeft() {
-  for (let i = 0; i < 16; i++) {
-    if (i % 4 === 0) {
-      let totalOne = squares[i].innerHTML;
-      let totalTwo = squares[i + 1].innerHTML;
-      let totalThree = squares[i + 2].innerHTML;
-      let totalFour = squares[i + 3].innerHTML;
-      let row = [
-        parseInt(totalOne),
-        parseInt(totalTwo),
-        parseInt(totalThree),
-        parseInt(totalFour),
-      ];
-
-      let filteredRow = row.filter((num) => num);
-      let missing = 4 - filteredRow.length;
-      let zeros = Array(missing).fill(0);
-      let newRow = filteredRow.concat(zeros);
-
-      squares[i].innerHTML = newRow[0];
-      squares[i + 1].innerHTML = newRow[1];
-      squares[i + 2].innerHTML = newRow[2];
-      squares[i + 3].innerHTML = newRow[3];
-    }
+  // Update visual appearance of the board
+  function updateBoard() {
+    squares.forEach(square => {
+      const value = square.innerHTML;
+      square.className = ''; // Reset classes
+      if (value !== '') {
+        square.classList.add(`tile-${value}`);
+      }
+      // Hide 0s or empty strings
+      if (value === '0' || value === '') {
+        square.innerHTML = '';
+      }
+    });
+    scoreDisplay.innerHTML = score;
   }
-}
 
-function moveUp() {
-  for (let i = 0; i < 4; i++) {
-    let totalOne = squares[i].innerHTML;
-    let totalTwo = squares[i + width].innerHTML;
-    let totalThree = squares[i + width * 2].innerHTML;
-    let totalFour = squares[i + width * 3].innerHTML;
-    let column = [
-      parseInt(totalOne),
-      parseInt(totalTwo),
-      parseInt(totalThree),
-      parseInt(totalFour),
-    ];
-
-    let filteredColumn = column.filter((num) => num);
-    let missing = 4 - filteredColumn.length;
+  // Handle row/column movement logic
+  function slide(row) {
+    let arr = row.filter(val => val);
+    let missing = width - arr.length;
     let zeros = Array(missing).fill(0);
-    let newColumn = filteredColumn.concat(zeros);
-
-    squares[i].innerHTML = newColumn[0];
-    squares[i + width].innerHTML = newColumn[1];
-    squares[i + width * 2].innerHTML = newColumn[2];
-    squares[i + width * 3].innerHTML = newColumn[3];
+    return arr.concat(zeros);
   }
-}
 
-function moveDown() {
-  for (let i = 0; i < 4; i++) {
-    let totalOne = squares[i].innerHTML;
-    let totalTwo = squares[i + width].innerHTML;
-    let totalThree = squares[i + width * 2].innerHTML;
-    let totalFour = squares[i + width * 3].innerHTML;
-    let column = [
-      parseInt(totalOne),
-      parseInt(totalTwo),
-      parseInt(totalThree),
-      parseInt(totalFour),
-    ];
-
-    let filteredColumn = column.filter((num) => num);
-    let missing = 4 - filteredColumn.length;
-    let zeros = Array(missing).fill(0);
-    let newColumn = zeros.concat(filteredColumn);
-
-    squares[i].innerHTML = newColumn[0];
-    squares[i + width].innerHTML = newColumn[1];
-    squares[i + width * 2].innerHTML = newColumn[2];
-    squares[i + width * 3].innerHTML = newColumn[3];
+  function combine(row) {
+    for (let i = 0; i < width - 1; i++) {
+      if (row[i] !== 0 && row[i] === row[i + 1]) {
+        row[i] *= 2;
+        row[i + 1] = 0;
+        score += row[i];
+        if (row[i] === 2048) {
+          resultDisplay.innerHTML = 'You WIN!';
+        }
+      }
+    }
+    return row;
   }
-}
 
-function combineRow() {
-  for (let i = 0; i < 15; i++) {
-    if (squares[i].innerHTML === squares[i + 1].innerHTML) {
-      let combinedTotal =
-        parseInt(squares[i].innerHTML) + parseInt(squares[i + 1].innerHTML);
-      squares[i].innerHTML = combinedTotal;
-      squares[i + 1].innerHTML = 0;
-      score += combinedTotal;
-      scoreDisplay.innerHTML = score;
+  function move(direction) {
+    if (isGameOver) return;
+    let moved = false;
+    const oldBoard = squares.map(s => s.innerHTML);
+
+    if (direction === 'left' || direction === 'right') {
+      for (let i = 0; i < width * width; i += width) {
+        let row = [
+          parseInt(squares[i].innerHTML) || 0,
+          parseInt(squares[i + 1].innerHTML) || 0,
+          parseInt(squares[i + 2].innerHTML) || 0,
+          parseInt(squares[i + 3].innerHTML) || 0
+        ];
+        if (direction === 'right') row.reverse();
+
+        row = slide(row);
+        row = combine(row);
+        row = slide(row);
+
+        if (direction === 'right') row.reverse();
+
+        squares[i].innerHTML = row[0] || '';
+        squares[i + 1].innerHTML = row[1] || '';
+        squares[i + 2].innerHTML = row[2] || '';
+        squares[i + 3].innerHTML = row[3] || '';
+      }
+    } else {
+      for (let i = 0; i < width; i++) {
+        let column = [
+          parseInt(squares[i].innerHTML) || 0,
+          parseInt(squares[i + width].innerHTML) || 0,
+          parseInt(squares[i + width * 2].innerHTML) || 0,
+          parseInt(squares[i + width * 3].innerHTML) || 0
+        ];
+        if (direction === 'down') column.reverse();
+
+        column = slide(column);
+        column = combine(column);
+        column = slide(column);
+
+        if (direction === 'down') column.reverse();
+
+        squares[i].innerHTML = column[0] || '';
+        squares[i + width].innerHTML = column[1] || '';
+        squares[i + width * 2].innerHTML = column[2] || '';
+        squares[i + width * 3].innerHTML = column[3] || '';
+      }
+    }
+
+    const newBoard = squares.map(s => s.innerHTML);
+    if (JSON.stringify(oldBoard) !== JSON.stringify(newBoard)) {
+      addTile();
+      updateBoard();
     }
   }
-  checkForWin();
-}
 
-function combineColumn() {
-  for (let i = 0; i < 12; i++) {
-    if (squares[i].innerHTML === squares[i + width].innerHTML) {
-      let combinedTotal =
-        parseInt(squares[i].innerHTML) +
-        parseInt(squares[i + width].innerHTML);
-      squares[i].innerHTML = combinedTotal;
-      squares[i + width].innerHTML = 0;
-      score += combinedTotal;
-      scoreDisplay.innerHTML = score;
+  function checkForGameOver() {
+    // Check for empty spots
+    if (squares.some(s => s.innerHTML === '')) return;
+
+    // Check for possible merges
+    for (let i = 0; i < width * width; i++) {
+      const val = parseInt(squares[i].innerHTML);
+      // Check right
+      if (i % width < width - 1 && val === parseInt(squares[i + 1].innerHTML)) return;
+      // Check down
+      if (i < width * (width - 1) && val === parseInt(squares[i + width].innerHTML)) return;
     }
+
+    isGameOver = true;
+    resultDisplay.innerHTML = 'Game Over!';
+    if (typeof stopVirtualKeyboard === 'function') stopVirtualKeyboard();
   }
-  checkForWin();
-}
 
-//assign functions to keyCodes
-function control(e) {
-  if (e.keyCode === 37) {
-    keyLeft();
-  } else if (e.keyCode === 38) {
-    keyUp();
-  } else if (e.keyCode === 39) {
-    keyRight();
-  } else if (e.keyCode === 40) {
-    keyDown();
+  function restartGame() {
+    score = 0;
+    isGameOver = false;
+    resultDisplay.innerHTML = '';
+    if (typeof resumeVirtualKeyboard === 'function') resumeVirtualKeyboard();
+    createBoard();
   }
-}
-document.addEventListener("keyup", control);
 
-function keyRight() {
-  moveRight();
-  combineRow();
-  moveRight();
-  generate();
-}
-
-function keyLeft() {
-  moveLeft();
-  combineRow();
-  moveLeft();
-  generate();
-}
-
-function keyUp() {
-  moveUp();
-  combineColumn();
-  moveUp();
-  generate();
-}
-
-function keyDown() {
-  moveDown();
-  combineColumn();
-  moveDown();
-  generate();
-}
-
-//check for the number 2048 in the squares to win
-function checkForWin() {
-  for (let i = 0; i < squares.length; i++) {
-    if (squares[i].innerHTML == 2048) {
-      resultDisplay.innerHTML = "You WIN";
-      document.removeEventListener("keyup", control);
-      setTimeout(() => clear(), 3000);
-    }
+  // Key bindings
+  function control(e) {
+    if (e.keyCode === 37) move('left');
+    else if (e.keyCode === 38) move('up');
+    else if (e.keyCode === 39) move('right');
+    else if (e.keyCode === 40) move('down');
+    else if (e.keyCode === 13) restartGame();
   }
-}
 
-//check if there are no zeros on the board to lose
-function checkForGameOver() {
-  let zeros = 0;
-  for (let i = 0; i < squares.length; i++) {
-    if (squares[i].innerHTML == 0) {
-      zeros++;
-    }
-  }
-  if (zeros === 0) {
-    resultDisplay.innerHTML = "You LOSE";
-    document.removeEventListener("keyup", control);
-    stopVirtualKeyboard();
-    myTimer = setTimeout(() => clear(), 3000);
-  }
-}
+  document.addEventListener('keydown', control);
+  newGameButton.addEventListener('click', restartGame);
 
-//clear timer
-function clear() {
-  if (myTimer != null) {
-    clearInterval(myTimer);
-    resumeVirtualKeyboard();
-  }
-}
+  // Global functions for virtual keyboard/gravity sensor in ctrl.js
+  window.keyLeft = () => move('left');
+  window.keyRight = () => move('right');
+  window.keyUp = () => move('up');
+  window.keyDown = () => move('down');
 
-//add colours
-function addColours() {
-  for (let i = 0; i < squares.length; i++) {
-    if (squares[i].innerHTML == 0)
-      squares[i].style.backgroundColor = "#afa192";
-    else if (squares[i].innerHTML == 2)
-      squares[i].style.backgroundColor = "#eee4da";
-    else if (squares[i].innerHTML == 4)
-      squares[i].style.backgroundColor = "#ede0c8";
-    else if (squares[i].innerHTML == 8)
-      squares[i].style.backgroundColor = "#f2b179";
-    else if (squares[i].innerHTML == 16)
-      squares[i].style.backgroundColor = "#ffcea4";
-    else if (squares[i].innerHTML == 32)
-      squares[i].style.backgroundColor = "#e8c064";
-    else if (squares[i].innerHTML == 64)
-      squares[i].style.backgroundColor = "#ffab6e";
-    else if (squares[i].innerHTML == 128)
-      squares[i].style.backgroundColor = "#fd9982";
-    else if (squares[i].innerHTML == 256)
-      squares[i].style.backgroundColor = "#ead79c";
-    else if (squares[i].innerHTML == 512)
-      squares[i].style.backgroundColor = "#76daff";
-    else if (squares[i].innerHTML == 1024)
-      squares[i].style.backgroundColor = "#beeaa5";
-    else if (squares[i].innerHTML == 2048)
-      squares[i].style.backgroundColor = "#d7d4f0";
-  }
-}
-window.addEventListener("load", () => {
-   gridDisplay = document.querySelector(".grid");
-   scoreDisplay = document.getElementById("score");
-   resultDisplay = document.getElementById("result");
   createBoard();
-  addColours();
-  myTimer = setInterval(addColours, 50);
 });

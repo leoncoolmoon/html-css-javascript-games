@@ -75,12 +75,12 @@ function createVirtualKeyboard() {
     oriantationCtl.className = 'ctrl second_line_virtual_keybroad';
 
     // 创建Reset Orientation按钮
-    const resetOriantation = document.createElement('div');
-    resetOriantation.id = 'reset_oriantation';
-    resetOriantation.className = 'arrow_button';
-    resetOriantation.onclick = resetOriantation;
-    resetOriantation.textContent = 'Reset Oriantation';
-    oriantationCtl.appendChild(resetOriantation);
+    const resetOriantationBtn = document.createElement('div');
+    resetOriantationBtn.id = 'reset_oriantation';
+    resetOriantationBtn.className = 'arrow_button';
+    resetOriantationBtn.onclick = resetOriantation;
+    resetOriantationBtn.textContent = 'Reset Oriantation';
+    oriantationCtl.appendChild(resetOriantationBtn);
 
     // 创建Use virtual keybroad按钮
     const showVirtualKeybroad = document.createElement('div');
