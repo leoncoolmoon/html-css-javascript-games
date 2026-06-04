@@ -18,18 +18,60 @@
     };
     const t = translations[currentLang];
 
+    const applyTheme = () => {
+        const theme = localStorage.getItem('theme') || 'system';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme === 'system' ? 'light dark' : theme;
+    };
+    applyTheme();
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'theme') applyTheme();
+    });
+
     const style = document.createElement('style');
     style.textContent = `
+        html[data-theme="light"], :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --bg: #f0f2f5;
+            --text: #333;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+        }
+        html[data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --surface: #2d2d2d;
+            --border: #444;
+        }
+        @media (prefers-color-scheme: dark) {
+            html[data-theme="system"] {
+                --bg-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --bg: #1a1a1a;
+                --text: #e0e0e0;
+                --surface: #2d2d2d;
+                --border: #444;
+            }
+        }
+
         /* Global layout fixes to prevent vertical overflow */
         html, body {
-            height: 100dvh !important;
+            min-height: 100dvh;
             margin: 0 !important;
             padding: 0 !important;
-            overflow: hidden !important;
+            overflow-x: hidden;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             width: 100vw !important;
+        }
+
+        html[data-theme] body {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color) !important;
         }
 
         /* Ensure all elements respect box-sizing */
@@ -37,9 +79,9 @@
 
         /* Constrain common game containers and canvases */
         canvas, #game-container, .container, .game-board, .grid, main, #board, .game-area, #canvas, .game {
-            max-height: 84dvh !important;
-            max-width: 100vw !important;
-            object-fit: contain !important;
+            max-height: 95dvh;
+            max-width: 100vw;
+            object-fit: contain;
         }
 
         /* Prevent large images from causing overflow */
@@ -99,7 +141,7 @@
             .floating-controls { display: none; }
         }
     `;
-    document.head.appendChild(style);
+    document.head.prepend(style);
 
     const container = document.createElement('div');
     container.className = 'floating-controls';
