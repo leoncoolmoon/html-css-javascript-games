@@ -61,6 +61,7 @@ function startGame() {
 
   let boardElement = document.getElementById("board");
   boardElement.innerHTML = "";
+  boardElement.style.display = "grid";
   boardElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
   boardElement.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   boardElement.style.width = `${columns * tileSize}px`;
