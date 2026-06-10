@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Word Square</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --cell-size:clamp(52px,13vmin,72px);
+  --gap:4px;
+  --font-cell:clamp(18px,5vmin,26px);
+  --bg-grad-a:hsl(220,45%,82%);
+  --bg-grad-b:hsl(200,40%,86%);
+  --bg-grad-c:hsl(240,38%,78%);
+  --color-text:#1e2a5e;
+  --color-text-sub:#4a5a8a;
+  --color-accent:#4f46e5;
+  --color-accent-bg:rgba(99,102,241,.85);
+  --panel-bg:rgba(255,255,255,.5);
+  --panel-border:rgba(200,210,255,.7);
+  --cell-bg:rgba(255,255,255,.65);
+  --cell-border:rgba(160,180,240,.5);
+  --cell-color:#1e2a5e;
+  --btn-bg:rgba(255,255,255,.65);
+  --btn-border:rgba(160,180,240,.8);
+  --btn-color:#1e2a5e;
+  --win-bg:rgba(224,231,255,.92);
+  --win-border:#4f46e5;
+  --win-color:#3730a3;
+  --toast-bg:rgba(15,18,60,.88);
+  --toast-color:#e0e7ff;
+  --toast-word-color:#a5b4fc;
+  --mute-bg:rgba(255,255,255,.55);
+  --mute-border:rgba(160,180,240,.7);
+  --orb-color:rgba(255,255,255,.2);
+  --status-color:#4a5a8a;
+  --next-color:#4f46e5;
+  --title-shadow:rgba(255,255,255,.5);
+}
+
+@media(prefers-color-scheme:dark){:root{
+  --bg-grad-a:hsl(230,35%,12%);
+  --bg-grad-b:hsl(215,30%,16%);
+  --bg-grad-c:hsl(245,32%,10%);
+  --color-text:#c7d2fe;
+  --color-text-sub:#818cf8;
+  --color-accent:#818cf8;
+  --color-accent-bg:rgba(79,70,229,.85);
+  --cell-bg:rgba(10,12,50,.65);
+  --cell-border:rgba(50,60,180,.4);
+  --cell-color:#c7d2fe;
+  --btn-bg:rgba(15,15,60,.6);
+  --btn-border:rgba(70,80,180,.6);
+  --btn-color:#a5b4fc;
+  --win-bg:rgba(15,12,60,.9);
+  --win-border:#818cf8;
+  --win-color:#c7d2fe;
+  --toast-bg:rgba(5,5,30,.92);
+  --toast-color:#e0e7ff;
+  --toast-word-color:#a5b4fc;
+  --mute-bg:rgba(15,15,60,.6);
+  --mute-border:rgba(70,80,180,.5);
+  --orb-color:rgba(80,70,200,.12);
+  --status-color:#818cf8;
+  --next-color:#818cf8;
+  --title-shadow:rgba(0,0,0,.4);
+}}
+
+html,body{width:100%;height:100dvh;overflow:hidden;font-family:'Quicksand',sans-serif;background:var(--bg-grad-a);touch-action:none;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(135deg,var(--bg-grad-a) 0%,var(--bg-grad-b) 50%,var(--bg-grad-c) 100%);animation:bgShift 9s ease-in-out infinite alternate;}
+@keyframes bgShift{0%{filter:hue-rotate(0deg) brightness(1)}100%{filter:hue-rotate(20deg) brightness(1.05)}}
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,var(--orb-color) 0%,transparent 70%);animation:float linear infinite;}
+@keyframes float{0%{transform:translate(0,0) scale(1)}33%{transform:translate(28px,-18px) scale(1.04)}66%{transform:translate(-14px,22px) scale(0.96)}100%{transform:translate(0,0) scale(1)}}
+
+#app{position:relative;z-index:1;width:100%;height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(env(safe-area-inset-top,0px),10px) 10px max(env(safe-area-inset-bottom,0px),10px) 10px;gap:10px;overflow:hidden;min-height:0;}
+
+#header{display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;}
+#theme-badge{background:var(--color-accent-bg);color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;letter-spacing:2px;padding:2px 10px;border-radius:20px;backdrop-filter:blur(4px);}
+#theme-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:var(--color-text);text-shadow:0 1px 8px var(--title-shadow);}
+
+#progress-row{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#score-label{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--color-text-sub);}
+#word-dots{display:flex;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--cell-border);transition:background .3s,transform .3s;}
+.dot.hinted{background:rgba(251,191,36,.9);}
+.dot.c0{background:rgba(199,210,254,1);transform:scale(1.3);}
+.dot.c1{background:rgba(187,247,208,1);transform:scale(1.3);}
+.dot.c2{background:rgba(254,205,170,1);transform:scale(1.3);}
+.dot.c3{background:rgba(233,213,255,1);transform:scale(1.3);}
+.dot.c4{background:rgba(165,243,252,1);transform:scale(1.3);}
+.dot.c5{background:rgba(254,215,170,1);transform:scale(1.3);}
+.dot.c6{background:rgba(249,168,212,1);transform:scale(1.3);}
+.dot.c7{background:rgba(167,243,208,1);transform:scale(1.3);}
+
+#grid-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+#grid{display:inline-grid;grid-template-columns:repeat(5,var(--cell-size));gap:var(--gap);user-select:none;touch-action:none;cursor:pointer;}
+
+.cell{width:var(--cell-size);height:var(--cell-size);display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;font-size:var(--font-cell);border-radius:10px;background:var(--cell-bg);border:1.5px solid var(--cell-border);color:var(--cell-color);transition:transform .08s;}
+.cell.selecting{background:#fde68a!important;border-color:#d97706!important;color:#78350f!important;transform:scale(1.1);}
+.cell.found-0{background:rgba(199,210,254,.9)!important;border-color:#4f46e5!important;color:#1e1b4b!important}
+.cell.found-1{background:rgba(187,247,208,.9)!important;border-color:#16a34a!important;color:#14532d!important}
+.cell.found-2{background:rgba(254,205,170,.9)!important;border-color:#ea580c!important;color:#431407!important}
+.cell.found-3{background:rgba(233,213,255,.9)!important;border-color:#9333ea!important;color:#4a044e!important}
+.cell.found-4{background:rgba(165,243,252,.9)!important;border-color:#0891b2!important;color:#083344!important}
+.cell.found-5{background:rgba(254,215,170,.9)!important;border-color:#d97706!important;color:#451a03!important}
+.cell.found-6{background:rgba(249,168,212,.9)!important;border-color:#db2777!important;color:#500724!important}
+.cell.found-7{background:rgba(167,243,208,.9)!important;border-color:#059669!important;color:#064e3b!important}
+.cell.hint-glow{animation:pulse .8s ease-in-out 3;background:rgba(251,191,36,.9)!important;border-color:#d97706!important;color:#78350f!important;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+/* Snake path connector SVG overlay */
+#path-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+.path-line{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:0.55;}
+
+#hint-reveal{min-height:28px;flex-shrink:0;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;}
+.hint-chip{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;padding:3px 12px;border-radius:20px;background:rgba(251,191,36,.25);border:1.5px solid #d97706;color:#92400e;animation:fadeIn .3s ease;}
+@media(prefers-color-scheme:dark){.hint-chip{background:rgba(251,191,36,.15);color:#fde68a;}}
+@keyframes fadeIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+#controls{display:flex;gap:8px;justify-content:center;flex-shrink:0;}
+button{font-family:'Nunito',sans-serif;font-weight:700;font-size:clamp(10px,2.5vw,13px);padding:7px 16px;border-radius:20px;border:1.5px solid var(--btn-border);background:var(--btn-bg);color:var(--btn-color);cursor:pointer;backdrop-filter:blur(4px);}
+button:active{opacity:.85;transform:scale(.97)}
+button.primary{background:var(--color-accent-bg);border-color:var(--color-accent);color:#fff;}
+
+#status{text-align:center;font-size:12px;color:var(--status-color);flex-shrink:0;min-height:16px;}
+
+#win-msg{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;text-align:center;background:var(--win-bg);border:1.5px solid var(--win-border);border-radius:16px;padding:18px 26px;color:var(--win-color);font-family:'Nunito',sans-serif;font-weight:800;font-size:clamp(13px,3.5vw,17px);backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.2);}
+
+#toast{position:fixed;bottom:max(env(safe-area-inset-bottom,16px),16px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--toast-bg);color:var(--toast-color);font-family:'Quicksand',sans-serif;font-size:12px;padding:9px 16px;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.28);z-index:999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:min(290px,90vw);text-align:center;line-height:1.5;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast strong{display:block;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;color:var(--toast-word-color);margin-bottom:2px;}
+
+#mute-btn{position:fixed;top:max(env(safe-area-inset-top,8px),8px);right:10px;z-index:10;background:var(--mute-bg);border:1px solid var(--mute-border);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);font-size:14px;padding:0;}
+
+#loading-overlay{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.06);backdrop-filter:blur(6px);font-family:'Nunito',sans-serif;font-weight:700;color:var(--color-text);font-size:14px;border-radius:12px;}
+.spinner{width:20px;height:20px;border:2px solid rgba(100,100,200,.3);border-top-color:var(--color-accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#load-tip{font-size:11px;color:var(--color-text-sub);font-family:'Quicksand',sans-serif;}
+#next-badge{text-align:center;font-size:10px;color:var(--next-color);flex-shrink:0;min-height:12px;}
+</style>
+</head>
+<body>
+
+<div class="orb" style="width:240px;height:240px;top:-70px;left:-70px;animation-duration:20s"></div>
+<div class="orb" style="width:170px;height:170px;bottom:-50px;right:-30px;animation-duration:25s;animation-delay:-8s"></div>
+
+<button id="mute-btn" onclick="toggleMute()">🔊</button>
+<div id="toast"><strong id="toast-word"></strong><span id="toast-def"></span></div>
+
+<div id="app">
+  <div id="header">
+    <div id="theme-badge">WORD SQUARE</div>
+    <div id="theme-title">Loading…</div>
+  </div>
+
+  <div id="progress-row">
+    <span id="score-label">0 found</span>
+    <div id="word-dots"></div>
+  </div>
+
+  <div id="grid-wrap">
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <span>Building your puzzle…</span>
+      <span id="load-tip"></span>
+    </div>
+    <div id="grid" style="display:none"></div>
+    <svg id="path-svg" style="display:none"></svg>
+    <div id="win-msg">
+      🎉 All words found!
+      <div style="margin-top:8px"><button class="primary" onclick="loadNextLevel()">Next Level →</button></div>
+    </div>
+  </div>
+
+  <div id="hint-reveal"></div>
+  <div id="status"></div>
+
+  <div id="controls" style="display:none">
+    <button onclick="resetSelection()">↺ Restart</button>
+    <button onclick="giveHint()">💡 Hint</button>
+    <button class="primary" onclick="loadNextLevel()">Next →</button>
+  </div>
+
+  <div id="next-badge"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DICTIONARY
+═══════════════════════════════════════════════════════ */
+const DICT={
+  BALLET:{pos:"n.",def:"Classical dance with precise, graceful movements"},SALSA:{pos:"n.",def:"Lively Latin dance of Cuban origin"},TANGO:{pos:"n.",def:"Passionate Argentine partner dance"},WALTZ:{pos:"n.",def:"Smooth ballroom dance in triple time"},SWING:{pos:"n.",def:"Energetic jazz-based dance from the 1930s"},JIVE:{pos:"n.",def:"Fast dance associated with rock and roll"},SAMBA:{pos:"n.",def:"Brazilian carnival dance with syncopated rhythm"},HOP:{pos:"n.",def:"Informal term for a lively social dance"},
+  LION:{pos:"n.",def:"Large African big cat; the king of beasts"},TIGER:{pos:"n.",def:"Largest wild cat, known for its stripes"},ZEBRA:{pos:"n.",def:"African equid with black-and-white stripes"},PANDA:{pos:"n.",def:"Bear native to China, famous for eating bamboo"},WOLF:{pos:"n.",def:"Social carnivorous mammal that hunts in packs"},ELK:{pos:"n.",def:"Large deer species of North America and Asia"},OWL:{pos:"n.",def:"Nocturnal bird of prey with a hooting call"},YAK:{pos:"n.",def:"Long-haired bovid native to the Himalayas"},EMU:{pos:"n.",def:"Large flightless bird native to Australia"},FOX:{pos:"n.",def:"Small clever canid with a bushy tail"},
+  FRANCE:{pos:"n.",def:"Country in Western Europe, capital Paris"},BRAZIL:{pos:"n.",def:"Largest country in South America"},JAPAN:{pos:"n.",def:"Island nation in East Asia"},EGYPT:{pos:"n.",def:"North African country famous for ancient pyramids"},PERU:{pos:"n.",def:"South American country, home of Machu Picchu"},CUBA:{pos:"n.",def:"Caribbean island nation and republic"},IRAN:{pos:"n.",def:"Country in the Middle East, formerly Persia"},MALI:{pos:"n.",def:"Landlocked country in West Africa"},OMAN:{pos:"n.",def:"Country on the Arabian Peninsula"},CHAD:{pos:"n.",def:"Landlocked country in north-central Africa"},FIJI:{pos:"n.",def:"Pacific island nation known for tropical beauty"},
+  TENNIS:{pos:"n.",def:"Racket sport played on a court with a net"},RUGBY:{pos:"n.",def:"Team sport played with an oval ball"},BOXING:{pos:"n.",def:"Combat sport where fighters punch each other"},GOLF:{pos:"n.",def:"Sport of hitting a ball into holes with clubs"},POLO:{pos:"n.",def:"Sport played on horseback with mallets"},SKI:{pos:"v.",def:"To glide over snow on long narrow runners"},SURF:{pos:"v.",def:"To ride ocean waves on a board"},LUGE:{pos:"n.",def:"Winter sledding sport on an icy track"},
+  APPLE:{pos:"n.",def:"Round fruit with red, green or yellow skin"},MANGO:{pos:"n.",def:"Sweet tropical fruit with yellow flesh"},GRAPE:{pos:"n.",def:"Small sweet fruit growing in clusters"},PEACH:{pos:"n.",def:"Soft juicy fruit with fuzzy golden-red skin"},LEMON:{pos:"n.",def:"Sour yellow citrus fruit rich in vitamin C"},PLUM:{pos:"n.",def:"Small oval fruit with smooth skin"},FIG:{pos:"n.",def:"Sweet pear-shaped fruit with edible seeds"},LIME:{pos:"n.",def:"Small green citrus fruit with a tart flavour"},PEAR:{pos:"n.",def:"Sweet bell-shaped fruit with a grainy texture"},KIWI:{pos:"n.",def:"Small brown fruit with bright green flesh"},
+  MARS:{pos:"n.",def:"The fourth planet from the Sun; the Red Planet"},VENUS:{pos:"n.",def:"Hottest planet, second from the Sun"},SATURN:{pos:"n.",def:"Sixth planet, famous for its ring system"},EARTH:{pos:"n.",def:"Our home planet; only known world with life"},MOON:{pos:"n.",def:"Earth's only natural satellite"},COMET:{pos:"n.",def:"Icy body that develops a tail near the Sun"},SUN:{pos:"n.",def:"The star at the centre of our solar system"},STAR:{pos:"n.",def:"Ball of plasma held together by gravity"},
+  PIANO:{pos:"n.",def:"Keyboard instrument with hammers striking strings"},GUITAR:{pos:"n.",def:"Six-stringed instrument plucked or strummed"},FLUTE:{pos:"n.",def:"Wind instrument played by blowing across a hole"},DRUMS:{pos:"n.",def:"Percussion instruments struck to create rhythm"},CELLO:{pos:"n.",def:"Large bowed string instrument with deep tones"},HARP:{pos:"n.",def:"Large plucked string instrument"},OBOE:{pos:"n.",def:"Double-reed woodwind with a nasal tone"},LUTE:{pos:"n.",def:"Ancient plucked string instrument"},TUBA:{pos:"n.",def:"Large brass instrument with a deep low tone"},
+  RED:{pos:"adj.",def:"Colour of blood and ripe cherries"},BLUE:{pos:"adj.",def:"Colour of the sky and sea"},GREEN:{pos:"adj.",def:"Colour of grass and leaves"},PINK:{pos:"adj.",def:"Light, warm colour; pale red"},TEAL:{pos:"adj.",def:"Blue-green colour resembling the teal duck"},GOLD:{pos:"adj.",def:"Rich yellow metallic colour"},JADE:{pos:"n.",def:"Deep green colour like the gemstone jade"},ROSE:{pos:"adj.",def:"Soft pink colour like the flower"},CYAN:{pos:"adj.",def:"Bright blue-green colour"},
+  WHALE:{pos:"n.",def:"Largest animal on Earth; a marine mammal"},SHARK:{pos:"n.",def:"Cartilaginous fish known for sharp teeth"},SQUID:{pos:"n.",def:"Ten-limbed marine mollusc"},SEAL:{pos:"n.",def:"Marine mammal with flippers"},REEF:{pos:"n.",def:"Ridge of coral near the ocean surface"},WAVE:{pos:"n.",def:"Ridge of water moving across the ocean"},TIDE:{pos:"n.",def:"Rise and fall of sea levels due to the Moon"},KELP:{pos:"n.",def:"Large brown seaweed found in cold ocean waters"},
+  RAIN:{pos:"n.",def:"Water falling from clouds in liquid drops"},SNOW:{pos:"n.",def:"Frozen water that falls as white flakes"},STORM:{pos:"n.",def:"Violent weather with strong wind and rain"},CLOUD:{pos:"n.",def:"Visible mass of water droplets in the sky"},HAIL:{pos:"n.",def:"Frozen rain that falls as small balls of ice"},FOG:{pos:"n.",def:"Thick mist close to the ground"},WIND:{pos:"n.",def:"Natural movement of air from high to low pressure"},SLEET:{pos:"n.",def:"Rain mixed with snow or melted snowflakes"},FROST:{pos:"n.",def:"Thin layer of ice forming on cold surfaces"}
+};
+
+const ALL_THEMES=["Dance","Animals","Countries","Sports","Fruits","Space","Instruments","Colours","Ocean","Weather"];
+const FALLBACK={
+  Dance:   ["BALLET","SALSA","TANGO","WALTZ","JIVE","HOP","SWING","SAMBA"],
+  Animals: ["LION","TIGER","ZEBRA","WOLF","OWL","YAK","EMU","FOX","ELK","PANDA"],
+  Countries:["FRANCE","BRAZIL","JAPAN","EGYPT","PERU","CUBA","IRAN","MALI","OMAN","CHAD","FIJI"],
+  Sports:  ["TENNIS","RUGBY","BOXING","GOLF","POLO","SKI","SURF","LUGE"],
+  Fruits:  ["APPLE","MANGO","GRAPE","PEACH","PLUM","FIG","LIME","PEAR","KIWI","LEMON"],
+  Space:   ["MARS","VENUS","SATURN","EARTH","MOON","COMET","SUN","STAR"],
+  Instruments:["PIANO","GUITAR","FLUTE","DRUMS","CELLO","HARP","OBOE","TUBA","LUTE"],
+  Colours: ["RED","BLUE","GREEN","PINK","TEAL","GOLD","JADE","ROSE","CYAN"],
+  Ocean:   ["WHALE","SHARK","SQUID","SEAL","REEF","WAVE","TIDE","KELP"],
+  Weather: ["RAIN","SNOW","STORM","CLOUD","HAIL","FOG","WIND","SLEET","FROST"]
+};
+
+/* ═══════════════════════════════════════════════════════
+   PICK WORDS — total letters = exactly 25, no repeats
+═══════════════════════════════════════════════════════ */
+function pickWords(pool) {
+  // Remove duplicates, shuffle
+  const unique = [...new Set(pool)].sort(() => Math.random() - .5);
+  // BFS/DP subset-sum: find a subset of unique words summing to 25
+  // State: dp[sum] = list of words chosen so far
+  // Cap pool to 14 words to keep search tractable
+  const words = unique.slice(0, 14);
+  const TARGET = 25;
+
+  // dp[s] = array of words reaching sum s, or null if unreachable
+  const dp = new Array(TARGET + 1).fill(null);
+  dp[0] = [];
+
+  for (const w of words) {
+    const wl = w.length;
+    // Iterate backwards to avoid using same word twice
+    for (let s = TARGET; s >= wl; s--) {
+      if (dp[s] === null && dp[s - wl] !== null) {
+        dp[s] = [...dp[s - wl], w];
+      }
+    }
+    if (dp[TARGET] !== null) break; // found early
+  }
+
+  if (dp[TARGET] !== null && dp[TARGET].length >= 2) {
+    return dp[TARGET].sort(() => Math.random() - .5);
+  }
+
+  // Fallback: greedy fill to as close to 25 as possible, pad with 3-letter words
+  let total = 0, chosen = [];
+  for (const w of words) {
+    if (total + w.length <= TARGET) { chosen.push(w); total += w.length; }
+    if (total === TARGET) break;
+  }
+  // If short, add short filler words
+  const fillers = ["THE","AND","FOR","ARE","BUT","NOT","YOU","ALL","CAN","HER","WAS","ONE","OUR","OUT","DAY","GET","HAS","HIM","HIS","HOW","ITS","NEW","NOW","OLD","OWN","SAY","SHE","TOO","USE","WAY","WHO"];
+  let fi = 0;
+  while (total < TARGET && fi < fillers.length) {
+    const fw = fillers[fi++];
+    if (!chosen.includes(fw) && total + fw.length <= TARGET) {
+      chosen.push(fw); total += fw.length;
+    }
+  }
+  return chosen;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SNAKE-PATH GRID PLACEMENT
+   Each word follows a path of adjacent cells (8-connected),
+   may turn freely, but cells cannot be reused across words.
+═══════════════════════════════════════════════════════ */
+const GRID_SIZE = 5;
+const ADJ = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+// used[r][c] = true if cell already occupied
+let usedCells;
+
+function placeWordSnake(word, grid) {
+  // Try random starting cells and random snake paths via DFS
+  const allCells = [];
+  for (let r = 0; r < GRID_SIZE; r++)
+    for (let c = 0; c < GRID_SIZE; c++)
+      if (!usedCells[r][c]) allCells.push([r, c]);
+
+  // Shuffle starting cells
+  allCells.sort(() => Math.random() - .5);
+
+  for (const [sr, sc] of allCells) {
+    const path = dfsSnake(word, 0, sr, sc, [[sr, sc]]);
+    if (path) {
+      // Commit: write letters and mark used
+      for (let i = 0; i < word.length; i++) {
+        const [r, c] = path[i];
+        grid[r][c] = word[i];
+        usedCells[r][c] = true;
+      }
+      return path;
+    }
+  }
+  return null;
+}
+
+function dfsSnake(word, idx, r, c, path) {
+  if (idx === word.length - 1) return path;
+  // Shuffle neighbours for variety
+  const nbrs = [...ADJ].sort(() => Math.random() - .5);
+  for (const [dr, dc] of nbrs) {
+    const nr = r + dr, nc = c + dc;
+    if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+    if (usedCells[nr][nc]) continue;
+    // Temporarily mark to avoid re-visiting within this word's path
+    const alreadyInPath = path.some(([pr, pc]) => pr === nr && pc === nc);
+    if (alreadyInPath) continue;
+    path.push([nr, nc]);
+    const result = dfsSnake(word, idx + 1, nr, nc, path);
+    if (result) return result;
+    path.pop();
+  }
+  return null;
+}
+
+function makeGrid(wordList) {
+  // Try to place all words; retry up to 40 times (iterative, no recursion)
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const grid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(''));
+    usedCells = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(false));
+    const shuffled = [...wordList].sort(() => Math.random() - .5);
+    const placedResult = [];
+    let ok = true;
+    for (const w of shuffled) {
+      const path = placeWordSnake(w, grid);
+      if (!path) { ok = false; break; }
+      placedResult.push({word: w, cells: path});
+    }
+    if (ok) {
+      // Fill remaining cells with random letters
+      for (let r = 0; r < GRID_SIZE; r++)
+        for (let c = 0; c < GRID_SIZE; c++)
+          if (!grid[r][c]) grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      return {grid, placed: placedResult};
+    }
+  }
+  return null; // signal failure
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO
+═══════════════════════════════════════════════════════ */
+let audioCtx=null,muted=false;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function playTone(freq,dur,type,vol){if(muted)return;try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type||'sine';o.frequency.value=freq;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(vol||.08,c.currentTime+.04);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
+function playFound(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.25,'sine',.1),i*100))}
+function playWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.4,'sine',.12),i*120))}
+function playSelect(){playTone(880,.05,'sine',.04)}
+function playHint(){[523,659,523,784].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'sine',.08),i*120))}
+let ambInterval=null;
+function startAmbience(){if(muted||ambInterval)return;const notes=[261,294,329,349,392,440,494,523];ambInterval=setInterval(()=>{if(muted)return;playTone(notes[Math.floor(Math.random()*notes.length)],1.5,'sine',.025)},2400);}
+function stopAmbience(){clearInterval(ambInterval);ambInterval=null;}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';if(!muted)startAmbience();else stopAmbience();}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+let toastTimer=null;
+function showToast(word,def){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-word').textContent=word;
+  let d=(def||'Great word!').trim();if(d&&!/[.!?]$/.test(d))d+='.';
+  document.getElementById('toast-def').textContent=d.charAt(0).toUpperCase()+d.slice(1);
+  t.classList.add('show');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),4200);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GAME STATE
+═══════════════════════════════════════════════════════ */
+let gridData=[], placedWords=[], words=[], found=[], foundColors={}, currentDefinitions={};
+let selecting=false, selStart=null, selCells=[], cellEls=[];
+let hintedWords=[], currentTheme='';
+
+// Selection: track adjacency path (any direction, no revisit within selection)
+function renderGrid() {
+  const el = document.getElementById('grid');
+  el.innerHTML = ''; cellEls = [];
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      const d = document.createElement('div');
+      d.className = 'cell'; d.textContent = gridData[r][c];
+      d.dataset.r = r; d.dataset.c = c;
+      el.appendChild(d); cellEls[r * GRID_SIZE + c] = d;
+    }
+  }
+  applyFoundColors();
+  renderPathSVG();
+  bindEvents(el);
+}
+
+function bindEvents(el) {
+  const fresh = el.cloneNode(true);
+  el.parentNode.replaceChild(fresh, el);
+  fresh.querySelectorAll('.cell').forEach(d => {
+    cellEls[parseInt(d.dataset.r) * GRID_SIZE + parseInt(d.dataset.c)] = d;
+  });
+  fresh.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const rc = cellFromPoint(e.clientX, e.clientY); if (!rc) return;
+    fresh.setPointerCapture(e.pointerId);
+    selecting = true; selStart = rc; selCells = [rc]; highlight(); playSelect();
+  }, {passive: false});
+  fresh.addEventListener('pointermove', e => {
+    if (!selecting) return; e.preventDefault();
+    const rc = cellFromPoint(e.clientX, e.clientY); if (!rc) return;
+    // Only add cell if it's adjacent to the last cell and not already in path
+    const last = selCells[selCells.length - 1];
+    const [lr, lc] = last; const [nr, nc] = rc;
+    const dr = Math.abs(nr - lr), dc = Math.abs(nc - lc);
+    if (dr <= 1 && dc <= 1 && (dr + dc > 0)) {
+      const already = selCells.some(([pr, pc]) => pr === nr && pc === nc);
+      if (!already) { selCells.push(rc); highlight(); }
+      // Allow backtracking: if rc is the second-to-last, pop the last
+      else if (selCells.length >= 2) {
+        const prev = selCells[selCells.length - 2];
+        if (prev[0] === nr && prev[1] === nc) { selCells.pop(); highlight(); }
+      }
+    }
+  }, {passive: false});
+  fresh.addEventListener('pointerup', e => {
+    e.preventDefault(); if (!selecting) return;
+    selecting = false; checkWord(); selCells = []; highlight();
+  }, {passive: false});
+  fresh.addEventListener('pointercancel', () => { selecting = false; selCells = []; highlight(); });
+}
+
+function cellFromPoint(x, y) {
+  // Instead of elementFromPoint (fires anywhere in the DOM pixel),
+  // compute which grid cell the coordinate mathematically falls in,
+  // then check the pointer is within the INNER SAFE ZONE (centre 70%)
+  // of that cell. Gap pixels and edge pixels return null.
+  const gridEl = document.getElementById('grid');
+  if (!gridEl) return null;
+  const rect = gridEl.getBoundingClientRect();
+  const lx = x - rect.left;
+  const ly = y - rect.top;
+
+  // CSS var values (read once per call is fine; we cache below)
+  const cellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 60;
+  const gap      = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'))       || 4;
+  const stride   = cellSize + gap;          // distance between cell origins
+
+  const col = Math.floor(lx / stride);
+  const row = Math.floor(ly / stride);
+  if (col < 0 || col >= GRID_SIZE || row < 0 || row >= GRID_SIZE) return null;
+
+  // Where inside this cell's stride-box is the pointer?
+  const ox = lx - col * stride;   // 0 … stride-1
+  const oy = ly - row * stride;
+
+  // Safe zone: only the inner (cellSize * SAFE_FRAC) × (cellSize * SAFE_FRAC) core
+  const SAFE_FRAC = 0.72;
+  const margin = cellSize * (1 - SAFE_FRAC) / 2;   // dead border on each side
+  if (ox < margin || ox > cellSize - margin) return null;
+  if (oy < margin || oy > cellSize - margin) return null;
+
+  return [row, col];
+}
+
+let prevSel = new Set();
+function highlight() {
+  const nextSel = new Set(selCells.map(([r, c]) => r * GRID_SIZE + c));
+  for (const k of prevSel) { if (!nextSel.has(k)) { const d = cellEls[k]; if (d) d.classList.remove('selecting'); } }
+  for (const k of nextSel) { if (!prevSel.has(k)) { const d = cellEls[k]; if (d) d.classList.add('selecting'); } }
+  prevSel = nextSel;
+}
+
+function applyFoundColors() {
+  for (const [word, ci] of Object.entries(foundColors)) {
+    const p = placedWords.find(p => p.word === word); if (!p) continue;
+    for (const [r, c] of p.cells) {
+      const d = cellEls[r * GRID_SIZE + c]; if (!d) continue;
+      for (let i = 0; i < 8; i++) d.classList.remove(`found-${i}`);
+      d.classList.remove('selecting'); d.classList.add(`found-${ci}`);
+    }
+  }
+}
+
+/* Draw snake path lines for found words */
+const PATH_COLORS = [
+  'rgba(99,102,241,.6)','rgba(22,163,74,.6)','rgba(234,88,12,.6)',
+  'rgba(147,51,234,.6)','rgba(8,145,178,.6)','rgba(217,119,6,.6)',
+  'rgba(219,39,119,.6)','rgba(5,150,105,.6)'
+];
+function renderPathSVG() {
+  const svg = document.getElementById('path-svg');
+  svg.innerHTML = '';
+  if (!cellEls.length) return;
+  const gridEl = document.getElementById('grid');
+  const gridRect = gridEl.getBoundingClientRect();
+  const wrapRect = document.getElementById('grid-wrap').getBoundingClientRect();
+
+  for (const [word, ci] of Object.entries(foundColors)) {
+    const p = placedWords.find(p => p.word === word); if (!p) continue;
+    const pts = p.cells.map(([r, c]) => {
+      const d = cellEls[r * GRID_SIZE + c]; if (!d) return null;
+      const rect = d.getBoundingClientRect();
+      return [(rect.left + rect.width / 2) - wrapRect.left, (rect.top + rect.height / 2) - wrapRect.top];
+    }).filter(Boolean);
+    if (pts.length < 2) continue;
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    polyline.setAttribute('points', pts.map(([x,y])=>`${x},${y}`).join(' '));
+    polyline.setAttribute('class', 'path-line');
+    polyline.setAttribute('stroke', PATH_COLORS[ci % 8]);
+    svg.appendChild(polyline);
+  }
+}
+
+function renderProgress() {
+  const dots = document.getElementById('word-dots');
+  dots.innerHTML = words.map((w, i) => {
+    let cls = 'dot';
+    if (found.includes(w)) cls += ` c${foundColors[w] ?? i % 8}`;
+    else if (hintedWords.includes(w)) cls += ' hinted';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+  document.getElementById('score-label').textContent = `${found.length} / ${words.length} found`;
+}
+
+function renderHintReveal() {
+  document.getElementById('hint-reveal').innerHTML = hintedWords
+    .filter(w => !found.includes(w))
+    .map(w => `<span class="hint-chip">💡 ${w}</span>`).join('');
+}
+
+function checkWord() {
+  if (selCells.length < 2) return;
+  const letters = selCells.map(([r, c]) => gridData[r][c]).join('');
+  const rev = letters.split('').reverse().join('');
+
+  for (const word of words) {
+    if (found.includes(word)) continue;
+    if (letters !== word && rev !== word) continue;
+
+    // Verify path matches the placed snake path (same set of cells)
+    const p = placedWords.find(p => p.word === word); if (!p) continue;
+    const selSet = new Set(selCells.map(([r,c])=>r*GRID_SIZE+c));
+    const placedSet = new Set(p.cells.map(([r,c])=>r*GRID_SIZE+c));
+    const setsMatch = selSet.size === placedSet.size && [...selSet].every(k => placedSet.has(k));
+    if (!setsMatch) continue;
+
+    const ci = found.length % 8;
+    found.push(word); foundColors[word] = ci;
+    hintedWords = hintedWords.filter(w => w !== word);
+    applyFoundColors(); renderPathSVG(); renderHintReveal(); renderProgress();
+    const def = currentDefinitions[word] || (DICT[word] ? `${DICT[word].pos} ${DICT[word].def}` : 'A great word!');
+    showToast(word, def);
+    if (found.length === words.length) {
+      document.getElementById('win-msg').style.display = 'block';
+      document.getElementById('status').textContent = '';
+      playWin(); stopAmbience();
+    } else {
+      document.getElementById('status').textContent = `✓ Found: ${word}`;
+      playFound();
+    }
+    return;
+  }
+  document.getElementById('status').textContent = '';
+}
+
+function giveHint() {
+  const unfound = placedWords.filter(p => !found.includes(p.word) && !hintedWords.includes(p.word));
+  if (!unfound.length) {
+    showToast('💡', 'All remaining words are shown below!'); return;
+  }
+  const hw = unfound[Math.floor(Math.random() * unfound.length)];
+  hintedWords.push(hw.word);
+  for (const [r, c] of hw.cells) {
+    const d = cellEls[r * GRID_SIZE + c]; if (!d) continue;
+    d.classList.add('hint-glow'); setTimeout(() => d.classList.remove('hint-glow'), 2600);
+  }
+  renderHintReveal(); renderProgress();
+  const def = currentDefinitions[hw.word] || (DICT[hw.word] ? `${DICT[hw.word].pos} ${DICT[hw.word].def}` : 'Find this word!');
+  showToast(`💡 ${hw.word}`, def); playHint();
+}
+
+function resetSelection() {
+  found = []; foundColors = {}; hintedWords = []; prevSel = new Set();
+  document.getElementById('win-msg').style.display = 'none';
+  document.getElementById('status').textContent = '';
+  document.getElementById('hint-reveal').innerHTML = '';
+  renderGrid(); renderProgress(); startAmbience();
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEVEL LOADING
+═══════════════════════════════════════════════════════ */
+let preloadedLevel = null, isPreloading = false;
+
+const LOAD_TIPS = [
+  'Words twist and turn — drag to trace them',
+  'No word list — discover them all!',
+  'Tap 💡 Hint to reveal a word name',
+  'Words can snake in any direction',
+];
+
+async function fetchWordsFromAPI(theme) {
+  const prompt = `Give me exactly 10 words related to the theme: "${theme}". Rules: Each word 3-8 letters, UPPERCASE, no spaces or hyphens. For each word provide a short definition (one sentence, 5-15 words). Return ONLY a JSON array like: [{"word":"WORD","def":"Short definition"}]. No markdown, no extra text.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{role: 'user', content: prompt}]})
+    });
+    if (!res.ok) throw new Error('API fail');
+    const data = await res.json();
+    const text = (data.content[0].text || '').replace(/```json|```/g, '').trim();
+    const arr = JSON.parse(text);
+    const ws = [], defs = {};
+    for (const item of arr) {
+      const w = (item.word || '').toUpperCase().replace(/[^A-Z]/g, '');
+      if (w.length >= 3 && w.length <= 8) { ws.push(w); defs[w] = item.def || ''; }
+    }
+    if (ws.length < 4) throw new Error('Too few words');
+    return {wordPool: ws, definitions: defs, theme};
+  } catch(e) { return null; }
+}
+
+async function preloadNextLevel(curTheme) {
+  if (isPreloading) return;
+  isPreloading = true;
+  const avail = ALL_THEMES.filter(t => t !== curTheme);
+  const next = avail[Math.floor(Math.random() * avail.length)];
+  const result = await fetchWordsFromAPI(next);
+  let pool, defs = {};
+  if (result && result.wordPool.length >= 4) { pool = result.wordPool; defs = result.definitions; }
+  else { pool = FALLBACK[next] || FALLBACK.Animals; }
+
+  const chosen = pickWords(pool);
+  const built = makeGrid(chosen);
+  if (built) {
+    preloadedLevel = {words: chosen, definitions: defs, theme: next, grid: built.grid, placed: built.placed};
+    document.getElementById('next-badge').textContent = `✨ Next: ${preloadedLevel.theme} ready`;
+  }
+  isPreloading = false;
+}
+
+function applyLevel(data) {
+  words = data.words;
+  currentDefinitions = data.definitions || {};
+  currentTheme = data.theme;
+  gridData = data.grid;
+  placedWords = data.placed;
+  found = []; foundColors = {}; hintedWords = []; prevSel = new Set();
+
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('grid').style.display = 'inline-grid';
+  document.getElementById('path-svg').style.display = 'block';
+  document.getElementById('win-msg').style.display = 'none';
+  document.getElementById('status').textContent = '';
+  document.getElementById('hint-reveal').innerHTML = '';
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('theme-title').textContent = currentTheme.toUpperCase();
+
+  renderGrid(); renderProgress(); startAmbience();
+  setTimeout(() => preloadNextLevel(currentTheme), 500);
+}
+
+function loadNewRandomTheme() {
+  const theme = ALL_THEMES[Math.floor(Math.random() * ALL_THEMES.length)];
+  document.getElementById('load-tip').textContent = LOAD_TIPS[Math.floor(Math.random() * LOAD_TIPS.length)];
+  document.getElementById('theme-title').textContent = theme.toUpperCase();
+  const pool = FALLBACK[theme] || FALLBACK.Animals;
+  const chosen = pickWords(pool);
+  const built = makeGrid(chosen);
+  if (built) {
+    applyLevel({words: chosen, definitions: {}, theme, grid: built.grid, placed: built.placed});
+  } else {
+    // Very rare: retry with a different theme
+    loadNewRandomTheme();
+  }
+}
+
+function loadNextLevel() {
+  document.getElementById('win-msg').style.display = 'none';
+  document.getElementById('next-badge').textContent = '';
+  if (preloadedLevel) {
+    const data = preloadedLevel; preloadedLevel = null;
+    applyLevel(data);
+  } else {
+    loadNewRandomTheme();
+  }
+}
+
+/* Boot */
+document.getElementById('load-tip').textContent = LOAD_TIPS[Math.floor(Math.random() * LOAD_TIPS.length)];
+loadNewRandomTheme();
+</script>
+</body>
+</html>
