@@ -1,7 +1,7 @@
 {
     "name": "HTML5 Game Collection",
     "short_name": "GameList",
-    "description": "A collection of 35+ HTML/CSS and JavaScript games.",
+    "description": "A collection of 46 HTML/CSS and JavaScript games.",
     "start_url": "index.html",
     "display": "standalone",
     "background_color": "#f0f2f5",
