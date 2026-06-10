@@ -43,5 +43,6 @@ const gamePaths = [
     { path: "42-Sudoku-Game/", category: "Logic" },
     { path: "43-Wordle-Game/", category: "Spelling" },
     { path: "44-Simon-Says-Game/", category: "Puzzle" },
-    { path: "45-Sliding-Puzzle-Game/", category: "Logic" }
+    { path: "45-Sliding-Puzzle-Game/", category: "Logic" },
+    { path: "46-word-square/", category: "Spelling" }
 ];
