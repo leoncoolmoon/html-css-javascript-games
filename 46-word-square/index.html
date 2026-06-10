@@ -608,14 +608,14 @@ const LOAD_TIPS = [
 async function fetchWordsFromAPI(theme) {
   const prompt = `Give me exactly 10 words related to the theme: "${theme}". Rules: Each word 3-8 letters, UPPERCASE, no spaces or hyphens. For each word provide a short definition (one sentence, 5-15 words). Return ONLY a JSON array like: [{"word":"WORD","def":"Short definition"}]. No markdown, no extra text.`;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://text.pollinations.ai/openai/v1/chat/completions', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{role: 'user', content: prompt}]})
+      body: JSON.stringify({model: 'openai', messages: [{role: 'user', content: prompt}], max_tokens: 800})
     });
     if (!res.ok) throw new Error('API fail');
     const data = await res.json();
-    const text = (data.content[0].text || '').replace(/```json|```/g, '').trim();
+    const text = data.choices[0].message.content.replace(/```json|```/g, '').trim();
     const arr = JSON.parse(text);
     const ws = [], defs = {};
     for (const item of arr) {
@@ -697,6 +697,5 @@ function loadNextLevel() {
 document.getElementById('load-tip').textContent = LOAD_TIPS[Math.floor(Math.random() * LOAD_TIPS.length)];
 loadNewRandomTheme();
 </script>
-<script src="../share.js" defer></script>
 </body>
 </html>
