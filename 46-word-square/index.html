@@ -141,6 +141,13 @@ button.primary{background:var(--color-accent-bg);border-color:var(--color-accent
 @keyframes spin{to{transform:rotate(360deg)}}
 #load-tip{font-size:11px;color:var(--color-text-sub);font-family:'Quicksand',sans-serif;}
 #next-badge{text-align:center;font-size:10px;color:var(--next-color);flex-shrink:0;min-height:12px;}
+
+#difficulty-selector{display:flex;gap:12px;margin-bottom:4px;flex-shrink:0;}
+.diff-star{cursor:pointer;font-size:18px;opacity:0.35;transition:opacity 0.2s,transform 0.2s;filter:grayscale(1);}
+.diff-star.active{opacity:1;transform:scale(1.15);filter:grayscale(0);}
+.diff-star:hover{transform:scale(1.1);}
+
+#win-time{margin-top:8px;font-size:14px;color:var(--color-text-sub);font-weight:600;}
 </style>
 </head>
 <body>
@@ -155,6 +162,12 @@ button.primary{background:var(--color-accent-bg);border-color:var(--color-accent
   <div id="header">
     <div id="theme-badge">WORD SQUARE</div>
     <div id="theme-title">Loading…</div>
+  </div>
+
+  <div id="difficulty-selector">
+    <span class="diff-star" onclick="setDifficulty(1)" title="Easy">⭐</span>
+    <span class="diff-star active" onclick="setDifficulty(2)" title="Medium">⭐⭐</span>
+    <span class="diff-star" onclick="setDifficulty(3)" title="Hard">⭐⭐⭐</span>
   </div>
 
   <div id="progress-row">
@@ -172,6 +185,7 @@ button.primary{background:var(--color-accent-bg);border-color:var(--color-accent
     <svg id="path-svg" style="display:none"></svg>
     <div id="win-msg">
       🎉 All words found!
+      <div id="win-time"></div>
       <div style="margin-top:8px"><button class="primary" onclick="loadNextLevel()">Next Level →</button></div>
     </div>
   </div>
@@ -181,7 +195,7 @@ button.primary{background:var(--color-accent-bg);border-color:var(--color-accent
 
   <div id="controls" style="display:none">
     <button onclick="resetSelection()">↺ Restart</button>
-    <button onclick="giveHint()">💡 Hint</button>
+    <button id="hint-btn" onclick="giveHint()">💡 Hint</button>
     <button class="primary" onclick="loadNextLevel()">Next →</button>
   </div>
 
@@ -380,7 +394,27 @@ function showToast(word,def){
 ═══════════════════════════════════════════════════════ */
 let gridData=[], placedWords=[], words=[], found=[], foundColors={}, currentDefinitions={};
 let selecting=false, selStart=null, selCells=[], cellEls=[];
-let hintedWords=[], currentTheme='';
+let hintedWords=[], currentTheme='', difficulty=2, startTime=Date.now();
+
+function setDifficulty(d) {
+  difficulty = d;
+  const stars = document.querySelectorAll('.diff-star');
+  stars.forEach((s, i) => {
+    if (i + 1 === d) s.classList.add('active');
+    else s.classList.remove('active');
+  });
+
+  if (difficulty === 1) {
+    hintedWords = [...words];
+  } else {
+    hintedWords = [];
+  }
+  renderHintReveal();
+  renderProgress();
+
+  const hintBtn = document.getElementById('hint-btn');
+  if (hintBtn) hintBtn.style.display = (difficulty === 3) ? 'none' : 'inline-block';
+}
 
 // Selection: track adjacency path (any direction, no revisit within selection)
 function renderGrid() {
@@ -436,34 +470,37 @@ function bindEvents(el) {
 }
 
 function cellFromPoint(x, y) {
-  // Instead of elementFromPoint (fires anywhere in the DOM pixel),
-  // compute which grid cell the coordinate mathematically falls in,
-  // then check the pointer is within the INNER SAFE ZONE (centre 70%)
-  // of that cell. Gap pixels and edge pixels return null.
+  // Compute which grid cell the coordinate falls in by measuring actual DOM elements.
   const gridEl = document.getElementById('grid');
-  if (!gridEl) return null;
+  if (!gridEl || !cellEls[0]) return null;
+
   const rect = gridEl.getBoundingClientRect();
+  const cellRect = cellEls[0].getBoundingClientRect();
+
   const lx = x - rect.left;
   const ly = y - rect.top;
 
-  // CSS var values (read once per call is fine; we cache below)
-  const cellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 60;
-  const gap      = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'))       || 4;
-  const stride   = cellSize + gap;          // distance between cell origins
+  const cellSize = cellRect.width;
+  // Calculate gap by looking at distance between two adjacent cells
+  let gap = 4;
+  if (cellEls[1]) {
+    const cell1Rect = cellEls[1].getBoundingClientRect();
+    gap = cell1Rect.left - cellRect.right;
+  }
 
+  const stride = cellSize + gap;
   const col = Math.floor(lx / stride);
   const row = Math.floor(ly / stride);
+
   if (col < 0 || col >= GRID_SIZE || row < 0 || row >= GRID_SIZE) return null;
 
-  // Where inside this cell's stride-box is the pointer?
-  const ox = lx - col * stride;   // 0 … stride-1
+  const ox = lx - col * stride;
   const oy = ly - row * stride;
 
-  // Safe zone: only the inner (cellSize * SAFE_FRAC) × (cellSize * SAFE_FRAC) core
-  const SAFE_FRAC = 0.72;
-  const margin = cellSize * (1 - SAFE_FRAC) / 2;   // dead border on each side
-  if (ox < margin || ox > cellSize - margin) return null;
-  if (oy < margin || oy > cellSize - margin) return null;
+  // Relaxed safe zone for better desktop alignment (85% of cell)
+  const SAFE_FRAC = 0.85;
+  const margin = cellSize * (1 - SAFE_FRAC) / 2;
+  if (ox < margin || ox > cellSize - margin || oy < margin || oy > cellSize - margin) return null;
 
   return [row, col];
 }
@@ -557,6 +594,10 @@ function checkWord() {
     const def = currentDefinitions[word] || (DICT[word] ? `${DICT[word].pos} ${DICT[word].def}` : 'A great word!');
     showToast(word, def);
     if (found.length === words.length) {
+      const elapsed = Date.now() - startTime;
+      const mins = Math.floor(elapsed / 60000);
+      const secs = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('win-time').textContent = `Time: ${mins}m ${secs}s`;
       document.getElementById('win-msg').style.display = 'block';
       document.getElementById('status').textContent = '';
       playWin(); stopAmbience();
@@ -586,10 +627,10 @@ function giveHint() {
 }
 
 function resetSelection() {
-  found = []; foundColors = {}; hintedWords = []; prevSel = new Set();
+  found = []; foundColors = {}; hintedWords = (difficulty === 1) ? [...words] : []; prevSel = new Set();
   document.getElementById('win-msg').style.display = 'none';
   document.getElementById('status').textContent = '';
-  document.getElementById('hint-reveal').innerHTML = '';
+  renderHintReveal();
   renderGrid(); renderProgress(); startAmbience();
 }
 
@@ -653,6 +694,8 @@ function applyLevel(data) {
   gridData = data.grid;
   placedWords = data.placed;
   found = []; foundColors = {}; hintedWords = []; prevSel = new Set();
+  startTime = Date.now();
+  if (difficulty === 1) hintedWords = [...words];
 
   document.getElementById('loading-overlay').style.display = 'none';
   document.getElementById('grid').style.display = 'inline-grid';
@@ -661,9 +704,11 @@ function applyLevel(data) {
   document.getElementById('status').textContent = '';
   document.getElementById('hint-reveal').innerHTML = '';
   document.getElementById('controls').style.display = 'flex';
+  const hintBtn = document.getElementById('hint-btn');
+  if (hintBtn) hintBtn.style.display = (difficulty === 3) ? 'none' : 'inline-block';
   document.getElementById('theme-title').textContent = currentTheme.toUpperCase();
 
-  renderGrid(); renderProgress(); startAmbience();
+  renderGrid(); renderProgress(); renderHintReveal(); startAmbience();
   setTimeout(() => preloadNextLevel(currentTheme), 500);
 }
 
