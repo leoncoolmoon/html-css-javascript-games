@@ -470,34 +470,37 @@ function bindEvents(el) {
 }
 
 function cellFromPoint(x, y) {
-  // Instead of elementFromPoint (fires anywhere in the DOM pixel),
-  // compute which grid cell the coordinate mathematically falls in,
-  // then check the pointer is within the INNER SAFE ZONE (centre 70%)
-  // of that cell. Gap pixels and edge pixels return null.
+  // Compute which grid cell the coordinate falls in by measuring actual DOM elements.
   const gridEl = document.getElementById('grid');
-  if (!gridEl) return null;
+  if (!gridEl || !cellEls[0]) return null;
+
   const rect = gridEl.getBoundingClientRect();
+  const cellRect = cellEls[0].getBoundingClientRect();
+
   const lx = x - rect.left;
   const ly = y - rect.top;
 
-  // CSS var values (read once per call is fine; we cache below)
-  const cellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 60;
-  const gap      = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'))       || 4;
-  const stride   = cellSize + gap;          // distance between cell origins
+  const cellSize = cellRect.width;
+  // Calculate gap by looking at distance between two adjacent cells
+  let gap = 4;
+  if (cellEls[1]) {
+    const cell1Rect = cellEls[1].getBoundingClientRect();
+    gap = cell1Rect.left - cellRect.right;
+  }
 
+  const stride = cellSize + gap;
   const col = Math.floor(lx / stride);
   const row = Math.floor(ly / stride);
+
   if (col < 0 || col >= GRID_SIZE || row < 0 || row >= GRID_SIZE) return null;
 
-  // Where inside this cell's stride-box is the pointer?
-  const ox = lx - col * stride;   // 0 … stride-1
+  const ox = lx - col * stride;
   const oy = ly - row * stride;
 
-  // Safe zone: only the inner (cellSize * SAFE_FRAC) × (cellSize * SAFE_FRAC) core
-  const SAFE_FRAC = 0.72;
-  const margin = cellSize * (1 - SAFE_FRAC) / 2;   // dead border on each side
-  if (ox < margin || ox > cellSize - margin) return null;
-  if (oy < margin || oy > cellSize - margin) return null;
+  // Relaxed safe zone for better desktop alignment (85% of cell)
+  const SAFE_FRAC = 0.85;
+  const margin = cellSize * (1 - SAFE_FRAC) / 2;
+  if (ox < margin || ox > cellSize - margin || oy < margin || oy > cellSize - margin) return null;
 
   return [row, col];
 }
