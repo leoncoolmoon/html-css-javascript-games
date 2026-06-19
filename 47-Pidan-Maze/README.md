@@ -1,5 +1,7 @@
 # 🌿 皮蛋迷宫 / Pidan Maze
 
+<!-- GAME_META: {"num": "47", "en": {"name": "Pidan Maze", "desc": "A single-file browser 3D maze game. Navigate a randomly generated hedge maze as a silver ball and collect 10 gems."}, "zh": {"name": "皮蛋迷宫", "desc": "一款运行在浏览器里的单文件 3D 迷宫探索游戏。在随机生成的绿篱迷宫里，操控银色小球收集 10 颗宝石。"}} -->
+
 一款运行在浏览器里的单文件 3D 迷宫探索游戏，无需安装，无需联网。  
 A single-file browser 3D maze game. No install, no server required.
 
@@ -65,14 +67,14 @@ Same zones as mouse. Multi-touch supported.
 
 ## 🚀 运行方式 / How to Run
 
-直接用浏览器打开 `pidan_maze.html` 即可，无需服务器。  
-Just open `pidan_maze.html` in any modern browser. No server needed.
+直接用浏览器打开 `index.html` 即可，无需服务器。
+Just open `index.html` in any modern browser. No server needed.
 
 推荐浏览器 / Recommended browsers: Chrome · Edge · Firefox · Safari
 
 ```
-双击 pidan_maze.html  →  浏览器打开  →  点击「开始冒险」
-Double-click pidan_maze.html → browser opens → click "Start Adventure"
+双击 index.html  →  浏览器打开  →  点击「开始冒险」
+Double-click index.html → browser opens → click "Start Adventure"
 ```
 
 ---
@@ -93,7 +95,7 @@ Double-click pidan_maze.html → browser opens → click "Start Adventure"
 ## 📁 文件说明 / Files
 
 ```
-pidan_maze.html   主游戏文件 / Main game file (everything included)
+index.html        主游戏文件 / Main game file (everything included)
 README.md         本文档 / This document
 ```
 
