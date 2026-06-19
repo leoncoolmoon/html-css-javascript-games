@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>皮蛋迷宫 / Pidan Maze</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;overflow:hidden;touch-action:none}
+#wrap{position:relative;width:100vw;height:100vh}
+#gc{width:100%;height:100%;display:block;outline:none}
+#hud{position:absolute;top:14px;right:16px;background:rgba(0,0,0,0.38);border-radius:12px;padding:7px 16px;color:#fff;font-family:sans-serif;font-size:13px;pointer-events:none;user-select:none}
+#hud .val{font-size:20px;font-weight:700}
+#mmwrap{position:absolute;top:50px;left:16px;font-family:sans-serif;z-index:10;user-select:none}
+#mmtoggle{background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;display:block;margin-bottom:5px}
+#mmbox{display:none;background:rgba(0,0,0,0.6);padding:5px;border-radius:10px}
+#mmbox.open{display:block}
+#mmcv{display:block;border-radius:6px}
+#overlay,#win{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif}
+#overlay{background:rgba(0,0,0,0.52)}
+#win{background:rgba(0,0,0,0.58);display:none}
+.card{background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-radius:18px;padding:28px 38px;text-align:center;color:#fff;max-width:360px}
+.card h1{font-size:26px;margin-bottom:10px}
+.card p{font-size:14px;opacity:.85;margin-bottom:22px;line-height:1.8}
+.card button{background:#FFD700;color:#333;border:none;padding:12px 34px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+.card button:hover{background:#ffe44d}
+
+#lang-toggle{position:absolute;top:14px;left:16px;background:rgba(0,0,0,0.38);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:sans-serif;z-index:20}
+#lang-toggle:hover{background:rgba(0,0,0,0.6)}
+
+#stats{position:absolute;top:50px;right:16px;background:rgba(0,0,0,0.38);border-radius:10px;padding:6px 14px;color:#fff;font-family:sans-serif;font-size:11px;text-align:right;pointer-events:none;user-select:none;line-height:1.8}
+#stats .sv{font-weight:700;font-size:13px}
+
+#hint{position:absolute;top:130px;right:16px;color:rgba(255,255,255,.38);font-size:11px;font-family:sans-serif;pointer-events:none;user-select:none;text-align:right;line-height:1.7}
+/* touch zone overlay — visible only while playing */
+#tzones{position:absolute;inset:0;pointer-events:none;display:none}
+#tzones.active{display:block}
+#tzones canvas{width:100%;height:100%;opacity:0.13}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="gc" tabindex="0"></canvas>
+  <button id="lang-toggle" onclick="toggleLang()">EN</button>
+  <div id="hud">💎 <span class="val" id="sc">0</span>/10 &nbsp;|&nbsp; ⏱ <span class="val" id="tm">0:00</span></div>
+  <div id="mmwrap">
+    <button id="mmtoggle">🗺 <span data-zh="小地图" data-en="Map">小地图</span></button>
+    <div id="mmbox"><canvas id="mmcv" width="150" height="150"></canvas></div>
+  </div>
+  <div id="overlay">
+    <div class="card">
+      <h1>🌿 <span data-zh="皮蛋迷宫" data-en="Pidan Maze">皮蛋迷宫</span></h1>
+      <p><span data-zh="收集迷宫里的 10 颗宝石" data-en="Collect 10 gems in the hedge maze">收集迷宫里的 10 颗宝石</span><br><br>
+      <b><span data-zh="键盘：" data-en="Keyboard:">键盘：</span></b>↑↓ <span data-zh="前后" data-en="fwd/back">前后</span> &nbsp;·&nbsp; ←→ <span data-zh="转向" data-en="turn">转向</span><br>
+      <b><span data-zh="鼠标/触屏：" data-en="Mouse/Touch:">鼠标/触屏：</span></b><br>
+      <span data-zh="触屏上半 → 前进" data-en="Touch above ball → forward">触屏上半 → 前进</span><br>
+      点击左/右下角 → 转向<br>
+      点击中下 → 后退</p>
+      <button id="startBtn"><span data-zh="开始冒险" data-en="Start Adventure">开始冒险</span></button>
+    </div>
+  </div>
+  <div id="win">
+    <div class="card">
+      <h1>🎉 <span data-zh="全部收集！" data-en="All Collected!">全部收集！</span></h1>
+      <p id="winmsg"></p>
+      <button id="restartBtn"><span data-zh="再玩一次" data-en="Play Again">再玩一次</span></button>
+    </div>
+  </div>
+  <div id="stats"></div>
+  <div id="hint"><span data-zh="↑↓ 前后 &nbsp;←→ 转向" data-en="↑↓ fwd/back &nbsp;←→ turn">↑↓ 前后 &nbsp;←→ 转向</span><br><span data-zh="鼠标/触屏分区控制" data-en="Mouse/touch zone control">鼠标/触屏分区控制</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ── DOM ───────────────────────────── */
+const canvas  = document.getElementById('gc');
+const mmcv    = document.getElementById('mmcv');
+const mmctx   = mmcv.getContext('2d');
+const scEl=()=>document.getElementById('sc');
+const tmEl=()=>document.getElementById('tm');
+const overlay = document.getElementById('overlay');
+const winEl   = document.getElementById('win');
+const mmbox   = document.getElementById('mmbox');
+document.getElementById('mmtoggle').onclick = () => mmbox.classList.toggle('open');
+
+/* ── constants ─────────────────────── */
+const MN   = 19;           // maze grid (odd)
+const CELL = 2.4;
+const WH   = MN * CELL / 2;
+const TURN_SPEED  = 2.0;   // rad/s
+const MOVE_SPEED  = 4.5;
+const FRICTION    = 0.88;  // velocity kept per second (proper exponential decay)
+const PLAYER_R    = 0.3;
+
+/* ── scene state ────────────────────── */
+let scene, camera, renderer, clock;
+let floorMesh, playerMesh;
+let hedges = [], gemObjs = [];
+let maze = [];
+
+/* ── player physics ─────────────────── */
+let px = 0, pz = 0;
+let vx = 0, vz = 0;       // velocity
+let pAngle = 0;            // facing (rad)
+let vTurn  = 0;            // angular velocity
+
+/* ── input ──────────────────────────── */
+let keys = {};
+// pointer/touch — separate from keyboard so both work simultaneously
+let pFwd = 0, pTurn = 0;
+let mouseDown = false;
+
+/* ── game ───────────────────────────── */
+let score = 0, startMs = 0, running = false;
+window._getScore=()=>score;
+window._getTm=()=>document.getElementById("tm")?document.getElementById("tm").textContent:"0:00";
+let introT = 0, inIntro = false, introDone = false;
+let smCX=0,smCY=2,smCZ=0,smLX=0,smLY=1.6,smLZ=-4;
+let animT = 0;
+
+/* ── fog-of-war: track visited cells ── */
+let visited = new Set(); // "r,c" keys
+const GEM_REVEAL_R = 3.5; // cells radius on minimap
+
+/* ══════════════════════════════════════
+   MAZE
+══════════════════════════════════════ */
+function genMaze(){
+  maze = Array.from({length:MN},()=>Array(MN).fill(1));
+  function carve(r,c){
+    maze[r][c]=0;
+    [[0,2],[0,-2],[2,0],[-2,0]].sort(()=>Math.random()-.5).forEach(([dr,dc])=>{
+      const nr=r+dr,nc=c+dc;
+      if(nr>0&&nr<MN-1&&nc>0&&nc<MN-1&&maze[nr][nc]===1){
+        maze[r+dr/2][c+dc/2]=0; carve(nr,nc);
+      }
+    });
+  }
+  carve(1,1);
+  // extra loops for complexity
+  let extra=Math.floor(MN*MN*0.05);
+  while(extra-->0){
+    const r=1+Math.floor(Math.random()*(MN-2));
+    const c=1+Math.floor(Math.random()*(MN-2));
+    if(!(r===1&&c===1)) maze[r][c]=0;
+  }
+}
+function cw(r,c){return{x:c*CELL-WH, z:r*CELL-WH};}
+function worldToCell(x,z){return{r:Math.round((z+WH)/CELL),c:Math.round((x+WH)/CELL)};}
+function cellOpen(r,c){return r>=0&&r<MN&&c>=0&&c<MN&&maze[r][c]===0;}
+function posOpen(x,z){const{r,c}=worldToCell(x,z);return cellOpen(r,c);}
+
+/* ══════════════════════════════════════
+   THREE.JS INIT
+══════════════════════════════════════ */
+function initThree(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x7DC8EA);
+  scene.fog=new THREE.FogExp2(0x8ECFEA,0.036);
+
+  camera=new THREE.PerspectiveCamera(72,canvas.clientWidth/canvas.clientHeight,0.05,200);
+  camera.position.set(0,WH*1.6,WH*1.3);
+  camera.lookAt(0,0,0);
+
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  clock=new THREE.Clock();
+
+  /* --- Sun: south (negative Z), 35° elevation --- */
+  // azimuth south = (0,0,-1) direction, elevation 35°
+  const sunDist=80;
+  const sunEl=35*Math.PI/180;
+  const sunX=0, sunY=Math.sin(sunEl)*sunDist, sunZ=-Math.cos(sunEl)*sunDist;
+
+  const sunLight=new THREE.DirectionalLight(0xFFE090,1.2);
+  sunLight.position.set(sunX,sunY,sunZ);
+  sunLight.castShadow=true;
+  sunLight.shadow.mapSize.set(2048,2048);
+  sunLight.shadow.camera.left=-60; sunLight.shadow.camera.right=60;
+  sunLight.shadow.camera.top=60;   sunLight.shadow.camera.bottom=-60;
+  sunLight.shadow.camera.far=200;
+  scene.add(sunLight);
+  scene.add(new THREE.AmbientLight(0xAABBFF,0.6));
+  scene.add(new THREE.HemisphereLight(0x87CEEB,0x4CAF50,0.38));
+
+  // visible sun disc
+  const sunSphere=new THREE.Mesh(
+    new THREE.SphereGeometry(3,16,12),
+    new THREE.MeshBasicMaterial({color:0xFFF176})
+  );
+  sunSphere.position.set(sunX,sunY,sunZ);
+  scene.add(sunSphere);
+  // halo
+  const halo=new THREE.Mesh(
+    new THREE.SphereGeometry(5,16,12),
+    new THREE.MeshBasicMaterial({color:0xFFEE44,transparent:true,opacity:0.15})
+  );
+  halo.position.copy(sunSphere.position);
+  scene.add(halo);
+
+  /* --- Clouds (fixed positions in sky) --- */
+  buildClouds();
+
+  /* --- Floor --- */
+  floorMesh=new THREE.Mesh(
+    new THREE.PlaneGeometry(MN*CELL+20,MN*CELL+20),
+    new THREE.MeshLambertMaterial({color:0x6BBD4A})
+  );
+  floorMesh.rotation.x=-Math.PI/2;
+  floorMesh.receiveShadow=true;
+  scene.add(floorMesh);
+
+  // Water border
+  const water=new THREE.Mesh(
+    new THREE.PlaneGeometry(500,500),
+    new THREE.MeshLambertMaterial({color:0x3A9FCF})
+  );
+  water.rotation.x=-Math.PI/2; water.position.y=-1.0; scene.add(water);
+
+  /* --- Player: silver reflective sphere --- */
+  playerMesh=new THREE.Mesh(
+    new THREE.SphereGeometry(0.32,32,24),
+    new THREE.MeshPhongMaterial({
+      color:0x222222,
+      specular:0xCCCCCC,
+      shininess:400,
+      emissive:0x0A0A0A
+    })
+  );
+  playerMesh.castShadow=true;
+  scene.add(playerMesh);
+
+  /* --- Input --- */
+  window.addEventListener('keydown',e=>{keys[e.code]=true;});
+  window.addEventListener('keyup',  e=>{keys[e.code]=false;});
+  window.addEventListener('resize', onResize);
+  setupPointer();
+}
+
+/* ── Clouds ─────────────────────────── */
+function buildClouds(){
+  const cloudDefs=[
+    {x:-25,y:32,z:-30,s:1.2},
+    {x: 18,y:38,z:-25,s:0.9},
+    {x: 35,y:34,z:  5,s:1.1},
+    {x:-40,y:30,z: 15,s:1.4},
+    {x:  5,y:42,z:-50,s:1.0},
+    {x:-10,y:36,z: 40,s:0.85},
+    {x: 50,y:33,z:-15,s:1.05},
+  ];
+  const cloudMat=new THREE.MeshLambertMaterial({color:0xFFFFFF,transparent:true,opacity:0.88});
+  cloudDefs.forEach(({x,y,z,s})=>{
+    const g=new THREE.Group();
+    // puff cluster
+    [[0,0,0,1],[1.4,0.3,0,0.75],[-1.2,0.2,0,0.7],[0.5,0.5,0.8,0.65],[-0.4,0.4,-0.7,0.6]].forEach(([dx,dy,dz,r])=>{
+      const puff=new THREE.Mesh(new THREE.SphereGeometry(r*2.2*s,8,6),cloudMat);
+      puff.position.set(dx*s*2.2,dy*s*2.2,dz*s*2.2);
+      g.add(puff);
+    });
+    g.position.set(x,y,z);
+    scene.add(g);
+  });
+}
+
+/* ── Hedges ─────────────────────────── */
+const hedgeMatTop =new THREE.MeshLambertMaterial({color:0x2D6A2D});
+const hedgeMatSide=new THREE.MeshLambertMaterial({color:0x236123});
+// Faded versions for occlusion
+const hedgeMatTopFade =new THREE.MeshLambertMaterial({color:0x2D6A2D,transparent:true,opacity:0.18,depthWrite:false});
+const hedgeMatSideFade=new THREE.MeshLambertMaterial({color:0x236123,transparent:true,opacity:0.18,depthWrite:false});
+let fadedHedges=new Set(); // hedges currently faded
+
+function makeHedge(x,z){
+  const g=new THREE.Group();
+  // body (6 faces with different materials)
+  const body=new THREE.Mesh(
+    new THREE.BoxGeometry(CELL*0.9,1.1,CELL*0.9),
+    [hedgeMatSide,hedgeMatSide,hedgeMatTop,hedgeMatSide,hedgeMatSide,hedgeMatSide]
+  );
+  body.position.y=0.55; body.castShadow=true; body.receiveShadow=true; g.add(body);
+  // top bumps
+  for(let i=0;i<5;i++){
+    const b=new THREE.Mesh(
+      new THREE.SphereGeometry(0.22+Math.random()*0.10,6,5),
+      hedgeMatTop
+    );
+    b.position.set((Math.random()-.5)*CELL*0.62,1.14,(Math.random()-.5)*CELL*0.62);
+    g.add(b);
+  }
+  g.position.set(x,0,z);
+  g.userData.body=body; // reference body for material swap
+  scene.add(g);
+  hedges.push(g);
+}
+function buildHedges(){
+  hedges.forEach(h=>scene.remove(h)); hedges=[];
+  for(let r=0;r<MN;r++) for(let c=0;c<MN;c++)
+    if(maze[r][c]===1){const{x,z}=cw(r,c);makeHedge(x,z);}
+}
+
+/* ── Gems ───────────────────────────── */
+function makeGem(x,z){
+  const g=new THREE.Group();
+  g.add(Object.assign(new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.23,0),
+    new THREE.MeshLambertMaterial({color:0xFFD700,emissive:0x664400})
+  ),{castShadow:true}));
+  const ring=new THREE.Mesh(
+    new THREE.TorusGeometry(0.38,0.04,8,24),
+    new THREE.MeshLambertMaterial({color:0xFFAA00,emissive:0x442200})
+  );
+  ring.rotation.x=Math.PI/2; g.add(ring);
+  g.position.set(x,0.55,z); scene.add(g);
+  return{x,z,collected:false,group:g,revealed:false};
+}
+function spawnGems(){
+  gemObjs.forEach(g=>scene.remove(g.group)); gemObjs=[];
+  const open=[];
+  for(let r=1;r<MN-1;r++) for(let c=1;c<MN-1;c++)
+    if(maze[r][c]===0&&!(r===1&&c===1)) open.push([r,c]);
+  // spread across 4 quadrants
+  const q=[[],[],[],[]];
+  open.sort(()=>Math.random()-.5);
+  open.forEach(([r,c])=>q[(r<MN/2?0:2)+(c<MN/2?0:1)].push([r,c]));
+  const chosen=[];
+  q.forEach(qo=>{for(let i=0;i<3&&i<qo.length;i++)chosen.push(qo[i]);});
+  const used=new Set(chosen.map(([r,c])=>r+','+c));
+  for(const rc of open){if(chosen.length>=10)break;const k=rc[0]+','+rc[1];if(!used.has(k)){chosen.push(rc);used.add(k);}}
+  chosen.slice(0,10).forEach(([r,c])=>{const{x,z}=cw(r,c);gemObjs.push(makeGem(x,z));});
+}
+
+/* ── Pointer / Touch input ─────────────
+   Zone logic: same as arrow keys
+   • click/touch ABOVE ball screen pos  → ArrowUp (forward)
+   • click/touch LEFT  of ball          → ArrowLeft (turn left)
+   • click/touch RIGHT of ball          → ArrowRight (turn right)
+   Held down = continuous input, released = stop
+──────────────────────────────────────── */
+function getZone(clientX, clientY){
+  if(!introDone) return null;
+  const W=canvas.clientWidth, H=canvas.clientHeight;
+  const rx=clientX/W, ry=clientY/H;
+
+  // Project ball and horizon to screen Y
+  const ballV=new THREE.Vector3(px,0.35,pz).project(camera);
+  const ballSY=(1-ballV.y)/2; // 0..1 screen Y of ball
+
+  // Horizon is roughly where Y=0 in world projects — approximate as camera looking ahead
+  // Project a point far ahead at ground level
+  const aheadW=new THREE.Vector3(
+    px+Math.sin(pAngle)*20, 0, pz-Math.cos(pAngle)*20
+  ).project(camera);
+  const horizSY=Math.max(0, Math.min(0.55, (1-aheadW.y)/2));
+
+  // Between horizon and ball → forward
+  if(ry >= horizSY && ry < ballSY) return 'ArrowUp';
+  // Below ball → turn zones
+  if(ry >= ballSY){
+    if(rx < 0.33) return 'ArrowLeft';
+    if(rx > 0.67) return 'ArrowRight';
+  }
+  return null;
+}
+
+// Pointer-driven virtual keys — stored separately, merged with keyboard in stepPlayer
+const pKeys={up:false,left:false,right:false};
+
+function clearPKeys(){ pKeys.up=false; pKeys.left=false; pKeys.right=false; }
+
+function setPKeysFromZone(clientX, clientY){
+  const z=getZone(clientX,clientY);
+  if(z==='ArrowUp')    pKeys.up=true;
+  if(z==='ArrowLeft')  pKeys.left=true;
+  if(z==='ArrowRight') pKeys.right=true;
+}
+
+function setupPointer(){
+  // ── Mouse: hold down = continuous, release = stop ──
+  canvas.addEventListener('mousedown',e=>{
+    if(!running||!introDone)return;
+    e.preventDefault();
+    mouseDown=true;
+    clearPKeys();
+    setPKeysFromZone(e.clientX,e.clientY);
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!mouseDown||!running||!introDone)return;
+    clearPKeys();
+    setPKeysFromZone(e.clientX,e.clientY);
+  });
+  window.addEventListener('mouseup',()=>{
+    mouseDown=false;
+    clearPKeys();
+  });
+
+  // ── Touch ──
+  let touches={};
+  function applyAllTouches(){
+    clearPKeys();
+    Object.values(touches).forEach(({x,y})=>setPKeysFromZone(x,y));
+  }
+  canvas.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(!running||!introDone)return;
+    [...e.changedTouches].forEach(t=>{touches[t.identifier]={x:t.clientX,y:t.clientY};});
+    applyAllTouches();
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(!running||!introDone)return;
+    [...e.changedTouches].forEach(t=>{touches[t.identifier]={x:t.clientX,y:t.clientY};});
+    applyAllTouches();
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{
+    [...e.changedTouches].forEach(t=>{delete touches[t.identifier];});
+    applyAllTouches();
+  });
+  canvas.addEventListener('touchcancel',e=>{
+    [...e.changedTouches].forEach(t=>{delete touches[t.identifier];});
+    applyAllTouches();
+  });
+}
+
+/* ── Player physics + movement ──────── */
+function stepPlayer(dt){
+  // turning (keyboard + pointer, both simultaneously)
+  let turnInput=0;
+  if(keys['ArrowLeft'] ||keys['KeyA']||pKeys.left)  turnInput-=1;
+  if(keys['ArrowRight']||keys['KeyD']||pKeys.right) turnInput+=1;
+  turnInput=Math.max(-1,Math.min(1,turnInput));
+  vTurn=vTurn*0.78+turnInput*TURN_SPEED*0.22;
+  pAngle+=vTurn*dt;
+
+  // forward/back input
+  let fwdInput=0;
+  if(keys['ArrowUp'] ||keys['KeyW']||pKeys.up) fwdInput+=1;
+  if(keys['ArrowDown']||keys['KeyS'])              fwdInput-=1;
+  fwdInput=Math.max(-1,Math.min(1,fwdInput));
+
+  // Impulse force — accumulates like pushing a real ball
+  const FORCE=32.0;
+  vx+=Math.sin(pAngle)*fwdInput*FORCE*dt;
+  vz-=Math.cos(pAngle)*fwdInput*FORCE*dt;
+
+  // Speed cap
+  const MAX_SPD=7.0;
+  const spd=Math.sqrt(vx*vx+vz*vz);
+  if(spd>MAX_SPD){vx=vx/spd*MAX_SPD;vz=vz/spd*MAX_SPD;}
+
+  // Rolling drag (grass friction) — 0.88 means keeps 88% per second
+  const fric=Math.pow(0.88,dt);
+  vx*=fric; vz*=fric;
+
+  // Wall bounce with reflection
+  const nx=px+vx*dt, nz=pz+vz*dt;
+  const okB=posOpen(nx,nz);
+  const okX=posOpen(nx,pz);
+  const okZ=posOpen(px,nz);
+  if(okB){
+    px=nx; pz=nz;
+  } else if(okX&&!okZ){
+    px=nx; vz=-vz*0.52; // bounce off Z wall
+  } else if(okZ&&!okX){
+    pz=nz; vx=-vx*0.52; // bounce off X wall
+  } else {
+    vx=-vx*0.4; vz=-vz*0.4; // corner bounce
+  }
+
+  // Rolling visual + squash on fast bounce
+  if(playerMesh){
+    playerMesh.position.set(px,0.35,pz);
+    const roll=Math.sqrt(vx*vx+vz*vz);
+    if(roll>0.05){
+      const axis=new THREE.Vector3(vz,0,-vx).normalize();
+      playerMesh.rotateOnWorldAxis(axis,roll*dt*3.2);
+    }
+    const sq=1+Math.min(0.16,roll*0.024);
+    playerMesh.scale.set(1/sq,sq,1/sq);
+  }
+
+  // fog-of-war: mark visited cells
+  const{r,c}=worldToCell(px,pz);
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) visited.add((r+dr)+','+(c+dc));
+}
+
+
+function checkCollect(){
+  gemObjs.forEach(g=>{
+    if(g.collected)return;
+    if(Math.hypot(px-g.x,pz-g.z)<0.8){
+      g.collected=true; scene.remove(g.group);
+      score++; scEl().textContent=score;
+      if(score>=10)endGame();
+    }
+  });
+}
+
+/* ── Camera ─────────────────────────── */
+function lerp(a,b,t){return a+(b-a)*t;}
+function eio(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+const CAM_BACK=2.6, CAM_EY=1.6, CAM_LOOK=5;
+
+function updateCamera(dt){
+  if(inIntro){
+    introT+=dt*0.25;
+    const p=Math.min(introT,1),e=eio(p);
+    const ovX=0,ovY=WH*1.6,ovZ=WH*1.3;
+    const tpX=px-Math.sin(pAngle)*CAM_BACK;
+    const tpZ=pz+Math.cos(pAngle)*CAM_BACK;
+    camera.position.set(lerp(ovX,tpX,e),lerp(ovY,CAM_EY,e),lerp(ovZ,tpZ,e));
+    if(p<0.45) camera.lookAt(0,2,0);
+    else{
+      const lp=eio((p-0.45)/0.55);
+      camera.lookAt(
+        lerp(0,px+Math.sin(pAngle)*CAM_LOOK,lp),
+        lerp(2,CAM_EY,lp),
+        lerp(0,pz-Math.cos(pAngle)*CAM_LOOK,lp)
+      );
+    }
+    if(p>=1){
+      inIntro=false;introDone=true;running=true;startMs=performance.now();
+      smCX=px-Math.sin(pAngle)*CAM_BACK; smCY=CAM_EY; smCZ=pz+Math.cos(pAngle)*CAM_BACK;
+      smLX=px+Math.sin(pAngle)*CAM_LOOK; smLY=CAM_EY; smLZ=pz-Math.cos(pAngle)*CAM_LOOK;
+    }
+    return;
+  }
+  if(!introDone)return;
+  const tpX=px-Math.sin(pAngle)*CAM_BACK, tpZ=pz+Math.cos(pAngle)*CAM_BACK;
+  const lkX=px+Math.sin(pAngle)*CAM_LOOK, lkZ=pz-Math.cos(pAngle)*CAM_LOOK;
+  const K=0.13;
+  smCX+=(tpX-smCX)*K; smCY+=(CAM_EY-smCY)*K; smCZ+=(tpZ-smCZ)*K;
+  smLX+=(lkX-smLX)*K; smLY+=(CAM_EY-smLY)*K; smLZ+=(lkZ-smLZ)*K;
+  camera.position.set(smCX,smCY,smCZ);
+  camera.lookAt(smLX,smLY,smLZ);
+}
+
+/* ── Minimap with fog-of-war for gems ── */
+function drawMinimap(){
+  const sz=150,cs=sz/MN;
+  mmctx.clearRect(0,0,sz,sz);
+
+  // maze cells — always visible
+  for(let r=0;r<MN;r++) for(let c=0;c<MN;c++){
+    mmctx.fillStyle=maze[r][c]===1?'#1B5E20':'#C8E6C9';
+    mmctx.fillRect(c*cs,r*cs,cs,cs);
+  }
+
+  // gems — only show if player has been within GEM_REVEAL_R cells
+  const {r:pr,c:pc}=worldToCell(px,pz);
+  gemObjs.forEach(g=>{
+    if(g.collected)return;
+    const {r:gr,c:gc}=worldToCell(g.x,g.z);
+    const dist=Math.hypot(pr-gr,pc-gc);
+    if(dist<=GEM_REVEAL_R){
+      // draw with opacity based on distance
+      const alpha=Math.max(0,1-dist/GEM_REVEAL_R);
+      mmctx.globalAlpha=alpha;
+      mmctx.fillStyle='#FFD700';
+      mmctx.beginPath();
+      mmctx.arc(gc*cs+cs/2,gr*cs+cs/2,cs*0.45,0,Math.PI*2);
+      mmctx.fill();
+      mmctx.globalAlpha=1;
+    }
+  });
+
+  // player dot + direction
+  mmctx.fillStyle='#F44336';
+  mmctx.beginPath();
+  mmctx.arc(pc*cs+cs/2,pr*cs+cs/2,cs*0.7,0,Math.PI*2);
+  mmctx.fill();
+  mmctx.strokeStyle='#fff';mmctx.lineWidth=1.5;
+  mmctx.beginPath();
+  mmctx.moveTo(pc*cs+cs/2,pr*cs+cs/2);
+  mmctx.lineTo(pc*cs+cs/2+Math.sin(pAngle)*cs*1.4,pr*cs+cs/2-Math.cos(pAngle)*cs*1.4);
+  mmctx.stroke();
+}
+
+/* ── Game flow ──────────────────────── */
+function fmtTime(s){return Math.floor(s/60)+':'+Math.floor(s%60).toString().padStart(2,'0');}
+
+function startGame(){
+  
+  vx=0;vz=0;vTurn=0;keys={};pFwd=0;pTurn=0;mouseDown=false;score = 0;
+  inIntro=false;introDone=false;introT=0;
+  visited=new Set();
+  genMaze();buildHedges();spawnGems();
+
+  // player starts at cell (1,1)
+  const start=cw(1,1);
+  px=start.x;pz=start.z;pAngle=0;
+  if(playerMesh) playerMesh.position.set(px,0.35,pz);
+
+  smCX=0;smCY=WH*1.6;smCZ=WH*1.3;
+  scEl().textContent='0';tmEl().textContent='0:00';
+  overlay.style.display='none';
+  winEl.style.display='none';
+  camera.position.set(0,WH*1.6,WH*1.3);
+  camera.lookAt(0,0,0);
+  inIntro=true;
+}
+
+function endGame(){
+  running=false;
+  const el=(performance.now()-startMs)/1000;
+  const isEN=currentLang==='en';
+
+  // Save progress
+  const d=loadSave();
+  d.runs=(d.runs||0)+1;
+  d.totalGems=(d.totalGems||0)+10;
+  if(d.bestTime===null||el<d.bestTime) d.bestTime=el;
+  writeSave(d);
+  renderStats();
+
+  // Build win message with best indicator
+  const newBest=d.bestTime===el;
+  const bestStr=newBest?(isEN?' 🏆 New Best!':' 🏆 新纪录！'):'';
+  document.getElementById('winmsg').textContent=
+    isEN?('Time: '+fmtTime(el)+bestStr+' · All 10 gems! 🎊')
+        :('用时 '+fmtTime(el)+bestStr+'，收集了全部 10 颗宝石 🎊');
+  winEl.style.display='flex';
+}
+
+/* ── Occlusion: fade hedges between camera and player ── */
+const occRay=new THREE.Raycaster();
+function updateOcclusion(){
+  if(!introDone) return;
+  const camPos=camera.position.clone();
+  const ballPos=new THREE.Vector3(px,0.35,pz);
+  const dir=ballPos.clone().sub(camPos).normalize();
+  const dist=camPos.distanceTo(ballPos);
+
+  // Collect all hedge bodies for intersection
+  const hedgeBodies=hedges.map(h=>h.userData.body).filter(Boolean);
+
+  occRay.set(camPos,dir);
+  const hits=occRay.intersectObjects(hedgeBodies,false);
+  const nowFaded=new Set();
+  hits.forEach(h=>{
+    if(h.distance<dist+0.5){
+      const g=h.object.parent;
+      nowFaded.add(g);
+    }
+  });
+
+  // Fade newly blocked hedges
+  nowFaded.forEach(g=>{
+    if(!fadedHedges.has(g)){
+      g.traverse(m=>{
+        if(m.isMesh){
+          m.userData.origMats=m.userData.origMats||m.material;
+          const isTop=Array.isArray(m.material)?m.material[2]===hedgeMatTop:m.material===hedgeMatTop;
+          m.material=isTop?hedgeMatTopFade:hedgeMatSideFade;
+        }
+      });
+    }
+  });
+  // Restore previously faded hedges that are no longer blocked
+  fadedHedges.forEach(g=>{
+    if(!nowFaded.has(g)){
+      g.traverse(m=>{
+        if(m.isMesh&&m.userData.origMats){
+          m.material=m.userData.origMats;
+        }
+      });
+    }
+  });
+  fadedHedges=nowFaded;
+}
+
+/* ── Render loop ────────────────────── */
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  animT+=dt;
+  if(running){
+    stepPlayer(dt);
+    checkCollect();
+    tmEl().textContent=fmtTime((performance.now()-startMs)/1000);
+  }
+  updateCamera(dt);
+
+  // gem animation
+  gemObjs.forEach((g,i)=>{
+    if(g.collected)return;
+    g.group.position.y=0.45+Math.sin(animT*2.2+i*1.3)*0.14;
+    g.group.rotation.y=animT*1.8+i;
+  });
+
+  updateOcclusion();
+  if(mmbox.classList.contains('open')) drawMinimap();
+  renderer.render(scene,camera);
+}
+
+function onResize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  camera.aspect=w/h;camera.updateProjectionMatrix();
+  renderer.setSize(w,h);
+}
+
+
+/* ── Language toggle ─────────────────── */
+let currentLang='zh';
+window.toggleLang=function toggleLang(){
+  currentLang=currentLang==='zh'?'en':'zh';
+  document.documentElement.lang=currentLang;
+  document.getElementById('lang-toggle').textContent=currentLang==='zh'?'EN':'中';
+  document.querySelectorAll('[data-zh]').forEach(el=>{
+    el.textContent=currentLang==='zh'?el.dataset.zh:el.dataset.en;
+  });
+  // restore live values
+  scEl().textContent=window._getScore();
+  renderStats();
+}
+
+
+/* ── Progress / localStorage ─────────────── */
+const SAVE_KEY='pidanMaze_v1';
+
+function loadSave(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    return raw?JSON.parse(raw):{runs:0,bestTime:null,totalGems:0};
+  }catch(e){return{runs:0,bestTime:null,totalGems:0};}
+}
+
+function writeSave(data){
+  try{ localStorage.setItem(SAVE_KEY,JSON.stringify(data)); }catch(e){}
+}
+
+function clearSave(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  renderStats();
+}
+window.clearSave=clearSave;  // expose for console use
+
+function renderStats(){
+  const d=loadSave();
+  const el=document.getElementById('stats');
+  if(!el)return;
+  const isEN=currentLang==='en';
+  const best=d.bestTime!==null?fmtTime(d.bestTime):(isEN?'--':'--');
+  if(isEN){
+    el.innerHTML=
+      'Best <span class="sv">'+best+'</span><br>'+
+      'Runs <span class="sv">'+d.runs+'</span><br>'+
+      'Gems <span class="sv">'+d.totalGems+'</span>';
+  } else {
+    el.innerHTML=
+      '最佳 <span class="sv">'+best+'</span><br>'+
+      '次数 <span class="sv">'+d.runs+'</span><br>'+
+      '宝石 <span class="sv">'+d.totalGems+'</span>';
+  }
+}
+
+/* ── Boot ───────────────────────────── */
+initThree();
+genMaze();buildHedges();spawnGems();
+animate();
+
+document.getElementById('startBtn').onclick   =startGame;
+renderStats();
+document.getElementById('restartBtn').onclick =startGame;
+
+})();
+</script>
+</body>
+</html>
