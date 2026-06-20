@@ -1,5 +1,7 @@
 # 🌴 宝藏岛 · Treasure Island
 
+<!-- GAME_META: {"num": "48", "en": {"name": "Treasure Island", "desc": "A low-poly 3D browser game. Collect all 10 gems scattered across a procedurally generated island as fast as you can."}, "zh": {"name": "夏日小岛", "desc": "一款低多边形风格的 3D 小游戏。在随机生成的夏日小岛上，尽可能快地收集 10 颗宝石。"}} -->
+
 一款运行在浏览器中的低多边形风格 3D 小游戏，无需安装，打开即玩。  
 A low-poly 3D browser game — no install needed, just open and play.
 
@@ -92,13 +94,13 @@ Just open the HTML file in any modern browser — no server required:
 
 ```bash
 # macOS
-open lowpoly_island_game_v5.html
+open index.html
 
 # Windows
-start lowpoly_island_game_v5.html
+start index.html
 
 # Linux
-xdg-open lowpoly_island_game_v5.html
+xdg-open index.html
 ```
 
 或将文件拖入浏览器窗口。  
@@ -111,7 +113,7 @@ Or drag the file into a browser window.
 ## 文件说明 · Files
 
 ```
-lowpoly_island_game_v5.html   # 游戏主文件 Main game (single file, self-contained)
+index.html                     # 游戏主文件 Main game (single file, self-contained)
 README.md                      # 本文档 This document
 ```
 

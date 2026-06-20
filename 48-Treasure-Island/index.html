@@ -7,7 +7,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
-#wrap { position: relative; width: 100%; height: 100vh; }
+#wrap { position: relative; width: 100%; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #5BA3C9; overflow: hidden; }
 #gc { width:100%; height:100%; display:block; outline:none; touch-action:none; cursor:crosshair; }
 #gc.dragging { cursor:grab; }
 #ui {
@@ -15,7 +15,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55);
 }
-#hud { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 18px; gap:8px; flex-wrap:wrap; }
+#hud { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 18px; gap:8px; flex-wrap:wrap; z-index: 10; }
 .hud-box { background:rgba(0,0,0,.30); border-radius:12px; padding:6px 14px; font-size:clamp(11px,2.2vw,13px); font-weight:500; backdrop-filter:blur(4px); }
 .hud-box span { font-size:clamp(17px,3.8vw,22px); font-weight:700; display:block; }
 #best-box { font-size:clamp(10px,2vw,12px); }
@@ -25,6 +25,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   position:absolute; inset:0; display:flex; flex-direction:column;
   align-items:center; justify-content:center; pointer-events:all;
   background:rgba(10,30,50,.52); backdrop-filter:blur(3px);
+  z-index: 100;
 }
 #overlay h1 { font-size:clamp(22px,5vw,32px); font-weight:800; margin-bottom:10px; }
 #overlay p  { font-size:clamp(12px,2.3vw,14px); margin-bottom:8px; opacity:.88; text-align:center; line-height:1.75; padding:0 24px; }
@@ -36,9 +37,15 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   transition:transform .1s,box-shadow .1s;
 }
 #overlay button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,160,0,.55); }
-#controls { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:clamp(9px,1.8vw,11px); opacity:.55; color:#fff; pointer-events:none; white-space:nowrap; }
+#controls { position:absolute; bottom:60px; left:50%; transform:translateX(-50%); font-size:clamp(9px,1.8vw,11px); opacity:.55; color:#fff; pointer-events:none; white-space:nowrap; }
 #cam-hint { position:absolute; top:50%; right:10px; transform:translateY(-50%); font-size:11px; opacity:0; color:#fff; pointer-events:none; transition:opacity .35s; writing-mode:vertical-rl; background:rgba(0,0,0,.28); border-radius:8px; padding:8px 4px; }
 #cam-hint.show { opacity:.72; }
+#lang-toggle {
+  position: absolute; top: 14px; left: 16px; background: rgba(0,0,0,0.38); color: #fff;
+  border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  font-family: sans-serif; z-index: 20; pointer-events: all;
+}
+#lang-toggle:hover { background: rgba(0,0,0,0.6); }
 #click-ripple { position:absolute; pointer-events:none; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,200,.9); transform:translate(-50%,-50%) scale(0); transition:transform .3s ease-out,opacity .3s ease-out; opacity:0; }
 #click-ripple.pop  { transform:translate(-50%,-50%) scale(1);   opacity:1; }
 #click-ripple.fade { transform:translate(-50%,-50%) scale(1.6); opacity:0; }
@@ -47,24 +54,25 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
 <body>
 <div id="wrap">
   <canvas id="gc" tabindex="0"></canvas>
+  <button id="lang-toggle">EN</button>
   <div id="ui">
     <div id="hud">
-      <div class="hud-box" id="score-box">宝石 <span id="sc">0 / 10</span></div>
-      <div class="hud-box" id="timer-box">用时 <span id="tm">0.0 s</span></div>
-      <div class="hud-box hidden" id="best-box">最佳 <span id="best-val">--</span></div>
+      <div class="hud-box" id="score-box"><span data-zh="宝石" data-en="Gems">宝石</span> <span id="sc">0 / 10</span></div>
+      <div class="hud-box" id="timer-box"><span data-zh="用时" data-en="Time">用时</span> <span id="tm">0.0 s</span></div>
+      <div class="hud-box hidden" id="best-box"><span data-zh="最佳" data-en="Best">最佳</span> <span id="best-val">--</span></div>
     </div>
   </div>
   <div id="overlay">
-    <h1>🌴 夏日小岛</h1>
-    <p>收集岛上所有 10 颗宝石，计时开始！<br>
-       WASD / 方向键 移动 · PgUp/PgDn 旋转视角<br>
-       鼠标点击移动 · 拖拽旋转视角<br>
-       触屏点击移动 · 横滑旋转视角</p>
+    <h1>🌴 <span data-zh="夏日小岛" data-en="Treasure Island">夏日小岛</span></h1>
+    <p><span data-zh="收集岛上所有 10 颗宝石，计时开始！" data-en="Collect all 10 gems on the island, time starts now!">收集岛上所有 10 颗宝石，计时开始！</span><br>
+       <span data-zh="WASD / 方向键 移动 · PgUp/PgDn 旋转视角" data-en="WASD / Arrow Keys to move · PgUp/PgDn to rotate">WASD / 方向键 移动 · PgUp/PgDn 旋转视角</span><br>
+       <span data-zh="鼠标点击移动 · 拖拽旋转视角" data-en="Mouse click to move · drag to rotate">鼠标点击移动 · 拖拽旋转视角</span><br>
+       <span data-zh="触屏点击移动 · 横滑旋转视角" data-en="Touch tap to move · swipe to rotate">触屏点击移动 · 横滑旋转视角</span></p>
     <div class="record-line" id="overlay-best" style="display:none"></div>
-    <button id="startBtn">开始游戏</button>
+    <button id="startBtn"><span data-zh="开始游戏" data-en="Start Game">开始游戏</span></button>
   </div>
-  <div id="controls">WASD/方向键 移动 · PgUp/PgDn 旋转 · 鼠标拖拽旋转/点击移动</div>
-  <div id="cam-hint">◀ 旋转视角 ▶</div>
+  <div id="controls"><span data-zh="WASD/方向键 移动 · PgUp/PgDn 旋转 · 鼠标拖拽旋转/点击移动" data-en="WASD/Arrows to Move · PgUp/PgDn to Rotate · Drag to Rotate/Click to Move">WASD/方向键 移动 · PgUp/PgDn 旋转 · 鼠标拖拽旋转/点击移动</span></div>
+  <div id="cam-hint">◀ <span data-zh="旋转视角" data-en="Rotate View">旋转视角</span> ▶</div>
   <div id="click-ripple"></div>
 </div>
 
@@ -127,6 +135,25 @@ function fmtTime(s){
   const m=Math.floor(s/60);
   return m+':'+(s%60).toFixed(1).padStart(4,'0');
 }
+
+let currentLang = localStorage.getItem('lang') || 'en';
+function updateLanguageUI() {
+  document.querySelectorAll('[data-zh]').forEach(el => {
+    el.textContent = currentLang === 'zh' ? el.dataset.zh : el.dataset.en;
+  });
+  const langToggle = document.getElementById('lang-toggle');
+  if (langToggle) langToggle.textContent = currentLang === 'zh' ? 'EN' : '中';
+  if (bestTime > 0) {
+    overlayBest.textContent = (currentLang === 'zh' ? '🏆 最佳记录：' : '🏆 Best Record: ') + fmtTime(bestTime);
+  }
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('lang', currentLang);
+  updateLanguageUI();
+}
+
 function loadBest(){
   const v=parseFloat(localStorage.getItem('island_best')||'0');
   bestTime=v;
@@ -134,7 +161,7 @@ function loadBest(){
     bestBox.classList.remove('hidden');
     bestVal.textContent=fmtTime(v);
     overlayBest.style.display='';
-    overlayBest.textContent='🏆 最佳记录：'+fmtTime(v);
+    overlayBest.textContent=(currentLang === 'zh' ? '🏆 最佳记录：' : '🏆 Best Record: ') + fmtTime(v);
   }
 }
 function saveBest(t){
@@ -510,12 +537,13 @@ function endGame(){
   running=false;
   const isRecord=saveBest(elapsed);
   overlay.style.display='flex';
+  const isZH = currentLang === 'zh';
   overlay.innerHTML=`
-    <h1>🎉 全部收集！</h1>
-    <p>你收集了全部 10 颗宝石！</p>
-    <div class="record-line">${isRecord?'🏆 新记录！':'⏱ 用时：'} ${fmtTime(elapsed)}</div>
-    ${bestTime>0?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">最佳记录：${fmtTime(bestTime)}</p>`:''}
-    <button id="startBtn">再玩一次</button>
+    <h1>🎉 ${isZH ? '全部收集！' : 'All Collected!'}</h1>
+    <p>${isZH ? '你收集了全部 10 颗宝石！' : 'You collected all 10 gems!'}</p>
+    <div class="record-line">${isRecord ? (isZH ? '🏆 新记录！' : '🏆 New Record!') : (isZH ? '⏱ 用时：' : '⏱ Time: ')} ${fmtTime(elapsed)}</div>
+    ${bestTime>0?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">${isZH ? '最佳记录：' : 'Best Record: '}${fmtTime(bestTime)}</p>`:''}
+    <button id="startBtn">${isZH ? '再玩一次' : 'Play Again'}</button>
   `;
   document.getElementById('startBtn').onclick=startGame;
 }
@@ -735,6 +763,8 @@ function init(){
   setupMouse();
   setupTouch();
   loadBest();
+  updateLanguageUI();
+  document.getElementById('lang-toggle').onclick = toggleLang;
   canvas.focus();
   animate();
 }
@@ -772,5 +802,6 @@ function animate(){
 startBtn.onclick=startGame;
 init();
 </script>
+<script src="../share.js" defer></script>
 </body>
 </html>
