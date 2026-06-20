@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>夏日小岛</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
+#wrap { position: relative; width: 100%; height: 100vh; }
+#gc { width:100%; height:100%; display:block; outline:none; touch-action:none; cursor:crosshair; }
+#gc.dragging { cursor:grab; }
+#ui {
+  position:absolute; top:0; left:0; width:100%; pointer-events:none;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55);
+}
+#hud { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 18px; gap:8px; flex-wrap:wrap; }
+.hud-box { background:rgba(0,0,0,.30); border-radius:12px; padding:6px 14px; font-size:clamp(11px,2.2vw,13px); font-weight:500; backdrop-filter:blur(4px); }
+.hud-box span { font-size:clamp(17px,3.8vw,22px); font-weight:700; display:block; }
+#best-box { font-size:clamp(10px,2vw,12px); }
+#best-box span { font-size:clamp(14px,3vw,18px); }
+#best-box.hidden { display:none; }
+#overlay {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; pointer-events:all;
+  background:rgba(10,30,50,.52); backdrop-filter:blur(3px);
+}
+#overlay h1 { font-size:clamp(22px,5vw,32px); font-weight:800; margin-bottom:10px; }
+#overlay p  { font-size:clamp(12px,2.3vw,14px); margin-bottom:8px; opacity:.88; text-align:center; line-height:1.75; padding:0 24px; }
+#overlay .record-line { font-size:clamp(14px,2.8vw,18px); margin-bottom:18px; font-weight:700; color:#FFD700; }
+#overlay button {
+  background:linear-gradient(135deg,#FFD700,#FFA500); color:#333; border:none;
+  padding:13px 36px; border-radius:12px; font-size:clamp(14px,3vw,16px); font-weight:700;
+  cursor:pointer; box-shadow:0 4px 16px rgba(255,160,0,.4);
+  transition:transform .1s,box-shadow .1s;
+}
+#overlay button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,160,0,.55); }
+#controls { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:clamp(9px,1.8vw,11px); opacity:.55; color:#fff; pointer-events:none; white-space:nowrap; }
+#cam-hint { position:absolute; top:50%; right:10px; transform:translateY(-50%); font-size:11px; opacity:0; color:#fff; pointer-events:none; transition:opacity .35s; writing-mode:vertical-rl; background:rgba(0,0,0,.28); border-radius:8px; padding:8px 4px; }
+#cam-hint.show { opacity:.72; }
+#click-ripple { position:absolute; pointer-events:none; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,200,.9); transform:translate(-50%,-50%) scale(0); transition:transform .3s ease-out,opacity .3s ease-out; opacity:0; }
+#click-ripple.pop  { transform:translate(-50%,-50%) scale(1);   opacity:1; }
+#click-ripple.fade { transform:translate(-50%,-50%) scale(1.6); opacity:0; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="gc" tabindex="0"></canvas>
+  <div id="ui">
+    <div id="hud">
+      <div class="hud-box" id="score-box">宝石 <span id="sc">0 / 10</span></div>
+      <div class="hud-box" id="timer-box">用时 <span id="tm">0.0 s</span></div>
+      <div class="hud-box hidden" id="best-box">最佳 <span id="best-val">--</span></div>
+    </div>
+  </div>
+  <div id="overlay">
+    <h1>🌴 夏日小岛</h1>
+    <p>收集岛上所有 10 颗宝石，计时开始！<br>
+       WASD / 方向键 移动 · PgUp/PgDn 旋转视角<br>
+       鼠标点击移动 · 拖拽旋转视角<br>
+       触屏点击移动 · 横滑旋转视角</p>
+    <div class="record-line" id="overlay-best" style="display:none"></div>
+    <button id="startBtn">开始游戏</button>
+  </div>
+  <div id="controls">WASD/方向键 移动 · PgUp/PgDn 旋转 · 鼠标拖拽旋转/点击移动</div>
+  <div id="cam-hint">◀ 旋转视角 ▶</div>
+  <div id="click-ripple"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── DOM ── */
+const canvas      = document.getElementById('gc');
+const overlay     = document.getElementById('overlay');
+const scEl        = document.getElementById('sc');
+const tmEl        = document.getElementById('tm');
+const bestBox     = document.getElementById('best-box');
+const bestVal     = document.getElementById('best-val');
+const overlayBest = document.getElementById('overlay-best');
+const startBtn    = document.getElementById('startBtn');
+const camHint     = document.getElementById('cam-hint');
+const ripple      = document.getElementById('click-ripple');
+
+/* ── Engine state ── */
+let scene, camera, renderer, player, clock;
+let gems = [], islandObjects = [], trees = [];
+let rockColliders = [];   // [{cx,cz,r}] circles on XZ plane
+let keys = {};
+let score = 0, elapsed = 0, running = false;
+let playerAngle = 0;
+let bestTime = 0;
+let cameraYaw = 0;
+const CAM_DIST = 15, CAM_H = 8, CAM_ROT_SPD = Math.PI / 55;
+let camHintTimer = null;
+
+/* ── Per-round terrain data ── */
+/*
+  The island is a single fine-grid disc (PlaneGeometry rotated to XZ).
+  Heights come from a sum of Gaussian "lobes":
+    H(x,z) = sum_i  A_i * exp(-((x-cx_i)²+(z-cz_i)²) / (2*s_i²))
+  where some lobes are negative → hollows/depressions.
+  The outer SKIRT_R controls the island outline: a smooth taper
+  multiplied in so vertices near the edge fall to sea level.
+  Multiple overlapping lobes with random centres create:
+    • raised plateaus   (large positive lobe)
+    • ridges            (two adjacent lobes)
+    • saddle depressions (negative lobe between positives)
+    • varied coastlines (lobes close to edge push land outward)
+*/
+const GRID_R  = 11;   // half-size of the height grid (world units)
+const WALK_R  = 8.2;  // hard walkable boundary radius
+const GRID_N  = 60;   // grid subdivisions per axis (60×60 quads)
+let   lobeData = [];  // [{cx,cz,amp,sigma}]  amp can be negative
+
+/* ── Helpers ── */
+function rand(a,b){ return a+Math.random()*(b-a); }
+function randInt(a,b){ return Math.floor(rand(a,b+1)); }
+
+function showCamHint(){
+  camHint.classList.add('show');
+  clearTimeout(camHintTimer);
+  camHintTimer = setTimeout(()=>camHint.classList.remove('show'),1100);
+}
+function fmtTime(s){
+  if(s<60) return s.toFixed(1)+' s';
+  const m=Math.floor(s/60);
+  return m+':'+(s%60).toFixed(1).padStart(4,'0');
+}
+function loadBest(){
+  const v=parseFloat(localStorage.getItem('island_best')||'0');
+  bestTime=v;
+  if(v>0){
+    bestBox.classList.remove('hidden');
+    bestVal.textContent=fmtTime(v);
+    overlayBest.style.display='';
+    overlayBest.textContent='🏆 最佳记录：'+fmtTime(v);
+  }
+}
+function saveBest(t){
+  if(bestTime===0||t<bestTime){
+    bestTime=t;
+    localStorage.setItem('island_best',t.toString());
+    loadBest(); return true;
+  }
+  return false;
+}
+
+/* ══════════════════════════════════════════
+   HEIGHT FIELD
+   islandH(x,z) → surface Y at world (x,z)
+   taper(r)     → 0..1 smooth island boundary
+══════════════════════════════════════════ */
+function taper(r){
+  // smooth step that reaches 0 at GRID_R
+  const t = Math.max(0, 1 - r / GRID_R);
+  return t * t * (3 - 2*t);   // smoothstep
+}
+
+function islandH(x,z){
+  const r = Math.hypot(x,z);
+  const tp = taper(r);
+  if(tp <= 0) return 0;
+  let h = 0;
+  for(const l of lobeData){
+    const dx=x-l.cx, dz=z-l.cz;
+    h += l.amp * Math.exp(-(dx*dx+dz*dz)/(2*l.sigma*l.sigma));
+  }
+  return Math.max(0, h) * tp;
+}
+
+// Is a point inside the walkable island?
+function onIsland(x,z,margin=0){
+  return Math.hypot(x,z) < WALK_R - margin;
+}
+
+/* ══════════════════════════════════════════
+   GENERATE LOBES each round
+   Creates 1-4 "base lobes" that define the
+   main topography, spread close together so
+   their tails overlap and fuse into one
+   connected landmass with hills/valleys.
+══════════════════════════════════════════ */
+function generateLobes(){
+  lobeData = [];
+
+  // Always one large central lobe (the main island body)
+  lobeData.push({ cx:0, cz:0, amp: rand(1.0,2.0), sigma: rand(3.5,5.5) });
+
+  // 0-3 extra lobes placed within the island radius
+  const extras = randInt(0,3);
+  for(let i=0;i<extras;i++){
+    const a = rand(0, Math.PI*2);
+    const d = rand(1.5, 5.0);          // offset from centre
+    const cx = Math.cos(a)*d;
+    const cz = Math.sin(a)*d;
+    const amp   = rand(0.8, 2.0);       // positive → hill
+    const sigma = rand(2.0, 4.5);
+    lobeData.push({ cx, cz, amp, sigma });
+  }
+
+  // 0-2 negative lobes → hollows / bowls between hills
+  const hollows = randInt(0,2);
+  for(let i=0;i<hollows;i++){
+    const a = rand(0, Math.PI*2);
+    const d = rand(0.5, 4.5);
+    lobeData.push({
+      cx: Math.cos(a)*d,
+      cz: Math.sin(a)*d,
+      amp:  -rand(0.4, 1.0),            // negative → depression
+      sigma: rand(1.5, 3.0)
+    });
+  }
+}
+
+/* ══════════════════════════════════════════
+   BUILD ISLAND MESH
+   PlaneGeometry in XY → rotate to XZ →
+   displace each vertex upward by islandH().
+   Vertex colour: grass/sand by height+radius.
+══════════════════════════════════════════ */
+function buildIslandMesh(){
+  const W = GRID_R*2, segs = GRID_N;
+  const geo = new THREE.PlaneGeometry(W, W, segs, segs);
+  // PlaneGeometry is in XY, rotate to lie flat in XZ
+  geo.rotateX(-Math.PI/2);
+
+  const pos = geo.attributes.position;
+  const cnt = pos.count;
+
+  // Displace Y
+  for(let i=0;i<cnt;i++){
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    pos.setY(i, islandH(x,z));
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+
+  // Vertex colours
+  const colors = new Float32Array(cnt*3);
+  for(let i=0;i<cnt;i++){
+    const x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
+    const r = Math.hypot(x,z)/WALK_R;
+    // grass hue varies slightly with height for micro-variation
+    const grassR = 0.38 + y*0.04 + rand(-0.02,0.02);
+    const grassG = 0.72 + y*0.02;
+    const grassB = 0.22;
+    // sand near the waterline (low height, outer radius)
+    const sandFactor = Math.max(0, Math.min(1, (r-0.72)/0.26 + (1-y)*0.4 ));
+    colors[i*3  ] = grassR*(1-sandFactor) + 0.91*sandFactor;
+    colors[i*3+1] = grassG*(1-sandFactor) + 0.83*sandFactor;
+    colors[i*3+2] = grassB*(1-sandFactor) + 0.59*sandFactor;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+
+  const mat = new THREE.MeshLambertMaterial({ vertexColors:true });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  islandObjects.push(mesh);
+
+  // Sand skirt (low-poly ring around the edge, matches original style)
+  const skirtGeo = new THREE.CylinderGeometry(WALK_R+1.0, WALK_R+2.2, 0.6, 14);
+  const skirtMat = new THREE.MeshLambertMaterial({ color:0xE8D59A });
+  const skirt = new THREE.Mesh(skirtGeo, skirtMat);
+  skirt.position.y = -0.55;
+  skirt.receiveShadow = true;
+  scene.add(skirt);
+  islandObjects.push(skirt);
+
+  // Cliff side (dark band below skirt)
+  const cliffGeo = new THREE.CylinderGeometry(WALK_R+0.8, WALK_R+1.4, 1.0, 14);
+  const cliffMat = new THREE.MeshLambertMaterial({ color:0xC8B878 });
+  const cliff = new THREE.Mesh(cliffGeo, cliffMat);
+  cliff.position.y = -1.3;
+  scene.add(cliff);
+  islandObjects.push(cliff);
+}
+
+/* ══════════════════════════════════════════
+   WATER
+══════════════════════════════════════════ */
+let waterMesh;
+function buildWater(){
+  waterMesh = new THREE.Mesh(
+    new THREE.CircleGeometry(30,10),
+    new THREE.MeshLambertMaterial({ color:0x3BA0D4 })
+  );
+  waterMesh.rotation.x = -Math.PI/2;
+  waterMesh.position.y = -1.6;
+  scene.add(waterMesh);
+}
+
+/* ══════════════════════════════════════════
+   TREES  (original v1 style)
+══════════════════════════════════════════ */
+function buildTree(x,z){
+  const g = new THREE.Group();
+  const hy = islandH(x,z);
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12,0.18,1.4,5),
+    new THREE.MeshLambertMaterial({color:0x8B6340})
+  );
+  trunk.position.y=0.7; trunk.castShadow=true; g.add(trunk);
+  const colors=[0x3BA048,0x4EB856,0x2D9B3F];
+  const lPos=[[0,2.0,0],[-0.4,1.55,0.1],[0.35,1.6,-0.15]];
+  const lScale=[1,0.75,0.7];
+  for(let i=0;i<3;i++){
+    const leaf=new THREE.Mesh(
+      new THREE.ConeGeometry(0.85*lScale[i],1.1*lScale[i],5),
+      new THREE.MeshLambertMaterial({color:colors[i]})
+    );
+    leaf.position.set(...lPos[i]); leaf.castShadow=true; g.add(leaf);
+  }
+  g.position.set(x,hy,z);
+  g.rotation.y=rand(0,Math.PI*2);
+  scene.add(g); trees.push(g); islandObjects.push(g);
+}
+
+function buildTrees(){
+  const count=randInt(8,13);
+  const used=[];
+  let tries=0;
+  while(used.length<count && tries<300){
+    tries++;
+    const a=rand(0,Math.PI*2), r=rand(2.0,WALK_R-1.5);
+    const x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!onIsland(x,z,1.2)) continue;
+    if(used.every(([px,pz])=>Math.hypot(x-px,z-pz)>2.1)){
+      buildTree(x,z); used.push([x,z]);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════
+   ROCKS — flush with terrain + colliders
+   Each rock group sits exactly on the height
+   field. A circular collider is stored so
+   the player cannot walk through them.
+══════════════════════════════════════════ */
+function buildRock(x,z){
+  const hy = islandH(x,z);
+  const g  = new THREE.Group();
+  const n  = randInt(1,3);
+  const colR = 0.22 + n*0.12;   // collider radius grows with rock count
+
+  const rockCols=[0x888888,0x777788,0x9E9E8E,0xAAAAAA,0x6E7060];
+  for(let i=0;i<n;i++){
+    const s = rand(0.20,0.48);
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(s,0),
+      new THREE.MeshLambertMaterial({color:rockCols[randInt(0,rockCols.length-1)]})
+    );
+    // Embed the rock so its bottom sits on the terrain surface
+    const ox=rand(-0.18,0.18), oz=rand(-0.18,0.18);
+    rock.position.set(ox, s*0.55, oz);   // half-height above local origin
+    rock.rotation.set(rand(0,Math.PI),rand(0,Math.PI),rand(0,Math.PI));
+    rock.castShadow=true; rock.receiveShadow=true;
+    g.add(rock);
+  }
+  // Place group at terrain height → rocks sit on surface
+  g.position.set(x, hy, z);
+  scene.add(g); islandObjects.push(g);
+
+  // Register collider
+  rockColliders.push({ cx:x, cz:z, r:colR });
+}
+
+function buildRocks(){
+  rockColliders=[];
+  const count=randInt(8,15);
+  const used=[];
+  let tries=0;
+  while(used.length<count && tries<300){
+    tries++;
+    const a=rand(0,Math.PI*2), r=rand(0.8,WALK_R-1.0);
+    const x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!onIsland(x,z,0.6)) continue;
+    // Keep rocks away from spawn & each other
+    if(Math.hypot(x,z)<1.5) continue;
+    if(used.every(([px,pz])=>Math.hypot(x-px,z-pz)>1.4)){
+      buildRock(x,z); used.push([x,z]);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════
+   PLAYER  (original v1 proportions)
+══════════════════════════════════════════ */
+function buildPlayer(){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(
+    new THREE.BoxGeometry(0.5,0.7,0.4),
+    new THREE.MeshLambertMaterial({color:0xFF6B6B})
+  );
+  body.position.y=0.35; body.castShadow=true; g.add(body);
+  const head=new THREE.Mesh(
+    new THREE.BoxGeometry(0.4,0.4,0.4),
+    new THREE.MeshLambertMaterial({color:0xFFD59E})
+  );
+  head.position.y=0.9; head.castShadow=true; g.add(head);
+  g.position.set(0,islandH(0,0)+0.01,0);
+  scene.add(g); player=g;
+}
+
+/* ══════════════════════════════════════════
+   GEMS
+══════════════════════════════════════════ */
+function makeGem(x,z){
+  const g=new THREE.Group();
+  const cols=[0xFFD700,0x44DDFF,0xFF44BB,0x88FF44,0xFF8800];
+  const col=cols[randInt(0,cols.length-1)];
+  const gem=new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.22,0),
+    new THREE.MeshLambertMaterial({color:col,emissive:new THREE.Color(col).multiplyScalar(0.3)})
+  );
+  gem.castShadow=true; g.add(gem);
+  const ring=new THREE.Mesh(
+    new THREE.TorusGeometry(0.28,0.02,4,12),
+    new THREE.MeshLambertMaterial({color:col})
+  );
+  ring.rotation.x=Math.PI/2; g.add(ring);
+  g.position.set(x, islandH(x,z)+0.55, z);
+  g.userData.collected=false;
+  scene.add(g); islandObjects.push(g);
+  return g;
+}
+
+function spawnGems(){
+  gems=[];
+  const used=[];
+  for(let i=0;i<10;i++){
+    let x,z,ok,tries=0;
+    do{
+      const a=rand(0,Math.PI*2), r=rand(1.0,WALK_R-1.3);
+      x=Math.cos(a)*r; z=Math.sin(a)*r;
+      // Not on a rock collider, not too close to others
+      ok = onIsland(x,z,0.9) &&
+           used.every(([px,pz])=>Math.hypot(x-px,z-pz)>1.5) &&
+           rockColliders.every(c=>Math.hypot(x-c.cx,z-c.cz)>c.r+0.5);
+      tries++;
+    }while(!ok && tries<150);
+    used.push([x,z]);
+    gems.push(makeGem(x,z));
+  }
+}
+
+/* ══════════════════════════════════════════
+   ISLAND BUILD (called each round)
+══════════════════════════════════════════ */
+function buildIsland(){
+  islandObjects.forEach(o=>scene.remove(o));
+  islandObjects=[]; trees=[];
+
+  generateLobes();
+  buildIslandMesh();
+  buildTrees();
+  buildRocks();
+  spawnGems();
+}
+
+/* ══════════════════════════════════════════
+   COLLISION  (island boundary + rocks)
+══════════════════════════════════════════ */
+const PLAYER_R = 0.32;
+
+function resolveCollision(nx, nz){
+  // 1) Island boundary
+  const dist = Math.hypot(nx, nz);
+  let rx=nx, rz=nz;
+  if(dist > WALK_R - PLAYER_R){
+    const a=Math.atan2(rz,rx);
+    rx=Math.cos(a)*(WALK_R-PLAYER_R);
+    rz=Math.sin(a)*(WALK_R-PLAYER_R);
+  }
+  // 2) Rock colliders
+  for(const c of rockColliders){
+    const dx=rx-c.cx, dz=rz-c.cz;
+    const d=Math.hypot(dx,dz);
+    const minD=c.r+PLAYER_R;
+    if(d<minD && d>0.0001){
+      const push=minD-d;
+      rx += (dx/d)*push;
+      rz += (dz/d)*push;
+    }
+  }
+  return {x:rx, z:rz};
+}
+
+/* ══════════════════════════════════════════
+   GAME FLOW
+══════════════════════════════════════════ */
+function startGame(){
+  score=0; elapsed=0; running=true;
+  tapTarget=null; tapMoving=false; cameraYaw=0;
+
+  buildIsland();
+
+  player.position.set(0, islandH(0,0)+0.01, 0);
+  playerAngle=0; player.rotation.y=0;
+
+  scEl.textContent='0 / 10';
+  tmEl.textContent='0.0 s';
+  overlay.style.display='none';
+  canvas.focus();
+}
+
+function endGame(){
+  running=false;
+  const isRecord=saveBest(elapsed);
+  overlay.style.display='flex';
+  overlay.innerHTML=`
+    <h1>🎉 全部收集！</h1>
+    <p>你收集了全部 10 颗宝石！</p>
+    <div class="record-line">${isRecord?'🏆 新记录！':'⏱ 用时：'} ${fmtTime(elapsed)}</div>
+    ${bestTime>0?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">最佳记录：${fmtTime(bestTime)}</p>`:''}
+    <button id="startBtn">再玩一次</button>
+  `;
+  document.getElementById('startBtn').onclick=startGame;
+}
+
+/* ══════════════════════════════════════════
+   CAMERA
+══════════════════════════════════════════ */
+function updateCamera(){
+  const px=player.position.x, pz=player.position.z;
+  const tx=px*0.28+Math.sin(cameraYaw)*CAM_DIST;
+  const tz=pz*0.28+Math.cos(cameraYaw)*CAM_DIST;
+  camera.position.x+=(tx-camera.position.x)*0.06;
+  camera.position.y+=(CAM_H-camera.position.y)*0.06;
+  camera.position.z+=(tz-camera.position.z)*0.06;
+  camera.lookAt(px*0.5, 0, pz*0.5);
+}
+
+/* ══════════════════════════════════════════
+   MOVEMENT
+══════════════════════════════════════════ */
+function movePlayer(dt){
+  if(!running) return;
+  if(keys['PageUp'])   { cameraYaw-=CAM_ROT_SPD; showCamHint(); }
+  if(keys['PageDown']) { cameraYaw+=CAM_ROT_SPD; showCamHint(); }
+
+  const speed=4;
+  let dx=0,dz=0;
+  if(keys['KeyW']||keys['ArrowUp'])    dz-=1;
+  if(keys['KeyS']||keys['ArrowDown'])  dz+=1;
+  if(keys['KeyA']||keys['ArrowLeft'])  dx-=1;
+  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
+
+  if(dx!==0||dz!==0){
+    const len=Math.hypot(dx,dz); dx/=len; dz/=len;
+    const rdx= dx*Math.cos(cameraYaw)+dz*Math.sin(cameraYaw);
+    const rdz=-dx*Math.sin(cameraYaw)+dz*Math.cos(cameraYaw);
+    playerAngle=Math.atan2(rdx,rdz);
+    player.rotation.y=playerAngle;
+    const p=resolveCollision(
+      player.position.x+rdx*speed*dt,
+      player.position.z+rdz*speed*dt
+    );
+    player.position.x=p.x;
+    player.position.z=p.z;
+    player.position.y=islandH(p.x,p.z)+0.01;
+    tapTarget=null;
+  }
+}
+
+function checkCollect(){
+  if(!running) return;
+  gems.forEach(g=>{
+    if(g.userData.collected) return;
+    if(player.position.distanceTo(g.position)<0.78){
+      g.userData.collected=true; scene.remove(g);
+      score++; scEl.textContent=`${score} / 10`;
+      if(score>=10) endGame();
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   TAP / CLICK  TO MOVE
+══════════════════════════════════════════ */
+const raycaster   = new THREE.Raycaster();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+let tapTarget=null, tapMoving=false;
+
+function screenToGround(cx,cy){
+  const rect=canvas.getBoundingClientRect();
+  const ndc=new THREE.Vector2(
+    ((cx-rect.left)/rect.width)*2-1,
+    -((cy-rect.top)/rect.height)*2+1
+  );
+  raycaster.setFromCamera(ndc,camera);
+  const pt=new THREE.Vector3();
+  return raycaster.ray.intersectPlane(groundPlane,pt)?pt:null;
+}
+
+function triggerMove(cx,cy){
+  if(!running) return;
+  const wp=screenToGround(cx,cy);
+  if(!wp) return;
+  // Clamp target to walkable area
+  const dist=Math.hypot(wp.x,wp.z);
+  if(dist>WALK_R-PLAYER_R){
+    const a=Math.atan2(wp.z,wp.x);
+    wp.x=Math.cos(a)*(WALK_R-PLAYER_R);
+    wp.z=Math.sin(a)*(WALK_R-PLAYER_R);
+  }
+  tapTarget={x:wp.x,z:wp.z};
+  tapMoving=true;
+  // ripple
+  ripple.style.left=cx+'px'; ripple.style.top=cy+'px';
+  ripple.className='';
+  requestAnimationFrame(()=>{
+    ripple.className='pop';
+    setTimeout(()=>ripple.className='fade',50);
+    setTimeout(()=>ripple.className='',350);
+  });
+}
+
+function updateTapMove(dt){
+  if(!tapTarget||!tapMoving||!running) return;
+  const dx=tapTarget.x-player.position.x;
+  const dz=tapTarget.z-player.position.z;
+  const dist=Math.hypot(dx,dz);
+  if(dist<0.12){ tapMoving=false; return; }
+  const speed=4;
+  const rdx=dx/dist, rdz=dz/dist;
+  playerAngle=Math.atan2(rdx,rdz);
+  player.rotation.y=playerAngle;
+  const p=resolveCollision(
+    player.position.x+rdx*speed*dt,
+    player.position.z+rdz*speed*dt
+  );
+  player.position.x=p.x;
+  player.position.z=p.z;
+  player.position.y=islandH(p.x,p.z)+0.01;
+  // If collisions prevent reaching target, give up after being stuck
+  if(Math.hypot(p.x-tapTarget.x,p.z-tapTarget.z)<0.35) tapMoving=false;
+}
+
+/* ══════════════════════════════════════════
+   MOUSE
+══════════════════════════════════════════ */
+let mouseDown=false, mouseDragX=0, mouseDragged=false;
+function setupMouse(){
+  canvas.addEventListener('mousedown',e=>{
+    if(e.button!==0) return;
+    mouseDown=true; mouseDragX=e.clientX; mouseDragged=false;
+    canvas.classList.add('dragging');
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!mouseDown) return;
+    const dx=e.clientX-mouseDragX;
+    if(Math.abs(dx)>4){ mouseDragged=true; cameraYaw+=dx*0.007; mouseDragX=e.clientX; showCamHint(); }
+  });
+  window.addEventListener('mouseup',e=>{
+    if(e.button!==0) return;
+    canvas.classList.remove('dragging');
+    if(!mouseDragged) triggerMove(e.clientX,e.clientY);
+    mouseDown=false; mouseDragged=false;
+  });
+}
+
+/* ══════════════════════════════════════════
+   TOUCH
+══════════════════════════════════════════ */
+let touchStartX=0,touchStartY=0,touchLastX=0,touchMoved=false;
+function setupTouch(){
+  if('ontouchstart' in window||navigator.maxTouchPoints>0)
+    document.body.classList.add('touch-device');
+  canvas.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===1){ touchStartX=touchLastX=e.touches[0].clientX; touchStartY=e.touches[0].clientY; touchMoved=false; }
+    else if(e.touches.length===2){ touchLastX=(e.touches[0].clientX+e.touches[1].clientX)/2; touchMoved=true; }
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){ const cx=(e.touches[0].clientX+e.touches[1].clientX)/2; cameraYaw+=(cx-touchLastX)*0.008; touchLastX=cx; showCamHint(); return; }
+    if(e.touches.length===1){
+      const dx=e.touches[0].clientX-touchStartX,dy=e.touches[0].clientY-touchStartY;
+      if(Math.hypot(dx,dy)>8) touchMoved=true;
+      if(touchMoved&&Math.abs(dx)>Math.abs(dy)*1.1){ cameraYaw+=(e.touches[0].clientX-touchLastX)*0.008; showCamHint(); }
+      touchLastX=e.touches[0].clientX;
+    }
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{
+    e.preventDefault();
+    if(!touchMoved) triggerMove(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+  },{passive:false});
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+function onResize(){
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight);
+  camera.aspect=canvas.clientWidth/canvas.clientHeight;
+  camera.updateProjectionMatrix();
+}
+
+function init(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x8EC8E8);
+  scene.fog=new THREE.Fog(0x8EC8E8,20,48);
+
+  camera=new THREE.PerspectiveCamera(60,canvas.clientWidth/canvas.clientHeight,0.1,100);
+
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+  clock=new THREE.Clock();
+
+  const sun=new THREE.DirectionalLight(0xFFE4A0,1.4);
+  sun.position.set(8,14,6); sun.castShadow=true;
+  sun.shadow.mapSize.set(1024,1024);
+  Object.assign(sun.shadow.camera,{near:.5,far:65,left:-24,right:24,top:24,bottom:-24});
+  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x88AACC,0.7));
+
+  buildWater();
+  buildIsland();
+  buildPlayer();
+
+  window.addEventListener('keydown',e=>{
+    keys[e.code]=true;
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown'].includes(e.key)) e.preventDefault();
+  });
+  window.addEventListener('keyup',e=>{ keys[e.code]=false; });
+  window.addEventListener('resize',onResize);
+
+  setupMouse();
+  setupTouch();
+  loadBest();
+  canvas.focus();
+  animate();
+}
+
+/* ══════════════════════════════════════════
+   ANIMATE
+══════════════════════════════════════════ */
+let t=0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  t+=dt;
+  if(running) elapsed+=dt;
+
+  movePlayer(dt);
+  updateTapMove(dt);
+  checkCollect();
+  if(running) tmEl.textContent=fmtTime(elapsed);
+
+  gems.forEach((g,i)=>{
+    if(!g.userData.collected){
+      g.rotation.y=t*2+i;
+      g.position.y=islandH(g.position.x,g.position.z)+0.52+Math.sin(t*2+i*1.3)*0.12;
+    }
+  });
+
+  trees.forEach((tr,i)=>{ tr.rotation.y=Math.sin(t*0.6+i*0.8)*0.04; });
+
+  if(waterMesh) waterMesh.material.color.setHSL(0.567+Math.sin(t*0.25)*0.012,0.65,0.42+Math.sin(t*0.7)*0.025);
+
+  updateCamera();
+  renderer.render(scene,camera);
+}
+
+startBtn.onclick=startGame;
+init();
+</script>
+</body>
+</html>
