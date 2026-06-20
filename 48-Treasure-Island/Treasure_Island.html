@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>夏日小岛</title>
+<title>宝藏岛 · Treasure Island</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
@@ -49,22 +49,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   <canvas id="gc" tabindex="0"></canvas>
   <div id="ui">
     <div id="hud">
-      <div class="hud-box" id="score-box">宝石 <span id="sc">0 / 10</span></div>
-      <div class="hud-box" id="timer-box">用时 <span id="tm">0.0 s</span></div>
-      <div class="hud-box hidden" id="best-box">最佳 <span id="best-val">--</span></div>
+      <div class="hud-box" id="score-box">宝石 Gems <span id="sc">0 / 10</span></div>
+      <div class="hud-box" id="timer-box">用时 Time <span id="tm">0.0 s</span></div>
+      <div class="hud-box hidden" id="best-box">最佳 Best <span id="best-val">--</span></div>
     </div>
   </div>
   <div id="overlay">
-    <h1>🌴 夏日小岛</h1>
-    <p>收集岛上所有 10 颗宝石，计时开始！<br>
-       WASD / 方向键 移动 · PgUp/PgDn 旋转视角<br>
-       鼠标点击移动 · 拖拽旋转视角<br>
-       触屏点击移动 · 横滑旋转视角</p>
+    <h1>🌴 宝藏岛 · Treasure Island</h1>
+    <p>收集所有 10 颗宝石，计时开始！<br><span style="font-size:0.85em;opacity:0.75">Collect all 10 gems — timer starts on play!</span><br><br>WASD / 方向键 移动 Move · PgUp/PgDn 旋转视角 Rotate View<br>鼠标点击移动 Click to Move · 拖拽旋转 Drag to Rotate<br>触屏点击移动 Tap to Move · 横滑旋转 Swipe to Rotate</p>
     <div class="record-line" id="overlay-best" style="display:none"></div>
-    <button id="startBtn">开始游戏</button>
+    <button id="startBtn">开始游戏 Start</button>
   </div>
-  <div id="controls">WASD/方向键 移动 · PgUp/PgDn 旋转 · 鼠标拖拽旋转/点击移动</div>
-  <div id="cam-hint">◀ 旋转视角 ▶</div>
+  <div id="controls">WASD/方向键 Move · PgUp/PgDn 旋转Rotate · 鼠标拖拽Drag to rotate · 点击Click to move</div>
+  <div id="cam-hint">◀ 旋转 Rotate ▶</div>
   <div id="click-ripple"></div>
 </div>
 
@@ -108,8 +105,8 @@ let camHintTimer = null;
     • saddle depressions (negative lobe between positives)
     • varied coastlines (lobes close to edge push land outward)
 */
-const GRID_R  = 11;   // half-size of the height grid (world units)
-const WALK_R  = 8.2;  // hard walkable boundary radius
+const GRID_R  = 13;   // half-size of the height grid (world units)
+const WALK_R  = 9.5;  // hard walkable boundary radius
 const GRID_N  = 60;   // grid subdivisions per axis (60×60 quads)
 let   lobeData = [];  // [{cx,cz,amp,sigma}]  amp can be negative
 
@@ -134,7 +131,7 @@ function loadBest(){
     bestBox.classList.remove('hidden');
     bestVal.textContent=fmtTime(v);
     overlayBest.style.display='';
-    overlayBest.textContent='🏆 最佳记录：'+fmtTime(v);
+    overlayBest.textContent='🏆 最佳记录 Best: '+fmtTime(v);
   }
 }
 function saveBest(t){
@@ -151,15 +148,25 @@ function saveBest(t){
    islandH(x,z) → surface Y at world (x,z)
    taper(r)     → 0..1 smooth island boundary
 ══════════════════════════════════════════ */
-function taper(r){
-  // smooth step that reaches 0 at GRID_R
-  const t = Math.max(0, 1 - r / GRID_R);
+// Per-round coastline noise seeds (8 harmonics, set in generateLobes)
+let coastNoise = [];
+
+function taper(r, angle){
+  // Irregular coastline: effective radius varies by angle
+  let nr = 1.0;
+  for(let i=0;i<coastNoise.length;i++){
+    const n = coastNoise[i];
+    nr += n.amp * Math.sin(n.freq * angle + n.phase);
+  }
+  const effR = GRID_R * Math.max(0.72, Math.min(1.18, nr));
+  const t = Math.max(0, 1 - r / effR);
   return t * t * (3 - 2*t);   // smoothstep
 }
 
 function islandH(x,z){
   const r = Math.hypot(x,z);
-  const tp = taper(r);
+  const angle = Math.atan2(z,x);
+  const tp = taper(r, angle);
   if(tp <= 0) return 0;
   let h = 0;
   for(const l of lobeData){
@@ -170,8 +177,11 @@ function islandH(x,z){
 }
 
 // Is a point inside the walkable island?
+// Use height field: above sea level (after sink) means on land
 function onIsland(x,z,margin=0){
-  return Math.hypot(x,z) < WALK_R - margin;
+  if(Math.hypot(x,z) > GRID_R) return false;
+  // margin>0 means we want to be margin units inside shore
+  return islandH(x,z) > 0.28 + margin * 0.12;
 }
 
 /* ══════════════════════════════════════════
@@ -185,17 +195,17 @@ function generateLobes(){
   lobeData = [];
 
   // Always one large central lobe (the main island body)
-  lobeData.push({ cx:0, cz:0, amp: rand(1.0,2.0), sigma: rand(3.5,5.5) });
+  lobeData.push({ cx:0, cz:0, amp: rand(1.2,2.2), sigma: rand(5.0,7.5) });
 
   // 0-3 extra lobes placed within the island radius
   const extras = randInt(0,3);
   for(let i=0;i<extras;i++){
     const a = rand(0, Math.PI*2);
-    const d = rand(1.5, 5.0);          // offset from centre
+    const d = rand(2.0, 7.0);          // offset from centre
     const cx = Math.cos(a)*d;
     const cz = Math.sin(a)*d;
     const amp   = rand(0.8, 2.0);       // positive → hill
-    const sigma = rand(2.0, 4.5);
+    const sigma = rand(3.0, 6.0);
     lobeData.push({ cx, cz, amp, sigma });
   }
 
@@ -211,6 +221,17 @@ function generateLobes(){
       sigma: rand(1.5, 3.0)
     });
   }
+
+  // Coastline irregularity: random angular harmonics
+  coastNoise = [];
+  const harmonics = [2, 3, 4, 5, 7, 9, 11, 13];
+  for(const freq of harmonics){
+    coastNoise.push({
+      freq,
+      amp:   rand(0.02, 0.10) / Math.sqrt(freq), // higher freq = weaker
+      phase: rand(0, Math.PI*2)
+    });
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -219,38 +240,38 @@ function generateLobes(){
    displace each vertex upward by islandH().
    Vertex colour: grass/sand by height+radius.
 ══════════════════════════════════════════ */
+// Sea level is Y=0. Island mesh is sunk so its tapered shore dips below sea.
+const ISLAND_SINK = 0.30;
+
 function buildIslandMesh(){
   const W = GRID_R*2, segs = GRID_N;
   const geo = new THREE.PlaneGeometry(W, W, segs, segs);
-  // PlaneGeometry is in XY, rotate to lie flat in XZ
   geo.rotateX(-Math.PI/2);
 
   const pos = geo.attributes.position;
   const cnt = pos.count;
 
-  // Displace Y
+  // Displace Y: subtract ISLAND_SINK so shore edge goes below Y=0 (sea level)
   for(let i=0;i<cnt;i++){
     const x = pos.getX(i);
     const z = pos.getZ(i);
-    pos.setY(i, islandH(x,z));
+    pos.setY(i, islandH(x,z) - ISLAND_SINK);
   }
   pos.needsUpdate = true;
   geo.computeVertexNormals();
 
-  // Vertex colours
+  // Vertex colours keyed on height above sea (Y=0)
   const colors = new Float32Array(cnt*3);
   for(let i=0;i<cnt;i++){
     const x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
-    const r = Math.hypot(x,z)/WALK_R;
-    // grass hue varies slightly with height for micro-variation
-    const grassR = 0.38 + y*0.04 + rand(-0.02,0.02);
-    const grassG = 0.72 + y*0.02;
-    const grassB = 0.22;
-    // sand near the waterline (low height, outer radius)
-    const sandFactor = Math.max(0, Math.min(1, (r-0.72)/0.26 + (1-y)*0.4 ));
-    colors[i*3  ] = grassR*(1-sandFactor) + 0.91*sandFactor;
-    colors[i*3+1] = grassG*(1-sandFactor) + 0.83*sandFactor;
-    colors[i*3+2] = grassB*(1-sandFactor) + 0.59*sandFactor;
+    // sand near/below waterline, grass well above
+    const sandFactor = Math.max(0, Math.min(1, 1.0 - y * 2.2));
+    const grassR = 0.36 + Math.max(0,y)*0.06;
+    const grassG = 0.70 + Math.max(0,y)*0.03;
+    const grassB = 0.20;
+    colors[i*3  ] = grassR*(1-sandFactor) + 0.90*sandFactor;
+    colors[i*3+1] = grassG*(1-sandFactor) + 0.82*sandFactor;
+    colors[i*3+2] = grassB*(1-sandFactor) + 0.58*sandFactor;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
 
@@ -260,22 +281,13 @@ function buildIslandMesh(){
   scene.add(mesh);
   islandObjects.push(mesh);
 
-  // Sand skirt (low-poly ring around the edge, matches original style)
-  const skirtGeo = new THREE.CylinderGeometry(WALK_R+1.0, WALK_R+2.2, 0.6, 14);
-  const skirtMat = new THREE.MeshLambertMaterial({ color:0xE8D59A });
+  // Underwater plug — entirely below Y=0, never visible above water
+  const skirtGeo = new THREE.CylinderGeometry(WALK_R+0.4, WALK_R+1.4, 1.4, 14);
+  const skirtMat = new THREE.MeshLambertMaterial({ color:0x6A6040 });
   const skirt = new THREE.Mesh(skirtGeo, skirtMat);
-  skirt.position.y = -0.55;
-  skirt.receiveShadow = true;
+  skirt.position.y = -1.0;
   scene.add(skirt);
   islandObjects.push(skirt);
-
-  // Cliff side (dark band below skirt)
-  const cliffGeo = new THREE.CylinderGeometry(WALK_R+0.8, WALK_R+1.4, 1.0, 14);
-  const cliffMat = new THREE.MeshLambertMaterial({ color:0xC8B878 });
-  const cliff = new THREE.Mesh(cliffGeo, cliffMat);
-  cliff.position.y = -1.3;
-  scene.add(cliff);
-  islandObjects.push(cliff);
 }
 
 /* ══════════════════════════════════════════
@@ -288,7 +300,7 @@ function buildWater(){
     new THREE.MeshLambertMaterial({ color:0x3BA0D4 })
   );
   waterMesh.rotation.x = -Math.PI/2;
-  waterMesh.position.y = -1.6;
+  waterMesh.position.y = 0.0;   // sea level
   scene.add(waterMesh);
 }
 
@@ -313,21 +325,21 @@ function buildTree(x,z){
     );
     leaf.position.set(...lPos[i]); leaf.castShadow=true; g.add(leaf);
   }
-  g.position.set(x,hy,z);
+  g.position.set(x,hy-ISLAND_SINK,z);
   g.rotation.y=rand(0,Math.PI*2);
   scene.add(g); trees.push(g); islandObjects.push(g);
 }
 
 function buildTrees(){
-  const count=randInt(8,13);
+  const count=randInt(10,15);
   const used=[];
   let tries=0;
   while(used.length<count && tries<300){
     tries++;
-    const a=rand(0,Math.PI*2), r=rand(2.0,WALK_R-1.5);
+    const a=rand(0,Math.PI*2), r=rand(1.8,WALK_R-0.8);
     const x=Math.cos(a)*r, z=Math.sin(a)*r;
-    if(!onIsland(x,z,1.2)) continue;
-    if(used.every(([px,pz])=>Math.hypot(x-px,z-pz)>2.1)){
+    if(!onIsland(x,z,0.6)) continue;
+    if(used.every(([px,pz])=>Math.hypot(x-px,z-pz)>1.8)){
       buildTree(x,z); used.push([x,z]);
     }
   }
@@ -360,7 +372,7 @@ function buildRock(x,z){
     g.add(rock);
   }
   // Place group at terrain height → rocks sit on surface
-  g.position.set(x, hy, z);
+  g.position.set(x, hy-ISLAND_SINK, z);
   scene.add(g); islandObjects.push(g);
 
   // Register collider
@@ -421,7 +433,7 @@ function makeGem(x,z){
     new THREE.MeshLambertMaterial({color:col})
   );
   ring.rotation.x=Math.PI/2; g.add(ring);
-  g.position.set(x, islandH(x,z)+0.55, z);
+  g.position.set(x, islandH(x,z)-ISLAND_SINK+0.55, z);
   g.userData.collected=false;
   scene.add(g); islandObjects.push(g);
   return g;
@@ -466,13 +478,23 @@ function buildIsland(){
 const PLAYER_R = 0.32;
 
 function resolveCollision(nx, nz){
-  // 1) Island boundary
-  const dist = Math.hypot(nx, nz);
+  // 1) Island boundary — use height field for irregular coast
   let rx=nx, rz=nz;
-  if(dist > WALK_R - PLAYER_R){
+  const dist = Math.hypot(rx,rz);
+  if(dist > WALK_R){
+    // hard outer cap first
     const a=Math.atan2(rz,rx);
     rx=Math.cos(a)*(WALK_R-PLAYER_R);
     rz=Math.sin(a)*(WALK_R-PLAYER_R);
+  } else if(islandH(rx,rz) < 0.22){
+    // height-based: push back toward centre until on land
+    const a=Math.atan2(rz,rx);
+    const step=0.25;
+    for(let s=dist; s>0; s-=step){
+      const tx=Math.cos(a)*s, tz=Math.sin(a)*s;
+      if(islandH(tx,tz) >= 0.22){ rx=tx; rz=tz; break; }
+    }
+    if(islandH(rx,rz)<0.22){ rx=0; rz=0; } // fallback to centre
   }
   // 2) Rock colliders
   for(const c of rockColliders){
@@ -497,7 +519,7 @@ function startGame(){
 
   buildIsland();
 
-  player.position.set(0, islandH(0,0)+0.01, 0);
+  player.position.set(0, islandH(0,0)-ISLAND_SINK+0.01, 0);
   playerAngle=0; player.rotation.y=0;
 
   scEl.textContent='0 / 10';
@@ -511,11 +533,11 @@ function endGame(){
   const isRecord=saveBest(elapsed);
   overlay.style.display='flex';
   overlay.innerHTML=`
-    <h1>🎉 全部收集！</h1>
-    <p>你收集了全部 10 颗宝石！</p>
-    <div class="record-line">${isRecord?'🏆 新记录！':'⏱ 用时：'} ${fmtTime(elapsed)}</div>
-    ${bestTime>0?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">最佳记录：${fmtTime(bestTime)}</p>`:''}
-    <button id="startBtn">再玩一次</button>
+    <h1>🎉 全部收集！All Collected!</h1>
+    <p>你收集了全部 10 颗宝石！<br><span style="font-size:0.85em;opacity:0.75">You found all 10 gems!</span></p>
+    <div class="record-line">${isRecord?'🏆 新记录 New Record！':'⏱ 用时 Time: '} ${fmtTime(elapsed)}</div>
+    ${bestTime>0?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">最佳记录 Best: ${fmtTime(bestTime)}</p>`:''}
+    <button id="startBtn">再玩一次 Play Again</button>
   `;
   document.getElementById('startBtn').onclick=startGame;
 }
@@ -560,7 +582,7 @@ function movePlayer(dt){
     );
     player.position.x=p.x;
     player.position.z=p.z;
-    player.position.y=islandH(p.x,p.z)+0.01;
+    player.position.y=islandH(p.x,p.z)-ISLAND_SINK+0.01;
     tapTarget=null;
   }
 }
@@ -634,7 +656,7 @@ function updateTapMove(dt){
   );
   player.position.x=p.x;
   player.position.z=p.z;
-  player.position.y=islandH(p.x,p.z)+0.01;
+  player.position.y=islandH(p.x,p.z)-ISLAND_SINK+0.01;
   // If collisions prevent reaching target, give up after being stuck
   if(Math.hypot(p.x-tapTarget.x,p.z-tapTarget.z)<0.35) tapMoving=false;
 }
@@ -676,11 +698,11 @@ function setupTouch(){
   },{passive:false});
   canvas.addEventListener('touchmove',e=>{
     e.preventDefault();
-    if(e.touches.length===2){ const cx=(e.touches[0].clientX+e.touches[1].clientX)/2; cameraYaw+=(cx-touchLastX)*0.008; touchLastX=cx; showCamHint(); return; }
+    if(e.touches.length===2){ const cx=(e.touches[0].clientX+e.touches[1].clientX)/2; cameraYaw-=(cx-touchLastX)*0.008; touchLastX=cx; showCamHint(); return; }
     if(e.touches.length===1){
       const dx=e.touches[0].clientX-touchStartX,dy=e.touches[0].clientY-touchStartY;
       if(Math.hypot(dx,dy)>8) touchMoved=true;
-      if(touchMoved&&Math.abs(dx)>Math.abs(dy)*1.1){ cameraYaw+=(e.touches[0].clientX-touchLastX)*0.008; showCamHint(); }
+      if(touchMoved&&Math.abs(dx)>Math.abs(dy)*1.1){ cameraYaw-=(e.touches[0].clientX-touchLastX)*0.008; showCamHint(); }
       touchLastX=e.touches[0].clientX;
     }
   },{passive:false});
@@ -702,7 +724,7 @@ function onResize(){
 function init(){
   scene=new THREE.Scene();
   scene.background=new THREE.Color(0x8EC8E8);
-  scene.fog=new THREE.Fog(0x8EC8E8,20,48);
+  scene.fog=new THREE.Fog(0x8EC8E8,22,50);
 
   camera=new THREE.PerspectiveCamera(60,canvas.clientWidth/canvas.clientHeight,0.1,100);
 
@@ -757,7 +779,7 @@ function animate(){
   gems.forEach((g,i)=>{
     if(!g.userData.collected){
       g.rotation.y=t*2+i;
-      g.position.y=islandH(g.position.x,g.position.z)+0.52+Math.sin(t*2+i*1.3)*0.12;
+      g.position.y=islandH(g.position.x,g.position.z)-ISLAND_SINK+0.52+Math.sin(t*2+i*1.3)*0.12;
     }
   });
 
