@@ -1,8 +1,8 @@
 # [HTML/CSS and JavaScript Games Collection / HTML/CSS 和 JavaScript 游戏合集](https://leoncoolmoon.github.io/html-css-javascript-games/) 🎮
 
-A modernized, decentralized, and Progressive Web App (PWA) collection of 46 interactive games. 🎯🕹
+A modernized, decentralized, and Progressive Web App (PWA) collection of 48 interactive games. 🎯🕹
 
-一个现代化、去中心化的渐进式 Web 应用程序 (PWA) 游戏合集，包含 46 款互动游戏。 🎯🕹
+一个现代化、去中心化的渐进式 Web 应用程序 (PWA) 游戏合集，包含 48 款互动游戏。 🎯🕹
 
 ## Key Features / 主要特性 🚀
 
@@ -74,6 +74,8 @@ The project uses a data-driven approach: / 该项目采用数据驱动的方法�
 | 44 | Simon Says Game | 西蒙说 | Puzzle |
 | 45 | Sliding Puzzle Game | 滑动拼图 | Logic |
 | 46 | Word Square | 单词方块 | Spelling |
+| 47 | Pidan Maze | 皮蛋迷宫 | Arcade |
+| 48 | Treasure Island | 宝藏岛 | Arcade |
 
 ## Forked From
 Original project by [he-is-talha](https://github.com/he-is-talha/html-css-javascript-games).

@@ -1,5 +1,7 @@
 # 🌴 宝藏岛 · Treasure Island
 
+<!-- GAME_META: {"num": "48", "en": {"name": "Treasure Island", "desc": "A low-poly 3D browser game. Collect 10 gems scattered across a procedurally generated island as fast as you can."}, "zh": {"name": "宝藏岛", "desc": "一款低多边形风格的 3D 浏览器小游戏。在随机生成的岛屿上尽快收集 10 颗宝石。"}} -->
+
 一款运行在浏览器中的低多边形风格 3D 小游戏，无需安装，打开即玩。  
 A low-poly 3D browser game — no install needed, just open and play.
 
