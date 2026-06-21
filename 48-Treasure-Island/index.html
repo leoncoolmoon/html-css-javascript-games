@@ -7,14 +7,6 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
-#lang-toggle {
-  position: absolute; top: 14px; left: 18px;
-  background: rgba(0,0,0,.30); color: #fff; border: none;
-  border-radius: 8px; padding: 6px 12px; font-size: 12px;
-  cursor: pointer; font-family: sans-serif; z-index: 100;
-  backdrop-filter: blur(4px);
-}
-#lang-toggle:hover { background: rgba(0,0,0,.45); }
 #wrap { position: relative; width: 100%; height: 100vh; }
 #gc { width:100%; height:100%; display:block; outline:none; touch-action:none; cursor:crosshair; }
 #gc.dragging { cursor:grab; }
@@ -23,11 +15,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55);
 }
-#hud { display:flex; justify-content:flex-end; align-items:flex-start; padding:14px 18px; gap:8px; flex-wrap:wrap; }
-.hud-box { background:rgba(0,0,0,.30); border-radius:12px; padding:6px 14px; font-size:clamp(11px,2.2vw,13px); font-weight:500; backdrop-filter:blur(4px); }
-.hud-box span { font-size:clamp(17px,3.8vw,22px); font-weight:700; display:block; }
-#best-box { font-size:clamp(10px,2vw,12px); }
-#best-box span { font-size:clamp(14px,3vw,18px); }
+#hud { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 18px; gap:8px; flex-wrap:wrap; }
+.hud-box { background:rgba(0,0,0,.30); border-radius:12px; padding:5px 12px; font-size:clamp(14px,2.8vw,16px); font-weight:500; backdrop-filter:blur(4px); display:flex; align-items:center; gap:4px; }
+.hud-box span { font-size:clamp(16px,3.5vw,20px); font-weight:700; }
+#best-box { font-size:clamp(14px,2.8vw,16px); }
+#best-box span { font-size:clamp(16px,3.5vw,20px); }
 #best-box.hidden { display:none; }
 #overlay {
   position:absolute; inset:0; display:flex; flex-direction:column;
@@ -44,7 +36,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
   transition:transform .1s,box-shadow .1s;
 }
 #overlay button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,160,0,.55); }
-#controls { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:clamp(9px,1.8vw,11px); opacity:.55; color:#fff; pointer-events:none; white-space:nowrap; }
+#controls { position:absolute; bottom:74px; left:50%; transform:translateX(-50%); font-size:clamp(9px,1.8vw,11px); opacity:.55; color:#fff; pointer-events:none; white-space:nowrap; }
 #cam-hint { position:absolute; top:50%; right:10px; transform:translateY(-50%); font-size:11px; opacity:0; color:#fff; pointer-events:none; transition:opacity .35s; writing-mode:vertical-rl; background:rgba(0,0,0,.28); border-radius:8px; padding:8px 4px; }
 #cam-hint.show { opacity:.72; }
 #click-ripple { position:absolute; pointer-events:none; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,200,.9); transform:translate(-50%,-50%) scale(0); transition:transform .3s ease-out,opacity .3s ease-out; opacity:0; }
@@ -55,19 +47,18 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #5BA3C9; }
 <body>
 <div id="wrap">
   <canvas id="gc" tabindex="0"></canvas>
-  <button id="lang-toggle" onclick="toggleLang()">EN</button>
   <div id="ui">
     <div id="hud">
-      <div class="hud-box" id="score-box"><span data-zh="宝石" data-en="Gems">宝石</span> <span id="sc">0 / 10</span></div>
-      <div class="hud-box" id="timer-box"><span data-zh="用时" data-en="Time">用时</span> <span id="tm">0.0 s</span></div>
-      <div class="hud-box hidden" id="best-box"><span data-zh="最佳" data-en="Best">最佳</span> <span id="best-val">--</span></div>
+      <div class="hud-box" id="score-box">💎 <span id="sc">0 / 10</span></div>
+      <div class="hud-box" id="timer-box">⏱ <span id="tm">0</span></div>
+      <div class="hud-box hidden" id="best-box">🥇 <span id="best-val">--</span></div>
     </div>
   </div>
   <div id="overlay">
-    <h1 id="overlay-title">🌴 宝藏岛 · Treasure Island</h1>
-    <p id="overlay-desc">收集所有 10 颗宝石，计时开始！<br><span style="font-size:0.85em;opacity:0.75">Collect all 10 gems — timer starts on play!</span><br><br>WASD / 方向键 移动 Move · PgUp/PgDn 旋转视角 Rotate View<br>鼠标点击移动 Click to Move · 拖拽旋转 Drag to Rotate<br>触屏点击移动 Tap to Move · 横滑旋转 Swipe to Rotate</p>
+    <h1>🌴 宝藏岛 · Treasure Island</h1>
+    <p>收集所有 10 颗宝石，计时开始！<br><span style="font-size:0.85em;opacity:0.75">Collect all 10 gems — timer starts on play!</span><br><br>WASD / 方向键 移动 Move · PgUp/PgDn 旋转视角 Rotate View<br>鼠标点击移动 Click to Move · 拖拽旋转 Drag to Rotate<br>触屏点击移动 Tap to Move · 横滑旋转 Swipe to Rotate</p>
     <div class="record-line" id="overlay-best" style="display:none"></div>
-    <button id="startBtn"><span data-zh="开始游戏" data-en="Start">开始游戏</span></button>
+    <button id="startBtn">开始游戏 Start</button>
   </div>
   <div id="controls">WASD/方向键 Move · PgUp/PgDn 旋转Rotate · 鼠标拖拽Drag to rotate · 点击Click to move</div>
   <div id="cam-hint">◀ 旋转 Rotate ▶</div>
@@ -129,9 +120,10 @@ function showCamHint(){
   camHintTimer = setTimeout(()=>camHint.classList.remove('show'),1100);
 }
 function fmtTime(s){
-  if(s<60) return s.toFixed(1)+' s';
-  const m=Math.floor(s/60);
-  return m+':'+(s%60).toFixed(1).padStart(4,'0');
+  s = Math.floor(s);
+  if(s<60) return s+' s';
+  const m=Math.floor(s/60), sec=s%60;
+  return m+':'+(sec<10?'0':'')+sec;
 }
 function loadBest(){
   const v=parseFloat(localStorage.getItem('island_best')||'0');
@@ -140,7 +132,7 @@ function loadBest(){
     bestBox.classList.remove('hidden');
     bestVal.textContent=fmtTime(v);
     overlayBest.style.display='';
-    overlayBest.textContent='🏆 最佳记录 Best: '+fmtTime(v);
+    overlayBest.textContent='🏆 '+fmtTime(v);
   }
 }
 function saveBest(t){
@@ -250,7 +242,7 @@ function generateLobes(){
    Vertex colour: grass/sand by height+radius.
 ══════════════════════════════════════════ */
 // Sea level is Y=0. Island mesh is sunk so its tapered shore dips below sea.
-const ISLAND_SINK = 0.30;
+const ISLAND_SINK = 0.18;
 
 function buildIslandMesh(){
   const W = GRID_R*2, segs = GRID_N;
@@ -273,14 +265,30 @@ function buildIslandMesh(){
   const colors = new Float32Array(cnt*3);
   for(let i=0;i<cnt;i++){
     const x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
-    // sand near/below waterline, grass well above
-    const sandFactor = Math.max(0, Math.min(1, 1.0 - y * 2.2));
-    const grassR = 0.36 + Math.max(0,y)*0.06;
-    const grassG = 0.70 + Math.max(0,y)*0.03;
-    const grassB = 0.20;
-    colors[i*3  ] = grassR*(1-sandFactor) + 0.90*sandFactor;
-    colors[i*3+1] = grassG*(1-sandFactor) + 0.82*sandFactor;
-    colors[i*3+2] = grassB*(1-sandFactor) + 0.58*sandFactor;
+    // Three colour layers keyed on height above sea (y=0)
+    // Underwater verts are hidden under the water mesh, so we paint them
+    // sand colour — they're invisible anyway, and the sand/sea boundary
+    // is pushed well below y=0 so the irregular shoreline edge blends
+    // smoothly into sand rather than showing an abrupt colour change.
+    //
+    // Layer 1 – deep sub  : y < -0.20  → sand (hidden under water)
+    // Layer 2 – shore     : -0.20 <= y < 0.20 → sand blend
+    // Layer 3 – grass     : y >= 0.20  → green
+    const sanR=0.88, sanG=0.80, sanB=0.54;
+    const graR=0.34+Math.max(0,y)*0.07, graG=0.68+Math.max(0,y)*0.04, graB=0.19;
+    let vr,vg,vb;
+    if(y < 0.20){
+      // sand everywhere near/below waterline — underwater part is hidden
+      vr=sanR; vg=sanG; vb=sanB;
+    } else {
+      const t2 = Math.min(1,(y-0.20)/0.10);
+      vr = sanR*(1-t2)+graR*t2;
+      vg = sanG*(1-t2)+graG*t2;
+      vb = sanB*(1-t2)+graB*t2;
+    }
+    colors[i*3  ] = vr;
+    colors[i*3+1] = vg;
+    colors[i*3+2] = vb;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
 
@@ -302,15 +310,65 @@ function buildIslandMesh(){
 /* ══════════════════════════════════════════
    WATER
 ══════════════════════════════════════════ */
-let waterMesh;
+let waterMesh, waterGeo, waterBaseY;
+const WATER_SEGS = 48;   // grid resolution for wave displacement
+const WATER_R    = 32;   // radius of water plane
+
 function buildWater(){
-  waterMesh = new THREE.Mesh(
-    new THREE.CircleGeometry(30,10),
-    new THREE.MeshLambertMaterial({ color:0x3BA0D4 })
-  );
-  waterMesh.rotation.x = -Math.PI/2;
+  // Use PlaneGeometry (XZ after rotation) with enough verts for waves
+  waterGeo = new THREE.PlaneGeometry(WATER_R*2, WATER_R*2, WATER_SEGS, WATER_SEGS);
+  waterGeo.rotateX(-Math.PI/2);
+
+  // Mask verts outside radius to avoid square outline
+  const pos = waterGeo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), z=pos.getZ(i);
+    if(Math.hypot(x,z) > WATER_R) pos.setY(i, -99); // sink corners below view
+  }
+  pos.needsUpdate=true;
+
+  const mat = new THREE.MeshLambertMaterial({
+    color: 0x2E9BC4,
+    transparent: true,
+    opacity: 0.82
+  });
+  waterMesh = new THREE.Mesh(waterGeo, mat);
   waterMesh.position.y = 0.0;   // sea level
+  waterMesh.receiveShadow = false;
   scene.add(waterMesh);
+}
+
+// Called each frame — displaces water verts for tide + wave effect
+function animateWater(t){
+  if(!waterMesh) return;
+  const pos = waterGeo.attributes.position;
+  const cnt = pos.count;
+
+  // Slow tide: sea level oscillates ±0.04 with a ~20s period
+  const tide = Math.sin(t * 0.31) * 0.04;
+
+  for(let i=0;i<cnt;i++){
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    if(Math.hypot(x,z) > WATER_R) continue; // skip sunken corners
+
+    // Sum of two wave trains at different angles for cross-hatch chop
+    const w1 = Math.sin( x * 0.55 + t * 1.4 ) * Math.cos( z * 0.35 + t * 0.9 );
+    const w2 = Math.sin( x * 0.30 - z * 0.50 + t * 1.8 ) * 0.5;
+    // Shore proximity: dampen waves near island centre, amplify at distance
+    const distFactor = Math.min(1.0, Math.hypot(x,z) / 14.0);
+    const waveH = (w1 + w2) * 0.065 * distFactor;
+
+    pos.setY(i, tide + waveH);
+  }
+  pos.needsUpdate = true;
+
+  // Subtle colour shift with tide
+  waterMesh.material.color.setHSL(
+    0.567 + Math.sin(t*0.20)*0.014,
+    0.68,
+    0.40 + tide * 0.12
+  );
 }
 
 /* ══════════════════════════════════════════
@@ -339,15 +397,21 @@ function buildTree(x,z){
   scene.add(g); trees.push(g); islandObjects.push(g);
 }
 
+// Height above sea level where grass colour fully dominates (sandFactor≈0)
+// Matches sandFactor formula: 1-(y-0.08)*5.5 <= 0  →  y >= 0.08+1/5.5 ≈ 0.262
+const GRASS_H = 0.38;
+
 function buildTrees(){
   const count=randInt(10,15);
   const used=[];
   let tries=0;
   while(used.length<count && tries<300){
     tries++;
-    const a=rand(0,Math.PI*2), r=rand(1.8,WALK_R-0.8);
+    const a=rand(0,Math.PI*2), r=rand(1.2,WALK_R-0.8);
     const x=Math.cos(a)*r, z=Math.sin(a)*r;
-    if(!onIsland(x,z,0.6)) continue;
+    // Only plant where terrain is well above sea level (green zone)
+    const hy=islandH(x,z);
+    if(hy - ISLAND_SINK < GRASS_H) continue;
     if(used.every(([px,pz])=>Math.hypot(x-px,z-pz)>1.8)){
       buildTree(x,z); used.push([x,z]);
     }
@@ -411,16 +475,18 @@ function buildRocks(){
 ══════════════════════════════════════════ */
 function buildPlayer(){
   const g=new THREE.Group();
+  // 2/3 of original size
+  const S=2/3;
   const body=new THREE.Mesh(
-    new THREE.BoxGeometry(0.5,0.7,0.4),
+    new THREE.BoxGeometry(0.5*S, 0.7*S, 0.4*S),
     new THREE.MeshLambertMaterial({color:0xFF6B6B})
   );
-  body.position.y=0.35; body.castShadow=true; g.add(body);
+  body.position.y=0.35*S; body.castShadow=true; g.add(body);
   const head=new THREE.Mesh(
-    new THREE.BoxGeometry(0.4,0.4,0.4),
+    new THREE.BoxGeometry(0.4*S, 0.4*S, 0.4*S),
     new THREE.MeshLambertMaterial({color:0xFFD59E})
   );
-  head.position.y=0.9; head.castShadow=true; g.add(head);
+  head.position.y=0.9*S; head.castShadow=true; g.add(head);
   g.position.set(0,islandH(0,0)+0.01,0);
   scene.add(g); player=g;
 }
@@ -532,7 +598,7 @@ function startGame(){
   playerAngle=0; player.rotation.y=0;
 
   scEl.textContent='0 / 10';
-  tmEl.textContent='0.0 s';
+  tmEl.textContent='0';
   overlay.style.display='none';
   canvas.focus();
 }
@@ -541,14 +607,12 @@ function endGame(){
   running=false;
   const isRecord=saveBest(elapsed);
   overlay.style.display='flex';
-
-  const isEN = currentLang === 'en';
-  overlay.innerHTML = `
-    <h1>${isEN ? '🎉 All Collected!' : '🎉 全部收集！'}</h1>
-    <p>${isEN ? 'You found all 10 gems!' : '你收集了全部 10 颗宝石！'}<br><span style="font-size:0.85em;opacity:0.75">${isEN ? 'Congratulations!' : '恭喜！'}</span></p>
-    <div class="record-line">${isRecord ? (isEN ? '🏆 New Record!' : '🏆 新记录！') : (isEN ? '⏱ Time: ' : '⏱ 用时: ')} ${fmtTime(elapsed)}</div>
-    ${bestTime > 0 ? `<p style="opacity:.7;font-size:13px;margin-bottom:16px">${isEN ? 'Best: ' : '最佳记录: '}${fmtTime(bestTime)}</p>` : ''}
-    <button id="startBtn">${isEN ? 'Play Again' : '再玩一次'}</button>
+  overlay.innerHTML=`
+    <h1>🎉 全部收集！All Collected!</h1>
+    <p>你收集了全部 10 颗宝石！<br><span style="font-size:0.85em;opacity:0.75">You found all 10 gems!</span></p>
+    <div class="record-line">${isRecord?'🏆 New Record!':''} ${fmtTime(elapsed)}</div>
+    ${bestTime>0&&!isRecord?`<p style="opacity:.7;font-size:13px;margin-bottom:16px">🥇 ${fmtTime(bestTime)}</p>`:''}
+    <button id="startBtn">再玩一次 Play Again</button>
   `;
   document.getElementById('startBtn').onclick=startGame;
 }
@@ -735,7 +799,7 @@ function onResize(){
 function init(){
   scene=new THREE.Scene();
   scene.background=new THREE.Color(0x8EC8E8);
-  scene.fog=new THREE.Fog(0x8EC8E8,22,50);
+  scene.fog=new THREE.FogExp2(0x8EC8E8, 0.055);
 
   camera=new THREE.PerspectiveCamera(60,canvas.clientWidth/canvas.clientHeight,0.1,100);
 
@@ -796,43 +860,13 @@ function animate(){
 
   trees.forEach((tr,i)=>{ tr.rotation.y=Math.sin(t*0.6+i*0.8)*0.04; });
 
-  if(waterMesh) waterMesh.material.color.setHSL(0.567+Math.sin(t*0.25)*0.012,0.65,0.42+Math.sin(t*0.7)*0.025);
+  animateWater(t);
 
   updateCamera();
   renderer.render(scene,camera);
 }
 
 startBtn.onclick=startGame;
-
-let currentLang = 'zh';
-function toggleLang() {
-  currentLang = currentLang === 'zh' ? 'en' : 'zh';
-  document.getElementById('lang-toggle').textContent = currentLang === 'zh' ? 'EN' : '中';
-  document.querySelectorAll('[data-zh]').forEach(el => {
-    el.textContent = currentLang === 'zh' ? el.dataset.zh : el.dataset.en;
-  });
-
-  const title = document.getElementById('overlay-title');
-  const desc = document.getElementById('overlay-desc');
-  if (currentLang === 'zh') {
-    title.textContent = '🌴 宝藏岛 · Treasure Island';
-    desc.innerHTML = '收集所有 10 颗宝石，计时开始！<br><span style="font-size:0.85em;opacity:0.75">Collect all 10 gems — timer starts on play!</span><br><br>WASD / 方向键 移动 Move · PgUp/PgDn 旋转视角 Rotate View<br>鼠标点击移动 Click to Move · 拖拽旋转 Drag to Rotate<br>触屏点击移动 Tap to Move · 横滑旋转 Swipe to Rotate';
-  } else {
-    title.textContent = '🌴 Treasure Island';
-    desc.innerHTML = 'Collect all 10 gems — timer starts on play!<br><br>WASD / Arrow Keys: Move<br>PgUp / PgDn: Rotate View<br>Mouse Click: Move · Drag: Rotate<br>Touch Tap: Move · Swipe: Rotate';
-  }
-
-  if (!running && score >= 10) {
-    const isEN = currentLang === 'en';
-    const h1 = overlay.querySelector('h1');
-    const p = overlay.querySelector('p');
-    const recordLine = document.getElementById('overlay-best');
-
-    h1.textContent = isEN ? '🎉 All Collected!' : '🎉 全部收集！';
-    p.innerHTML = isEN ? 'You found all 10 gems!<br><span style="font-size:0.85em;opacity:0.75">Congratulations!</span>' : '你收集了全部 10 颗宝石！<br><span style="font-size:0.85em;opacity:0.75">恭喜！</span>';
-  }
-}
-
 init();
 </script>
 <script src="../share.js" defer></script>
