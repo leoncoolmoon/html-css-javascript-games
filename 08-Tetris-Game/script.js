@@ -94,7 +94,7 @@
       this.lines = 0;
       this.isActive = 0;
       this.curComplete = false;
-      this.speed = 700;
+      this.speed = 1000;
       this.clearTimers();
 
       this.initBoard();
@@ -204,9 +204,10 @@
       var ns = [];
       for (var i = 0; i < this.nextShape.length; i++) {
         ns[i] = this.createSquare(
-          this.nextShape[i][0] + 2,
-          this.nextShape[i][1] + 2,
-          this.nextShapeIndex
+          this.nextShape[i][0] + 1,
+          this.nextShape[i][1] + 1,
+          this.nextShapeIndex,
+          true
         );
         ns[i].style.position = "absolute";
       }
@@ -225,11 +226,14 @@
         this.canvas.appendChild(this.curSqs[k]);
       }
     },
-    createSquare: function (x, y, type) {
+    createSquare: function (x, y, type, isNext) {
       var el = document.createElement("div");
       el.className = "square type" + type;
-      el.style.left = x * this.pSize + "px";
-      el.style.top = y * this.pSize + "px";
+      var size = isNext ? (window.innerWidth <= 480 ? 20 : 25) : this.pSize;
+      el.style.width = size - 1 + "px";
+      el.style.height = size - 1 + "px";
+      el.style.left = x * size + "px";
+      el.style.top = y * size + "px";
       return el;
     },
     removeCur: function () {
@@ -367,9 +371,36 @@
         this.clearTimers();
         this.isActive = 0;
         btn.innerHTML = "▶️";
+        this.showPauseOverlay();
       } else {
+        this.removePauseOverlay();
         this.play();
         btn.innerHTML = "⏸️";
+      }
+    },
+    showPauseOverlay: function () {
+      if (!document.getElementById("pause-overlay")) {
+        var overlay = document.createElement("div");
+        overlay.id = "pause-overlay";
+        overlay.innerHTML = "<h1 data-en=\"PAUSED\" data-zh=\"暂停\">PAUSED</h1>";
+        overlay.style.position = "absolute";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0,0,0,0.5)";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.zIndex = "100";
+        this.canvas.appendChild(overlay);
+        updateTexts();
+      }
+    },
+    removePauseOverlay: function () {
+      var overlay = document.getElementById("pause-overlay");
+      if (overlay) {
+        this.canvas.removeChild(overlay);
       }
     },
     clearTimers: function () {
