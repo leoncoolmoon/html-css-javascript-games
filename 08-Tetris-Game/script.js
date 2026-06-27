@@ -4,9 +4,9 @@
     board: [],
     boardDiv: null,
     canvas: null,
-    pSize: 20,
-    canvasHeight: 440,
-    canvasWidth: 200,
+    pSize: 30,
+    canvasHeight: 600,
+    canvasWidth: 300,
     boardHeight: 0,
     boardWidth: 0,
     spawnX: 4,
@@ -208,6 +208,7 @@
           this.nextShape[i][1] + 2,
           this.nextShapeIndex
         );
+        ns[i].style.position = "absolute";
       }
       this.nextShapeDisplay.innerHTML = "";
       for (var k = 0; k < ns.length; k++) {
