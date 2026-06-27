@@ -83,11 +83,27 @@
     init: function () {
       isStart = true;
       this.canvas = document.getElementById("canvas");
+      this.canvas.innerHTML = "";
+      this.sqs = [];
+      this.board = [];
+      this.curSqs = [];
+      this.score = 0;
+      this.level = 1;
+      this.time = 0;
+      this.lines = 0;
+      this.isActive = 0;
+      this.curComplete = false;
+      this.speed = 700;
+      this.clearTimers();
+
       this.initBoard();
       this.initInfo();
       this.initLevelScores();
       this.initShapes();
-      this.bindKeyEvents();
+      if (!this.keysBound) {
+        this.bindKeyEvents();
+        this.keysBound = true;
+      }
       this.play();
     },
     initBoard: function () {
@@ -102,17 +118,13 @@
     initInfo: function () {
       this.nextShapeDisplay = document.getElementById("next_shape");
       this.levelDisplay = document
-        .getElementById("level")
-        .getElementsByTagName("span")[0];
+        .querySelector("#level .val");
       this.timeDisplay = document
-        .getElementById("time")
-        .getElementsByTagName("span")[0];
+        .querySelector("#time .val");
       this.scoreDisplay = document
-        .getElementById("score")
-        .getElementsByTagName("span")[0];
+        .querySelector("#score .val");
       this.linesDisplay = document
-        .getElementById("lines")
-        .getElementsByTagName("span")[0];
+        .querySelector("#lines .val");
       this.setInfo("time");
       this.setInfo("score");
       this.setInfo("level");
@@ -317,9 +329,11 @@
     gameOver: function () {
       this.clearTimers();
       isStart = false;
-      this.canvas.innerHTML = "<h1>GAME OVER</h1>";
+      this.canvas.innerHTML = "<h1 data-en=\"GAME OVER\" data-zh=\"游戏结束\">GAME OVER</h1>";
       stopVirtualKeyboard();
-      btn.style.display = "none";
+      btn.innerHTML = "🔄";
+      btn.style.display = "block";
+      updateTexts();
     },
     play: function () {
       var me = this;
@@ -587,15 +601,35 @@
   };
   const btn = document.querySelector("#start");
   btn.addEventListener("click", function () {
-    //btn.style.display = "none";
     if (!isStart) {
       tetris.init();
       btn.innerHTML = "⏯️";
     } else {
       tetris.togglePause();
     }
-
   });
+
+  window.keyUp = keyUp;
+  window.keyDown = keyDown;
+  window.keyLeft = keyLeft;
+  window.keyRight = keyRight;
+
+  let currentLang = localStorage.getItem('tetris-lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+
+  function updateTexts() {
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.innerText = el.getAttribute(`data-${currentLang}`);
+    });
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('tetris-lang', currentLang);
+    updateTexts();
+  });
+
+  window.updateTexts = updateTexts;
+  updateTexts();
 })();
 
 if (!Array.prototype.eachdo) {

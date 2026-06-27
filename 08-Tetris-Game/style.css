@@ -4,13 +4,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vmin;
+  min-height: 100vh;
+  margin: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 #tetris {
-  width: 360px;
+  max-width: 95vw;
   border: 1px solid black;
-  padding: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  background: #000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 #canvas {
@@ -19,6 +27,7 @@ body {
   background-color: #000;
   position: relative;
   color: #fff;
+  border: 1px solid #333;
 }
 
 #canvas h1 {
@@ -34,13 +43,6 @@ body {
   position: absolute;
 }
 
-#start {
-  background: black;
-  text-shadow: 0px 0px 4px #efe7e7;
-  border: none;
-  cursor: pointer;
-  font-size: 28px;
-}
 
 @keyframes blink {
   to {
@@ -98,8 +100,49 @@ body {
 #info {
   background-color: #000;
   color: #fff;
-  float: right;
   width: 110px;
-  height: 420px;
+  height: 440px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font-family: Arial, sans-serif;
+}
+
+#info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+#start {
+  background: #444;
+  color: white;
+  text-shadow: 0px 0px 4px #000;
+  border: 1px solid #666;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 5px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+#start:active {
+  background: #666;
+}
+
+@media (max-width: 350px) {
+  #tetris {
+    flex-direction: column-reverse;
+    align-items: center;
+  }
+  #info {
+    height: auto;
+    width: 200px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  #next_shape {
+    display: none;
+  }
 }

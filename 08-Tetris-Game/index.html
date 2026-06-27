@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <title>Tetris Game</title>
     <meta name="viewport" content="user-scalable=no maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="style.css" />
@@ -18,12 +19,13 @@
     <div id="tetris">
       <div id="info">
         <div id="next_shape"></div>
-        <p id="level">Level: <span></span></p>
-        <p id="lines">Lines: <span></span></p>
-        <p id="score">Score: <span></span></p>
-        <p id="time">Time: <span></span></p>
+        <p id="level"><span data-en="Level" data-zh="等级">Level</span>: <span class="val"></span></p>
+        <p id="lines"><span data-en="Lines" data-zh="行数">Lines</span>: <span class="val"></span></p>
+        <p id="score"><span data-en="Score" data-zh="分数">Score</span>: <span class="val"></span></p>
+        <p id="time"><span data-en="Time" data-zh="时间">Time</span>: <span class="val"></span></p>
         <button id="start">▶️</button>
-        <p class="red">Press the Esc button to pause<span></span></p>
+        <button id="lang-toggle" style="background: #444; color: white; border: 1px solid #666; cursor: pointer; margin-top: 10px; border-radius: 4px; padding: 5px;">EN/中</button>
+        <p class="red" data-en="Press the Esc button to pause" data-zh="按下 Esc 键暂停">Press the Esc button to pause<span></span></p>
       </div>
       <div id="canvas"></div>
     </div>
