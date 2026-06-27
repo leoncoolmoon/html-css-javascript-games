@@ -82,6 +82,7 @@
 
     init: function () {
       isStart = true;
+      btn.innerHTML = "⏸️";
       this.canvas = document.getElementById("canvas");
       this.canvas.innerHTML = "";
       this.sqs = [];
@@ -364,8 +365,10 @@
       if (this.isActive === 1) {
         this.clearTimers();
         this.isActive = 0;
+        btn.innerHTML = "▶️";
       } else {
         this.play();
+        btn.innerHTML = "⏸️";
       }
     },
     clearTimers: function () {
@@ -603,7 +606,6 @@
   btn.addEventListener("click", function () {
     if (!isStart) {
       tetris.init();
-      btn.innerHTML = "⏯️";
     } else {
       tetris.togglePause();
     }
@@ -630,6 +632,10 @@
 
   window.updateTexts = updateTexts;
   updateTexts();
+
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.querySelector('.red').style.display = 'none';
+  }
 })();
 
 if (!Array.prototype.eachdo) {

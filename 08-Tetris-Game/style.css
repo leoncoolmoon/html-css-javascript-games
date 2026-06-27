@@ -130,17 +130,19 @@ body {
   background: #666;
 }
 
-@media (max-width: 350px) {
+@media (max-width: 480px) {
   #tetris {
     flex-direction: column-reverse;
     align-items: center;
+    gap: 10px;
   }
   #info {
     height: auto;
     width: 200px;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 10px;
   }
   #next_shape {
     display: none;
