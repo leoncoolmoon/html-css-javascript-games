@@ -669,14 +669,18 @@
     document.querySelector('.red').style.display = 'none';
   }
 
-  const ctrlToggle = document.getElementById('ctrl-toggle');
+  const ctrlToggle = document.createElement('button');
+  ctrlToggle.id = 'ctrl-toggle-fixed';
+  ctrlToggle.innerHTML = '🎮';
+  document.body.appendChild(ctrlToggle);
+
   let ctrlsVisible = true;
   ctrlToggle.addEventListener('click', () => {
     ctrlsVisible = !ctrlsVisible;
     const vkb = document.getElementById('virtual_keybroad');
     const octl = document.getElementById('oriantationCtl');
-    if (vkb) vkb.style.visibility = ctrlsVisible ? 'visible' : 'hidden';
-    if (octl) octl.style.visibility = ctrlsVisible ? 'visible' : 'hidden';
+    if (vkb) vkb.style.display = ctrlsVisible ? 'block' : 'none';
+    if (octl) octl.style.display = ctrlsVisible ? 'flex' : 'none';
     ctrlToggle.style.opacity = ctrlsVisible ? '1' : '0.5';
   });
 })();

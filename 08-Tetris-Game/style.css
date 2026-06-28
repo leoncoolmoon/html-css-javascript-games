@@ -133,14 +133,49 @@ body {
   background: #666;
 }
 
+#ctrl-toggle-fixed {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  z-index: 10002;
+  background: rgba(68, 68, 68, 0.9);
+  color: white;
+  border: 1px solid #888;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
 @media (max-width: 480px) {
   #tetris {
     flex-direction: column-reverse;
     align-items: center;
-    gap: 10px;
-    transform: scale(0.85);
-    transform-origin: center;
-    margin-top: -50px;
+    gap: 5px;
+    transform: scale(0.75);
+    transform-origin: center top;
+    margin-top: 0;
+  }
+
+  .virtual_keybroad {
+    top: auto !important;
+    bottom: 10px !important;
+    height: auto !important;
+  }
+
+  #oriantationCtl {
+    top: auto !important;
+    bottom: 10px !important;
+  }
+
+  .arrow_button {
+    padding: 5px !important;
+    margin: 0 2px !important;
   }
   #info {
     height: auto;
