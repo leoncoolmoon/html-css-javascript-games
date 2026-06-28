@@ -668,6 +668,17 @@
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     document.querySelector('.red').style.display = 'none';
   }
+
+  const ctrlToggle = document.getElementById('ctrl-toggle');
+  let ctrlsVisible = true;
+  ctrlToggle.addEventListener('click', () => {
+    ctrlsVisible = !ctrlsVisible;
+    const vkb = document.getElementById('virtual_keybroad');
+    const octl = document.getElementById('oriantationCtl');
+    if (vkb) vkb.style.visibility = ctrlsVisible ? 'visible' : 'hidden';
+    if (octl) octl.style.visibility = ctrlsVisible ? 'visible' : 'hidden';
+    ctrlToggle.style.opacity = ctrlsVisible ? '1' : '0.5';
+  });
 })();
 
 if (!Array.prototype.eachdo) {
