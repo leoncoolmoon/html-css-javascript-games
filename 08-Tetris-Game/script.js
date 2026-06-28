@@ -4,9 +4,9 @@
     board: [],
     boardDiv: null,
     canvas: null,
-    pSize: 20,
-    canvasHeight: 440,
-    canvasWidth: 200,
+    pSize: 30,
+    canvasHeight: 600,
+    canvasWidth: 300,
     boardHeight: 0,
     boardWidth: 0,
     spawnX: 4,
@@ -82,12 +82,29 @@
 
     init: function () {
       isStart = true;
+      btn.innerHTML = "⏸️";
       this.canvas = document.getElementById("canvas");
+      this.canvas.innerHTML = "";
+      this.sqs = [];
+      this.board = [];
+      this.curSqs = [];
+      this.score = 0;
+      this.level = 1;
+      this.time = 0;
+      this.lines = 0;
+      this.isActive = 0;
+      this.curComplete = false;
+      this.speed = 1000;
+      this.clearTimers();
+
       this.initBoard();
       this.initInfo();
       this.initLevelScores();
       this.initShapes();
-      this.bindKeyEvents();
+      if (!this.keysBound) {
+        this.bindKeyEvents();
+        this.keysBound = true;
+      }
       this.play();
     },
     initBoard: function () {
@@ -102,17 +119,13 @@
     initInfo: function () {
       this.nextShapeDisplay = document.getElementById("next_shape");
       this.levelDisplay = document
-        .getElementById("level")
-        .getElementsByTagName("span")[0];
+        .querySelector("#level .val");
       this.timeDisplay = document
-        .getElementById("time")
-        .getElementsByTagName("span")[0];
+        .querySelector("#time .val");
       this.scoreDisplay = document
-        .getElementById("score")
-        .getElementsByTagName("span")[0];
+        .querySelector("#score .val");
       this.linesDisplay = document
-        .getElementById("lines")
-        .getElementsByTagName("span")[0];
+        .querySelector("#lines .val");
       this.setInfo("time");
       this.setInfo("score");
       this.setInfo("level");
@@ -191,10 +204,12 @@
       var ns = [];
       for (var i = 0; i < this.nextShape.length; i++) {
         ns[i] = this.createSquare(
-          this.nextShape[i][0] + 2,
-          this.nextShape[i][1] + 2,
-          this.nextShapeIndex
+          this.nextShape[i][0] + 1,
+          this.nextShape[i][1] + 1,
+          this.nextShapeIndex,
+          true
         );
+        ns[i].style.position = "absolute";
       }
       this.nextShapeDisplay.innerHTML = "";
       for (var k = 0; k < ns.length; k++) {
@@ -211,11 +226,14 @@
         this.canvas.appendChild(this.curSqs[k]);
       }
     },
-    createSquare: function (x, y, type) {
+    createSquare: function (x, y, type, isNext) {
       var el = document.createElement("div");
       el.className = "square type" + type;
-      el.style.left = x * this.pSize + "px";
-      el.style.top = y * this.pSize + "px";
+      var size = isNext ? (window.innerWidth <= 480 ? 20 : 25) : this.pSize;
+      el.style.width = size - 1 + "px";
+      el.style.height = size - 1 + "px";
+      el.style.left = x * size + "px";
+      el.style.top = y * size + "px";
       return el;
     },
     removeCur: function () {
@@ -317,9 +335,11 @@
     gameOver: function () {
       this.clearTimers();
       isStart = false;
-      this.canvas.innerHTML = "<h1>GAME OVER</h1>";
+      this.canvas.innerHTML = "<h1 data-en=\"GAME OVER\" data-zh=\"游戏结束\">GAME OVER</h1>";
       stopVirtualKeyboard();
-      btn.style.display = "none";
+      btn.innerHTML = "🔄";
+      btn.style.display = "block";
+      updateTexts();
     },
     play: function () {
       var me = this;
@@ -350,8 +370,37 @@
       if (this.isActive === 1) {
         this.clearTimers();
         this.isActive = 0;
+        btn.innerHTML = "▶️";
+        this.showPauseOverlay();
       } else {
+        this.removePauseOverlay();
         this.play();
+        btn.innerHTML = "⏸️";
+      }
+    },
+    showPauseOverlay: function () {
+      if (!document.getElementById("pause-overlay")) {
+        var overlay = document.createElement("div");
+        overlay.id = "pause-overlay";
+        overlay.innerHTML = "<h1 data-en=\"PAUSED\" data-zh=\"暂停\">PAUSED</h1>";
+        overlay.style.position = "absolute";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0,0,0,0.5)";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.zIndex = "100";
+        this.canvas.appendChild(overlay);
+        updateTexts();
+      }
+    },
+    removePauseOverlay: function () {
+      var overlay = document.getElementById("pause-overlay");
+      if (overlay) {
+        this.canvas.removeChild(overlay);
       }
     },
     clearTimers: function () {
@@ -587,14 +636,52 @@
   };
   const btn = document.querySelector("#start");
   btn.addEventListener("click", function () {
-    //btn.style.display = "none";
     if (!isStart) {
       tetris.init();
-      btn.innerHTML = "⏯️";
     } else {
       tetris.togglePause();
     }
+  });
 
+  window.keyUp = keyUp;
+  window.keyDown = keyDown;
+  window.keyLeft = keyLeft;
+  window.keyRight = keyRight;
+
+  let currentLang = localStorage.getItem('tetris-lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+
+  function updateTexts() {
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.innerText = el.getAttribute(`data-${currentLang}`);
+    });
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('tetris-lang', currentLang);
+    updateTexts();
+  });
+
+  window.updateTexts = updateTexts;
+  updateTexts();
+
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.querySelector('.red').style.display = 'none';
+  }
+
+  const ctrlToggle = document.createElement('button');
+  ctrlToggle.id = 'ctrl-toggle-fixed';
+  ctrlToggle.innerHTML = '🎮';
+  document.body.appendChild(ctrlToggle);
+
+  let ctrlsVisible = true;
+  ctrlToggle.addEventListener('click', () => {
+    ctrlsVisible = !ctrlsVisible;
+    const vkb = document.getElementById('virtual_keybroad');
+    const octl = document.getElementById('oriantationCtl');
+    if (vkb) vkb.style.display = ctrlsVisible ? 'block' : 'none';
+    if (octl) octl.style.display = ctrlsVisible ? 'flex' : 'none';
+    ctrlToggle.style.opacity = ctrlsVisible ? '1' : '0.5';
   });
 })();
 
