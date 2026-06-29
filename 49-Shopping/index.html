@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Aussie Money Shop 🛒</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito','Segoe UI',Arial,sans-serif;min-height:100vh;color:#37474F;
+  user-select:none;-webkit-user-select:none;transition:background .5s}
+body.mode-buyer{background:linear-gradient(150deg,#B3E5FC 0%,#E8F5E9 55%,#FFF9C4 100%)}
+body.mode-seller{background:linear-gradient(150deg,#FFE0B2 0%,#FFF9C4 55%,#F3E5F5 100%)}
+#lang-bar{display:flex;justify-content:flex-end;gap:6px;padding:8px 14px 3px}
+.lbtn{background:rgba(255,255,255,.85);border:2px solid #B0BEC5;border-radius:50px;
+  padding:5px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.lbtn.on{background:#0277BD;color:#fff;border-color:#0277BD}
+header{text-align:center;padding:12px 14px 10px;border-radius:0 0 28px 28px;
+  box-shadow:0 4px 18px rgba(0,0,0,.22);transition:background .5s}
+body.mode-buyer  header{background:linear-gradient(100deg,#01579B,#0288D1,#039BE5)}
+body.mode-seller header{background:linear-gradient(100deg,#E65100,#F57C00,#FFA726)}
+header h1{font-size:clamp(20px,5.5vw,32px);color:#fff;font-weight:900;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+header p{font-size:clamp(11px,2.8vw,14px);color:rgba(255,255,255,.8);margin-top:3px}
+#mode-bar{display:flex;justify-content:center;padding:10px 16px 4px}
+.mode-track{display:flex;background:#E0E0E0;border-radius:50px;padding:3px;gap:3px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.12)}
+.mode-btn{padding:8px 18px;border:none;border-radius:50px;font-family:inherit;
+  font-size:clamp(12px,3vw,15px);font-weight:800;cursor:pointer;
+  background:transparent;color:#888;transition:all .25s;white-space:nowrap}
+body.mode-buyer  .mode-btn[data-m="buyer"].on{background:linear-gradient(135deg,#0288D1,#01579B);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+body.mode-seller .mode-btn[data-m="seller"].on{background:linear-gradient(135deg,#F57C00,#E65100);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+#score-bar{display:flex;justify-content:center;gap:24px;padding:6px 16px 4px;font-size:clamp(13px,3.5vw,16px);font-weight:800}
+.sc{display:flex;align-items:center;gap:5px}
+.wrap{display:grid;grid-template-columns:1fr;gap:12px;padding:12px 12px 28px;max-width:960px;margin:0 auto}
+@media(min-width:680px){.wrap{grid-template-columns:1fr 1fr}.full{grid-column:1/-1}}
+.card{background:#fff;border-radius:20px;padding:14px 15px 16px;box-shadow:0 3px 16px rgba(0,0,0,.09)}
+.card-hd{font-size:clamp(14px,3.5vw,17px);font-weight:800;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+#prod-card{background:linear-gradient(135deg,#FFF9C4,#fff)}
+.prod-row{display:flex;align-items:center;gap:14px}
+#prod-canvas{border-radius:16px;border:3px solid #F9A825;flex-shrink:0;display:block}
+.prod-name{font-size:clamp(15px,4vw,22px);font-weight:800;color:#BF360C;line-height:1.2}
+.prod-price{font-size:clamp(28px,7.5vw,44px);font-weight:900;color:#2E7D32;margin-top:4px;line-height:1}
+.prod-price small{font-size:.42em;color:#888;font-weight:600}
+#next-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+  background:linear-gradient(135deg,#FF7043,#E64A19);color:#fff;border:none;border-radius:50px;
+  padding:10px 22px;font-size:clamp(12px,3.2vw,15px);font-family:inherit;font-weight:700;cursor:pointer;
+  box-shadow:0 3px 10px rgba(230,74,25,.4)}
+#next-btn:active{opacity:.87}
+#wallet-card{background:linear-gradient(135deg,#E8F5E9,#fff)}
+.w-amt{font-size:clamp(20px,6vw,30px);font-weight:900;color:#1B5E20;text-align:center;margin-bottom:8px}
+.prog-wrap{background:#C8E6C9;border-radius:20px;height:22px;overflow:hidden;margin-bottom:10px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#A5D6A7,#2E7D32);border-radius:20px;transition:width .4s ease;min-width:4px}
+.hint{font-size:clamp(12px,3vw,15px);color:#555;text-align:center;min-height:22px;line-height:1.45;padding:0 6px}
+.hint.over{color:#C62828;font-weight:700}.hint.exact{color:#1B5E20;font-weight:800}
+.hint.seller-ok{color:#1B5E20;font-weight:800}.hint.seller-over{color:#C62828;font-weight:700}.hint.seller-under{color:#E65100;font-weight:700}
+#recv-card{background:linear-gradient(135deg,#E8F5E9,#fff)}
+.recv-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.recv-amount{font-size:clamp(24px,6vw,36px);font-weight:900;color:#1B5E20}
+.recv-label{font-size:clamp(12px,3vw,14px);color:#777}
+.change-due{display:none;align-items:center;justify-content:space-between;background:#FFF9C4;border-radius:14px;padding:10px 14px;border:2px solid #F9A825;margin-top:4px}
+.change-due .cd-label{font-size:clamp(12px,3vw,14px);color:#555;font-weight:700}
+.change-due .cd-amt{font-size:clamp(20px,5.5vw,30px);font-weight:900;color:#E65100}
+.note-pick-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.quick-btn{padding:8px 14px;border:2.5px solid #9FA8DA;border-radius:50px;background:#fff;
+  font-family:inherit;font-size:clamp(13px,3.2vw,16px);font-weight:800;cursor:pointer;color:#3949AB;transition:all .15s}
+.quick-btn.on{background:#3949AB;color:#fff;border-color:#3949AB}
+#coins-card{background:linear-gradient(135deg,#F3E5F5,#fff)}
+.coins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:360px){/*.coins-grid{grid-template-columns:repeat(6,1fr)*/}}
+.coin-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;
+  padding:7px 3px 5px;border-radius:16px;border:2.5px solid transparent;
+  transition:transform .12s,background .15s,border-color .15s;position:relative}
+.coin-item:active{transform:scale(.86)}
+.coin-item.sel{background:#F1F8E9;border-color:#66BB6A;box-shadow:0 0 0 3px #C5E1A540}
+.coin-item canvas{border-radius:50%;display:block}
+.coin-lbl{font-size:clamp(11px,2.6vw,14px);font-weight:800;margin-top:5px;color:#37474F}
+.cbadge{position:absolute;top:3px;right:5px;background:#F9A825;color:#4E342E;border-radius:50%;
+  width:22px;height:22px;font-size:12px;font-weight:900;display:none;align-items:center;justify-content:center;
+  box-shadow:0 1px 5px rgba(0,0,0,.3)}
+.cbadge.on{display:flex}
+#notes-card{background:linear-gradient(135deg,#E3F2FD,#fff)}
+.notes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:520px){/*.notes-grid{grid-template-columns:repeat(5,1fr)*/}}
+.note-item{cursor:pointer;border-radius:12px;border:3px solid transparent;
+  transition:transform .12s,border-color .15s;position:relative;overflow:hidden;background:#f0f0f0}
+.note-item:active{transform:scale(.91)}
+.note-item.sel{border-color:#66BB6A;box-shadow:0 0 0 3px #A5D6A740}
+.note-item canvas{display:block;width:100%;height:auto}
+.note-lbl{font-size:12px;font-weight:800;text-align:center;padding:4px 0 5px;background:rgba(255,255,255,.9);color:#37474F}
+.nbadge{position:absolute;top:5px;right:5px;background:#F9A825;color:#4E342E;border-radius:50%;
+  width:22px;height:22px;font-size:12px;font-weight:900;display:none;align-items:center;justify-content:center;
+  box-shadow:0 1px 5px rgba(0,0,0,.35)}
+.nbadge.on{display:flex}
+#tray-card{background:#FAFAFA}
+.tray{display:flex;flex-wrap:wrap;gap:7px;min-height:66px;padding:9px;
+  background:#F5F5F5;border-radius:14px;border:2px dashed #CFD8DC;align-items:center}
+.tray-empty{color:#BDBDBD;font-size:14px;width:100%;text-align:center}
+.chip{display:flex;align-items:center;gap:5px;background:#fff;border:2px solid #90CAF9;
+  border-radius:50px;padding:4px 10px 4px 5px;font-size:clamp(11px,2.8vw,14px);font-weight:800;
+  cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.chip:active{background:#FFCDD2;border-color:#EF9A9A}
+.chip canvas{display:block;flex-shrink:0}
+.chip-x{color:#BDBDBD;font-size:11px}
+.tray-btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.tray-btns button{flex:1;min-width:100px;padding:11px;border:none;border-radius:50px;
+  font-family:inherit;font-size:clamp(12px,3vw,15px);font-weight:800;cursor:pointer}
+.tray-btns button:active{opacity:.87}
+#clear-btn{background:#FFCDD2;color:#B71C1C}
+#pay-btn{background:linear-gradient(135deg,#66BB6A,#2E7D32);color:#fff;box-shadow:0 3px 12px rgba(46,125,50,.38)}
+#pay-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center}
+#overlay.on{display:flex}
+.rbox{background:#fff;border-radius:28px;padding:30px 24px 22px;text-align:center;
+  max-width:340px;width:92%;box-shadow:0 10px 44px rgba(0,0,0,.32);animation:pop .32s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.r-emo{font-size:68px;margin-bottom:8px;line-height:1}
+.r-ttl{font-size:23px;font-weight:900;margin-bottom:6px}
+.r-dsc{font-size:14px;color:#555;margin-bottom:6px;line-height:1.55}
+.r-change-box{background:#F1F8E9;border-radius:14px;padding:10px 14px;margin:10px 0 14px;border:2px solid #A5D6A7}
+.r-change-box .rc-label{font-size:13px;color:#555;margin-bottom:3px}
+.r-change-box .rc-amt{font-size:30px;font-weight:900;color:#2E7D32}
+.r-change-chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:6px}
+.r-chip{background:#E8F5E9;border:1.5px solid #A5D6A7;border-radius:50px;padding:3px 10px;font-size:13px;font-weight:800;color:#2E7D32}
+.r-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.r-btns button{padding:10px 22px;border:none;border-radius:50px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
+#retry-btn{background:#FFE082;color:#5D4037}
+#cont-btn{background:linear-gradient(135deg,#66BB6A,#2E7D32);color:#fff}
+.buyer-only,.seller-only{display:none}
+body.mode-buyer  .buyer-only{display:block}
+body.mode-seller .seller-only{display:block}
+
+/* ── NEW FEATURES ── */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+@keyframes bgshift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(130px) rotate(720deg);opacity:0}}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+body{background:linear-gradient(160deg,#FFF9C4,#B3E5FC,#F8BBD9,#DCEDC8);background-size:400% 400%;animation:bgshift 14s ease infinite}
+body.mode-buyer{background:linear-gradient(160deg,#FFF9C4,#B3E5FC,#F8BBD9,#DCEDC8);background-size:400% 400%;animation:bgshift 14s ease infinite}
+body.mode-seller{background:linear-gradient(160deg,#FFE0B2,#FFF9C4,#F3E5F5,#FFE0B2);background-size:400% 400%;animation:bgshift 10s ease infinite}
+body.mode-buyer header{background:linear-gradient(110deg,#4FC3F7,#0288D1,#7C4DFF,#E91E8C);position:relative;overflow:hidden}
+body.mode-seller header{background:linear-gradient(110deg,#FF8A65,#F57C00,#FF4081,#AB47BC);position:relative;overflow:hidden}
+header::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);background-size:200% 100%;animation:shimmer 3s linear infinite;pointer-events:none}
+.bg-star{position:fixed;pointer-events:none;z-index:0;opacity:.15;animation:bounce 3s ease-in-out infinite}
+/* round progress dots */
+#round-track{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 16px 3px;flex-wrap:wrap}
+.rd{width:28px;height:28px;border-radius:50%;border:2.5px solid rgba(0,0,0,.12);background:#E0E0E0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;color:#aaa}
+.rd.d-perfect{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#fff;border-color:#FF8C00;box-shadow:0 2px 8px rgba(255,140,0,.5);transform:scale(1.1)}
+.rd.d-good{background:linear-gradient(135deg,#66BB6A,#2E7D32);color:#fff;border-color:#2E7D32;box-shadow:0 2px 8px rgba(46,125,50,.35)}
+.rd.d-miss{background:linear-gradient(135deg,#EF5350,#B71C1C);color:#fff;border-color:#B71C1C}
+.rd.d-cur{background:linear-gradient(135deg,#CE93D8,#7B1FA2);color:#fff;border-color:#7B1FA2;box-shadow:0 0 0 4px rgba(123,31,162,.25);animation:pulse-ring 1.2s ease-out infinite}
+/* best score pill */
+#sc-best{font-size:clamp(12px,3vw,15px);font-weight:800;background:linear-gradient(135deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* progress bar 3 states */
+.prog-fill.st-under{background:linear-gradient(90deg,#FFF176,#F9A825)}
+.prog-fill.st-exact{background:linear-gradient(90deg,#A5D6A7,#2E7D32)}
+.prog-fill.st-over{background:linear-gradient(90deg,#EF9A9A,#C62828)}
+/* tray red border when over */
+.tray.tray-over{border-color:#E53935;background:rgba(255,235,238,.4)}
+/* wallet missing banner */
+#wallet-missing{margin-top:9px;font-size:12px;font-weight:800;color:#B71C1C;
+  background:#FFEBEE;border-radius:10px;padding:7px 11px;display:none;line-height:1.5;border:1.5px solid #FFCDD2}
+/* optimal hint box */
+.r-optimal-box{background:#FFF8E1;border:2px solid #FFD54F;border-radius:14px;padding:9px 12px;margin:8px 0 4px;display:none}
+.ro-label{font-size:12px;color:#795548;font-weight:800;margin-bottom:4px}
+.r-optimal-chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.r-opt-chip{background:#FFF3E0;border:1.5px solid #FFB74D;border-radius:50px;padding:3px 10px;font-size:13px;font-weight:800;color:#E65100}
+/* report overlay */
+#report-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.rpt-box{background:#fff;border-radius:28px;padding:22px 18px 20px;max-width:400px;width:95%;box-shadow:0 20px 70px rgba(0,0,0,.4);animation:pop .38s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto}
+.rpt-title{font-size:22px;font-weight:900;text-align:center;margin-bottom:2px}
+.rpt-sub{font-size:13px;color:#888;font-weight:700;text-align:center;margin-bottom:12px}
+.rpt-score{font-size:52px;font-weight:900;text-align:center;line-height:1;background:linear-gradient(135deg,#FF8A65,#7B1FA2,#0288D1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.rpt-grade{font-size:20px;font-weight:900;text-align:center;margin:4px 0 14px}
+.rpt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.rpt-stat{background:#F8F9FA;border-radius:14px;padding:9px 6px;text-align:center;border:2px solid #E0E0E0}
+.rpt-stat-n{font-size:22px;font-weight:900;line-height:1}
+.rpt-stat-l{font-size:11px;color:#888;font-weight:700;margin-top:2px}
+.rpt-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.rpt-row{display:flex;align-items:center;gap:9px;background:#F8F9FA;border-radius:13px;padding:7px 11px}
+.rpt-rnum{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0}
+.rpt-rnum.rn-p{background:linear-gradient(135deg,#FFD700,#FF8C00)}
+.rpt-rnum.rn-g{background:linear-gradient(135deg,#66BB6A,#2E7D32)}
+.rpt-rnum.rn-m{background:linear-gradient(135deg,#EF5350,#B71C1C)}
+.rpt-rinfo{flex:1;font-size:12px;font-weight:700;color:#37474F}
+.rpt-rbadge{font-size:14px;font-weight:900}
+.rpt-btns{display:flex;gap:10px;justify-content:center}
+.rpt-btns button{padding:11px 24px;border:none;border-radius:50px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+#rpt-play-btn{background:linear-gradient(135deg,#4FC3F7,#0288D1);color:#fff}
+/* confetti */
+.confetti-piece{position:fixed;pointer-events:none;z-index:400;font-size:20px;animation:confetti-fall 1.3s ease-out forwards}
+/* score best pill */
+#score-bar .sc{background:rgba(255,255,255,.75);border-radius:50px;padding:4px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+</style>
+</head>
+<body class="mode-buyer">
+<div id="sprites" style="display:none" aria-hidden="true">
+  <img id="ss-coins" src="audConin.jpg"">
+  <img id="ss-notes" src="audDollar.jpg">
+  <img id="ss-toys"  src="toys.jpg">
+</div>
+
+<span class="bg-star" style="top:8%;left:4%;font-size:22px">⭐</span>
+<span class="bg-star" style="top:14%;right:7%;font-size:16px;animation-delay:.9s;animation-duration:4s">💫</span>
+<span class="bg-star" style="top:50%;left:2%;font-size:26px;animation-delay:1.7s;animation-duration:3.5s">🌟</span>
+<span class="bg-star" style="top:60%;right:3%;font-size:18px;animation-delay:2.5s;animation-duration:5s">✨</span>
+<span class="bg-star" style="top:80%;left:8%;font-size:20px;animation-delay:.4s">🎈</span>
+<span class="bg-star" style="top:78%;right:11%;font-size:17px;animation-delay:1.3s;animation-duration:4.5s">🎉</span>
+<div id="lang-bar">
+  <button class="lbtn on" onclick="setLang('en')">🇦🇺 EN</button>
+  <button class="lbtn"    onclick="setLang('zh')">🇨🇳 中文</button>
+</div>
+<header>
+  <h1 id="hdr-h">🛒 Aussie Money Shop</h1>
+  <p  id="hdr-p">Pick the right coins &amp; notes to buy the toy!</p>
+</header>
+<div id="round-track"></div>
+<div id="mode-bar">
+  <div class="mode-track">
+    <button class="mode-btn on" data-m="buyer"  onclick="setMode('buyer')">🛍️ <span id="l-buyer">Buyer</span></button>
+    <button class="mode-btn"    data-m="seller" onclick="setMode('seller')">🏪 <span id="l-seller">Shopkeeper</span></button>
+  </div>
+</div>
+<div id="score-bar">
+  <div class="sc">⭐ <span id="sc-s">0</span>&thinsp;<span id="sc-p">pts</span></div>
+  <div class="sc">🎯 <span id="sc-l">Level 1</span></div>
+  <div class="sc">❤️ <span id="sc-v">3</span>&thinsp;<span id="sc-lft">left</span></div>
+  <div class="sc">🏆 <span id="sc-best">Best: 0</span></div>
+</div>
+<div class="wrap">
+  <div class="card" id="prod-card">
+    <div class="card-hd">🧸 <span id="l-buy">Today's Item</span></div>
+    <div class="prod-row">
+      <canvas id="prod-canvas" width="108" height="108"></canvas>
+      <div>
+        <div class="prod-name" id="prod-name"></div>
+        <div class="prod-price" id="prod-price"></div>
+      </div>
+    </div>
+    <button id="next-btn">🔄 <span id="l-next">Next Item</span></button>
+    <div id="wallet-missing"></div>
+  </div>
+  <div class="card buyer-only" id="wallet-card">
+    <div class="card-hd">💰 <span id="l-wal">My Wallet</span></div>
+    <div class="w-amt"><span id="l-sel">Selected:</span> $<span id="w-tot">0.00</span></div>
+    <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <div class="hint" id="hint"></div>
+  </div>
+  <div class="card seller-only" id="recv-card">
+    <div class="card-hd">💳 <span id="l-custpaid">Customer Paid</span></div>
+    <div class="recv-row">
+      <div class="recv-amount">$<span id="recv-amt">0.00</span></div>
+      <div class="recv-label" id="recv-sublabel">— tap below to select</div>
+    </div>
+    <div class="change-due" id="change-due">
+      <div class="cd-label" id="l-changedue">Change to give back:</div>
+      <div class="cd-amt">$<span id="change-due-amt">0.00</span></div>
+    </div>
+    <div class="note-pick-row" id="cust-note-row"></div>
+  </div>
+  <div class="card" id="coins-card">
+    <div class="card-hd">🪙 <span id="l-coins">Coins</span></div>
+    <div class="coins-grid" id="coins-grid"></div>
+  </div>
+  <div class="card" id="notes-card">
+    <div class="card-hd">💵 <span id="l-notes">Banknotes</span></div>
+    <div class="notes-grid" id="notes-grid"></div>
+  </div>
+  <div class="card full" id="tray-card">
+    <div class="card-hd">🧾 <span id="l-tray">Payment Tray</span></div>
+    <div class="tray" id="tray"></div>
+    <div class="tray-btns">
+      <button id="clear-btn">🗑️ <span id="l-clr">Clear All</span></button>
+      <button id="pay-btn" disabled>💳 <span id="l-pay">Pay Now!</span></button>
+    </div>
+  </div>
+</div>
+<div id="overlay">
+  <div class="rbox">
+    <div class="r-emo" id="r-emo">🎉</div>
+    <div class="r-ttl" id="r-ttl"></div>
+    <div class="r-dsc" id="r-dsc"></div>
+    <div class="r-change-box" id="r-change-box" style="display:none">
+      <div class="rc-label" id="l-rcLabel">Change given:</div>
+      <div class="rc-amt">$<span id="r-change-total">0.00</span></div>
+      <div class="r-change-chips" id="r-change-chips"></div>
+    </div>
+    <div class="r-optimal-box" id="r-optimal-box">
+      <div class="ro-label" id="r-optimal-label">Fewest coins:</div>
+      <div class="r-optimal-chips" id="r-optimal-chips"></div>
+    </div>
+    <div class="r-btns">
+      <button id="retry-btn">🔄 <span id="l-retry">Try Again</span></button>
+      <button id="cont-btn">➡️ <span id="l-cont">Next Level</span></button>
+    </div>
+  </div>
+</div>
+<div id="report-overlay">
+  <div class="rpt-box">
+    <div class="rpt-title" id="rpt-title">🎓 Session Report!</div>
+    <div class="rpt-sub" id="rpt-sub">10 rounds complete</div>
+    <div class="rpt-score" id="rpt-score">0</div>
+    <div class="rpt-grade" id="rpt-grade">🌟</div>
+    <div class="rpt-stats" id="rpt-stats"></div>
+    <div class="rpt-rows" id="rpt-rows"></div>
+    <div class="rpt-btns">
+      <button id="rpt-play-btn">🎮 <span id="rpt-play-lbl">Play Again!</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SPRITE COORDINATE DATA (pixels into the 3 spritesheet images) ─────
+const COINS = [
+  {id:'5c',  value:0.05, label:'5¢',  cx:82,  cy:29,  r:30},
+  {id:'10c', value:0.10, label:'10¢', cx:72,  cy:100, r:38},
+  {id:'20c', value:0.20, label:'20¢', cx:88,  cy:182, r:38},
+  {id:'50c', value:0.50, label:'50¢', cx:59,  cy:270, r:46},
+  {id:'1d',  value:1.00, label:'$1',  cx:88,  cy:358, r:48},
+  {id:'2d',  value:2.00, label:'$2',  cx:88,  cy:437, r:48},
+];
+const NOTES = [
+  {id:'n5',   value:5,   label:'$5',   sx:2,  sy:6,   sw:247, sh:110},
+  {id:'n10',  value:10,  label:'$10',  sx:3,  sy:135, sw:246, sh:117},
+  {id:'n20',  value:20,  label:'$20',  sx:0,  sy:258, sw:249, sh:117},
+  {id:'n50',  value:50,  label:'$50',  sx:0,  sy:370, sw:249, sh:117},
+  {id:'n100', value:100, label:'$100', sx:0,  sy:491, sw:244, sh:111},
+];
+const PRODUCTS = [
+  {
+    id: 'teddy',
+    name: 'Teddy Bear',
+    nameZh: '泰迪熊',
+    price: 5.00,
+    tx: 15, ty: 15,
+    tw: 240, th: 260
+  },
+
+  {
+    id: 'minion',
+    name: 'Minion Plush',
+    nameZh: '小黄人玩偶',
+    price: 3.50,
+    tx: 520, ty: 15,
+    tw: 250, th: 320
+  },
+
+  {
+    id: 'stitch',
+    name: 'Stitch Cowboy',
+    nameZh: '史迪奇牛仔',
+    price: 7.50,
+    tx: 800, ty: 15,
+    tw: 250, th: 260
+  },
+
+  {
+    id: 'zoo_bear',
+    name: 'Zoo Bear Plush',
+    nameZh: '动物园小熊',
+    price: 12.00,
+    tx: 1060, ty: 15,
+    tw: 250, th: 260
+  },
+
+  {
+    id: 'elephant',
+    name: 'Elephant Toy',
+    nameZh: '大象玩具',
+    price: 6.50,
+    tx: 1590, ty: 15,
+    tw: 270, th: 300
+  },
+
+  {
+    id: 'squishy',
+    name: 'Squishy Tushy',
+    nameZh: '软软玩具',
+    price: 4.50,
+    tx: 15, ty: 330,
+    tw: 250, th: 290
+  },
+
+  {
+    id: 'racecar',
+    name: 'Race Car',
+    nameZh: '赛车模型',
+    price: 8.00,
+    tx: 270, ty: 300,
+    tw: 250, th: 260
+  },
+
+  {
+    id: 'blocks',
+    name: 'Stacking Blocks',
+    nameZh: '叠叠积木',
+    price: 9.50,
+    tx: 560, ty: 420,
+    tw: 250, th: 240
+  },
+
+  {
+    id: 'zebra',
+    name: 'Zebra Dog Toy',
+    nameZh: '斑马公仔',
+    price: 11.00,
+    tx: 910, ty: 270,
+    tw: 180, th: 320
+  },
+
+  {
+    id: 'pinwheel',
+    name: 'Colour Pinwheel',
+    nameZh: '彩色风车',
+    price: 2.50,
+    tx: 0, ty: 660,
+    tw: 240, th: 220
+  },
+
+  {
+    id: 'livepets',
+    name: 'Little Live Pets',
+    nameZh: '宠物玩具包',
+    price: 15.00,
+    tx: 260, ty: 610,
+    tw: 280, th: 260
+  },
+
+  {
+    id: 'chopper',
+    name: 'One Piece Figure',
+    nameZh: '乔巴手办',
+    price: 13.50,
+    tx: 840, ty: 600,
+    tw: 250, th: 260
+  },
+
+  {
+    id: 'lotso',
+    name: 'Lotso Bear',
+    nameZh: '抱抱熊',
+    price: 10.00,
+    tx: 1320, ty: 620,
+    tw: 260, th: 220
+  },
+];
+
+const ALL_MONEY = [...COINS,...NOTES];
+
+// Loaded spritesheet Image elements
+const IMG = {};
+function loadSprites() {
+  return new Promise(res => {
+    const map = {coins:'ss-coins', notes:'ss-notes', toys:'ss-toys'};
+    let done=0, total=3;
+    Object.entries(map).forEach(([k,id]) => {
+      const el = document.getElementById(id);
+      IMG[k] = el;
+      if(el.complete && el.naturalWidth>0) { if(++done===total) res(); }
+      else { el.onload = () => { if(++done===total) res(); }; el.onerror=res; }
+    });
+  });
+}
+
+// ── CANVAS DRAW ───────────────────────────────────────────────────────
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function drawCoin(canvas, coin, size) {
+  canvas.width=canvas.height=size;
+  const ctx=canvas.getContext('2d'), half=size/2;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(half,half,half-1,0,Math.PI*2); ctx.clip();
+  // src rect: expand slightly around the coin centre
+  const r=coin.r, pad=4;
+  ctx.drawImage(IMG.coins, coin.cx-r-pad, coin.cy-r-pad, (r+pad)*2, (r+pad)*2, 0, 0, size, size);
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(half,half,half-1,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1.5; ctx.stroke();
+}
+function drawNote(canvas, note, outW, outH) {
+  canvas.width=outW; canvas.height=outH;
+  const ctx=canvas.getContext('2d');
+  ctx.save(); roundRect(ctx,0,0,outW,outH,6); ctx.clip();
+  ctx.drawImage(IMG.notes, note.sx, note.sy, note.sw, note.sh, 0, 0, outW, outH);
+  ctx.restore();
+}
+function drawToy(canvas, prod, size) {
+  canvas.width=canvas.height=size;
+  const ctx=canvas.getContext('2d');
+  ctx.save(); roundRect(ctx,0,0,size,size,14); ctx.clip();
+  ctx.fillStyle='#f0f0f0'; ctx.fill();
+  ctx.drawImage(IMG.toys, prod.tx, prod.ty, prod.tw, prod.th, 0, 0, size, size);
+  ctx.restore();
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let lang='en', mode='buyer', tray=[], uid=0, score=0, level=1, current=null, custPaid=0;
+const ROUNDS_PER_SESSION = 10;
+let roundNum=1, sessionResults=[], bestScore=0, usedProducts=[];
+let availableIds = new Set(ALL_MONEY.map(m=>m.id));
+
+// ── I18N ──────────────────────────────────────────────────────────────
+const STR={
+  en:{
+    'hdr-h-buyer':'🛒 Aussie Money Shop','hdr-p-buyer':'Pick the right coins & notes to buy the toy!',
+    'hdr-h-seller':'🏪 Aussie Money Shop','hdr-p-seller':'Work out the change and give it back!',
+    'l-buyer':'Buyer','l-seller':'Shopkeeper','l-buy':"Today's Item",'l-next':'Next Item',
+    'l-wal':'My Wallet','l-sel':'Selected:','l-coins':'Coins','l-notes':'Banknotes',
+    'l-tray-buyer':'Payment Tray','l-tray-seller':'Change Tray',
+    'l-clr':'Clear All','l-pay-buyer':'Pay Now!','l-pay-seller':'Give Change!',
+    'l-retry':'Try Again','l-cont':'Next Level','sc-p':'pts','sc-lft':'left',
+    'l-custpaid':'Customer Paid','recv-sublabel':'— tap below to select amount',
+    'l-changedue':'Change to give back:','l-rcLabel':'Change given:',
+    tE_buyer:'Tap a coin or note to add it here 👆',
+    tE_seller:'Tap coins or notes to give as change 👆',
+    hS_buyer:'Choose coins or notes to add 😊',
+    hS_seller:'Add coins/notes that total the change amount 💰',
+    hN:d=>`Still need $${d} more 😮`,
+    hO:d=>`$${d} too much — try fewer 🤔`,
+    hX_buyer:'Perfect! Tap Pay Now! 🎉',
+    hX_seller:'Correct change! Tap Give Change! 🎉',
+    hOs:d=>`$${d} too much change! Remove some 🤔`,
+    hUs:d=>`Still $${d} short in change 😮`,
+    rPT:'Amazing! 🎉',         rPD_b:(p,n)=>`Exactly $${p} for the ${n}! Great counting! 🌟`,
+    rOT_b:'You can buy it! 👍', rOD_b:(t,d,n)=>`$${t} for ${n} — $${d} extra. Try exact change!`,
+    rPT_s:'Great shopkeeper! 🎉', rPD_s:c=>`Exactly $${c} back — perfect change! 🌟`,
+    rOT_s:'Too much change! 😬',  rOD_s:(g,d)=>`Gave $${g} but should be $${d}. Customer gets too much!`,
+    rUT_s:'Not enough change! 😬',rUD_s:(g,d)=>`Gave $${g} but should be $${d}. Customer gets too little!`,
+    lvl:l=>`Level ${l}`, aud:'AUD', custQ:'Customer pays with:',
+    roundLabel:n=>`Round ${n}/10`, bestLabel:b=>`Best: ${b}`,
+    rPT_min:'Perfect & Fewest! 🏆', rPD_b_min:(p,n)=>`$${p} for ${n} — fewest coins too! 🌟`,
+    rNotMin:'Correct but not fewest 🤔', rDsc_notMin:(ex,bd)=>`Right amount, but ${ex} extra coin${ex!==1?'s':''}.\nFewest: ${bd}`,
+    rPT_s_min:'Perfect Change! 🏆', rPD_s_min:c=>`$${c} change — fewest coins! 🌟`,
+    rNotMin_s:'Correct but not fewest 🤔', rDsc_notMin_s:(ex,bd)=>`Right change, but ${ex} extra coin${ex!==1?'s':''}.\nFewest: ${bd}`,
+    fewest:'Fewest coins:', walletMissing_b:'⚠️ Not in wallet: ', walletMissing_s:'⚠️ Not in till: ',
+    rpt_title:'🎓 Session Report!', rpt_sub:m=>`${m} mode — 10 rounds done`,
+    rpt_play:'🎮 Play Again!',
+    rpt_grade:p=>p>=90?'🏆 Champion!':p>=70?'⭐ Great job!':p>=50?'👍 Good try!':'🌱 Keep practising!',
+    rpt_perfect:'Perfect 🏆', rpt_good:'Correct ✅', rpt_notmin:'Good 🤔', rpt_miss:'Miss ❌',
+    rpt_sl_p:'Perfect', rpt_sl_g:'Correct', rpt_sl_m:'Miss',
+  },
+  zh:{
+    'hdr-h-buyer':'🛒 澳币小商店','hdr-p-buyer':'选对硬币和纸币，买到心爱的玩具！',
+    'hdr-h-seller':'🏪 澳币小商店','hdr-p-seller':'算好找零，把零钱还给顾客！',
+    'l-buyer':'买家','l-seller':'店家','l-buy':'今天想买','l-next':'换商品',
+    'l-wal':'我的钱包','l-sel':'已选：','l-coins':'硬币','l-notes':'纸币',
+    'l-tray-buyer':'收款盘','l-tray-seller':'找零盘',
+    'l-clr':'清空','l-pay-buyer':'付款！','l-pay-seller':'找零！',
+    'l-retry':'再试一次','l-cont':'下一关','sc-p':'分','sc-lft':'次',
+    'l-custpaid':'顾客付了','recv-sublabel':'— 点下方选顾客付款金额',
+    'l-changedue':'需要找回：','l-rcLabel':'已找零钱：',
+    tE_buyer:'点击硬币或纸币放到这里 👆',
+    tE_seller:'点击硬币或纸币作为零钱 👆',
+    hS_buyer:'选择硬币或纸币 😊',
+    hS_seller:'选硬币/纸币凑出需要找回的金额 💰',
+    hN:d=>`还差 $${d} 哦 😮`,
+    hO:d=>`多了 $${d}，减少一些 🤔`,
+    hX_buyer:'正好！快点付款吧 🎉',
+    hX_seller:'零钱正好！点找零吧 🎉',
+    hOs:d=>`找多了 $${d}！减少一些 🤔`,
+    hUs:d=>`还差 $${d} 零钱 😮`,
+    rPT:'太棒了！🎉',         rPD_b:(p,n)=>`付了 $${p} 正好买到${n}！🌟`,
+    rOT_b:'可以买到！👍',      rOD_b:(t,d,n)=>`付了 $${t} 买${n}，多了 $${d}！`,
+    rPT_s:'好店家！🎉',        rPD_s:c=>`找零 $${c} 分毫不差！顾客满意！🌟`,
+    rOT_s:'找多零钱了！😬',    rOD_s:(g,d)=>`找了 $${g} 但应找 $${d}，顾客赚了！`,
+    rUT_s:'找少零钱了！😬',    rUD_s:(g,d)=>`找了 $${g} 但应找 $${d}，顾客吃亏了！`,
+    lvl:l=>`第${l}关`, aud:'澳元', custQ:'顾客付款：',
+    roundLabel:n=>`第${n}关/共10关`, bestLabel:b=>`最高：${b}`,
+    rPT_min:'完美又最少！🏆', rPD_b_min:(p,n)=>`付了$${p}买${n}，而且枚数最少！🌟`,
+    rNotMin:'对了但不是最少 🤔', rDsc_notMin:(ex,bd)=>`金额正确，但多用了${ex}枚。\n最少方案：${bd}`,
+    rPT_s_min:'完美找零！🏆', rPD_s_min:c=>`找零$${c}且枚数最少！🌟`,
+    rNotMin_s:'对了但不是最少 🤔', rDsc_notMin_s:(ex,bd)=>`找零正确，但多用了${ex}枚。\n最少方案：${bd}`,
+    fewest:'最少组合：', walletMissing_b:'⚠️ 钱包里没有：', walletMissing_s:'⚠️ 收银机里没有：',
+    rpt_title:'🎓 本轮报告！', rpt_sub:m=>`${m==='buyer'?'买家':'店家'}模式 — 10关完成`,
+    rpt_play:'🎮 再来一局！',
+    rpt_grade:p=>p>=90?'🏆 超级冠军！':p>=70?'⭐ 非常棒！':p>=50?'👍 不错！':'🌱 继续加油！',
+    rpt_perfect:'完美 🏆', rpt_good:'正确 ✅', rpt_notmin:'良好 🤔', rpt_miss:'答错 ❌',
+    rpt_sl_p:'完美', rpt_sl_g:'正确', rpt_sl_m:'答错',
+  }
+};
+const s=k=>STR[lang][k];
+
+// ── LANG / MODE ───────────────────────────────────────────────────────
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lbtn').forEach(b=>
+    b.classList.toggle('on',(l==='en'&&b.textContent.includes('EN'))||(l==='zh'&&b.textContent.includes('中文'))));
+  applyLang();
+}
+function setMode(m){
+  mode=m;
+  document.body.className='mode-'+m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  tray=[]; custPaid=0;
+  startNewSession();
+}
+function applyLang(){
+  document.getElementById('hdr-h').textContent=s('hdr-h-'+mode);
+  document.getElementById('hdr-p').textContent=s('hdr-p-'+mode);
+  ['l-buyer','l-seller','l-buy','l-next','l-wal','l-sel','l-coins','l-notes',
+   'l-clr','l-retry','l-cont','sc-p','sc-lft','l-custpaid','recv-sublabel','l-changedue','l-rcLabel'].forEach(k=>{
+    const el=document.getElementById(k); if(el) el.textContent=s(k);
+  });
+  document.getElementById('sc-l').textContent=s('lvl')(level);
+  document.getElementById('sc-l').textContent=s('roundLabel')(roundNum);
+  const bEl=document.getElementById('sc-best'); if(bEl) bEl.textContent=s('bestLabel')(bestScore);
+  document.getElementById('l-tray').textContent=s('l-tray-'+mode);
+  document.getElementById('l-pay').textContent=s('l-pay-'+mode);
+  if(current){
+    document.getElementById('prod-name').textContent=lang==='zh'?current.nameZh:current.name;
+    document.getElementById('prod-price').innerHTML=`$${current.price.toFixed(2)} <small>${s('aud')}</small>`;
+  }
+  if(mode==='seller') buildCustNotes();
+  updateWallet(); renderTray();
+}
+
+// ── BUILD GRIDS ───────────────────────────────────────────────────────
+function buildCoins(){
+  const g = document.getElementById('coins-grid'); g.innerHTML = '';
+  COINS.forEach(c => {
+    const avail = availableIds.has(c.id);
+    const qty   = walletQty[c.id] || 0;
+    const wrap  = document.createElement('div');
+    wrap.className = 'coin-item'; wrap.dataset.id = c.id;
+    if(!avail) wrap.style.cssText = 'opacity:.22;filter:grayscale(1);pointer-events:none';
+
+    const badge = document.createElement('div'); badge.className = 'cbadge'; badge.id = 'cb-' + c.id; badge.textContent = '0';
+    const cv    = document.createElement('canvas'); drawCoin(cv, c, 68);
+    // Qty label
+    const qtyEl = document.createElement('div'); qtyEl.className = 'coin-lbl';
+    qtyEl.id = 'cq-' + c.id;
+    qtyEl.textContent = avail ? `${c.label} (×${qty})` : `${c.label} ✕`;
+    wrap.appendChild(badge); wrap.appendChild(cv); wrap.appendChild(qtyEl);
+    if(avail){
+      wrap.addEventListener('click', () => addItem(c, 'coin'));
+      wrap.addEventListener('touchstart', e => { e.preventDefault(); addItem(c, 'coin'); }, {passive:false});
+    }
+    g.appendChild(wrap);
+  });
+}
+function buildNotes(){
+  const g = document.getElementById('notes-grid'); g.innerHTML = '';
+  NOTES.forEach(n => {
+    const avail = availableIds.has(n.id);
+    const qty   = walletQty[n.id] || 0;
+    const wrap  = document.createElement('div');
+    wrap.className = 'note-item'; wrap.dataset.id = n.id;
+    if(!avail) wrap.style.cssText = 'opacity:.22;filter:grayscale(1);pointer-events:none';
+
+    const badge = document.createElement('div'); badge.className = 'nbadge'; badge.id = 'nb-' + n.id; badge.textContent = '0';
+    const cv    = document.createElement('canvas');
+    drawNote(cv, n, 200, 89); cv.style.width = '100%'; cv.style.height = 'auto';
+    const qtyEl = document.createElement('div'); qtyEl.className = 'note-lbl';
+    qtyEl.id = 'nq-' + n.id;
+    qtyEl.textContent = avail ? `${n.label} (×${qty})` : `${n.label} ✕`;
+    wrap.appendChild(badge); wrap.appendChild(cv); wrap.appendChild(qtyEl);
+    if(avail){
+      wrap.addEventListener('click', () => addItem(n, 'note'));
+      wrap.addEventListener('touchstart', e => { e.preventDefault(); addItem(n, 'note'); }, {passive:false});
+    }
+    g.appendChild(wrap);
+  });
+}
+
+// ── SELLER PAYMENT BUTTONS ────────────────────────────────────────────
+function buildCustNotes(){
+  const row=document.getElementById('cust-note-row'); row.innerHTML='';
+  if(!current) return;
+  const price=current.price;
+  const candidates=[0.50,1,2,5,10,20,50,100];
+  const options=candidates.filter(v=>v>=price && v<=price+50);
+  if(options.length<2) options.push(...candidates.filter(v=>v>=price).slice(0,3));
+  const lbl=document.createElement('div');
+  lbl.style.cssText='width:100%;font-size:13px;font-weight:700;color:#555;margin-bottom:2px';
+  lbl.textContent=s('custQ'); row.appendChild(lbl);
+  options.slice(0,6).forEach(v=>{
+    const btn=document.createElement('button');
+    btn.className='quick-btn'+(custPaid===v?' on':'');
+    btn.textContent=`$${v%1===0?v:v.toFixed(2)}`;
+    btn.addEventListener('click',()=>setCustPaid(v));
+    btn.addEventListener('touchstart',e=>{e.preventDefault();setCustPaid(v);},{passive:false});
+    row.appendChild(btn);
+  });
+}
+function setCustPaid(v){
+  custPaid = v;
+  document.getElementById('recv-amt').textContent = v.toFixed(2);
+  const due = +(v - current.price).toFixed(2);
+  document.getElementById('change-due-amt').textContent = due >= 0 ? due.toFixed(2) : '—';
+  document.getElementById('change-due').style.display = due >= 0 ? 'flex' : 'none';
+  document.querySelectorAll('.quick-btn').forEach(b =>
+    b.classList.toggle('on', parseFloat(b.textContent.replace('$','')) === v));
+  // Regenerate till now that we know exact change amount — guarantees it's solvable
+  if(due > 0){
+    const w = generateTill(due);
+    availableIds = w.avail;
+    walletQty    = w.qty;
+    ALL_MONEY.forEach(m => walletUsed[m.id] = 0);
+    buildCoins(); buildNotes();
+  }
+  tray = []; walletUsed = {}; ALL_MONEY.forEach(m => walletUsed[m.id] = 0);
+  refresh();
+}
+
+// ── TRAY ──────────────────────────────────────────────────────────────
+function addItem(money, type){
+  const used = walletUsed[money.id] || 0;
+  const avail = walletQty[money.id] || 0;
+  if(used >= avail){ return; }  // can't add more than you have
+  walletUsed[money.id] = used + 1;
+  tray.push({...money, _uid: uid++, _type: type});
+  refresh();
+}
+function removeItem(u){
+  const item = tray.find(x => x._uid === u);
+  if(item) walletUsed[item.id] = Math.max(0, (walletUsed[item.id] || 1) - 1);
+  tray = tray.filter(x => x._uid !== u);
+  refresh();
+}
+function refresh(){
+  const cnt = {};
+  tray.forEach(x => cnt[x.id] = (cnt[x.id] || 0) + 1);
+  ALL_MONEY.forEach(m => {
+    const n = cnt[m.id] || 0;
+    const bid = (m.value < 5 ? 'cb' : 'nb') + '-' + m.id;
+    const b = document.getElementById(bid); if(b){ b.textContent = n; b.classList.toggle('on', n > 0); }
+    const el = document.querySelector('[data-id="' + m.id + '"]'); if(el) el.classList.toggle('sel', n > 0);
+
+    // Update qty remaining label
+    const total = walletQty[m.id] || 0;
+    const used  = walletUsed[m.id] || 0;
+    const rem   = total - used;
+    const prefix = m.value < 5 ? 'cq-' : 'nq-';
+    const ql = document.getElementById(prefix + m.id);
+    if(ql && availableIds.has(m.id)){
+      ql.textContent = rem > 0 ? `${m.label} (×${rem})` : `${m.label} (none left)`;
+      ql.style.color = rem === 0 ? '#E53935' : '';
+      // Grey out the coin/note card if exhausted
+      const card = document.querySelector('[data-id="' + m.id + '"]');
+      if(card){ card.style.pointerEvents = rem <= 0 ? 'none' : ''; card.style.opacity = rem <= 0 ? '.4' : ''; }
+    }
+  });
+  renderTray(); updateWallet(); updateMissingBanner();
+}
+function renderTray(){
+  const el=document.getElementById('tray'); el.innerHTML='';
+  if(!tray.length){
+    const e=document.createElement('span'); e.className='tray-empty'; e.textContent=s('tE_'+mode);
+    el.appendChild(e); return;
+  }
+  tray.forEach(item=>{
+    const chip=document.createElement('div'); chip.className='chip';
+    const cv=document.createElement('canvas');
+    if(item._type==='coin'){ drawCoin(cv,item,30); cv.style.borderRadius='50%'; }
+    else { drawNote(cv,item,52,23); cv.style.borderRadius='4px'; }
+    const lb=document.createElement('span'); lb.textContent=item.label;
+    const x=document.createElement('span'); x.className='chip-x'; x.textContent=' ✕';
+    chip.appendChild(cv); chip.appendChild(lb); chip.appendChild(x);
+    const u=item._uid;
+    chip.addEventListener('click',()=>removeItem(u));
+    chip.addEventListener('touchstart',e=>{e.preventDefault();removeItem(u);},{passive:false});
+    el.appendChild(chip);
+  });
+}
+function updateWallet(){
+  const total=+tray.reduce((a,x)=>a+x.value,0).toFixed(2);
+  const h=document.getElementById('hint'), payBtn=document.getElementById('pay-btn');
+  if(mode==='buyer'){
+    const price=current?.price||0;
+    document.getElementById('w-tot').textContent=total.toFixed(2);
+    const pct=price>0?Math.min(total/price,1)*100:0;
+    document.getElementById('prog').style.width=pct+'%';
+    const diff=+(total-price).toFixed(2);
+    const prog=document.getElementById('prog');
+    if(!total||diff<0){prog.className='prog-fill st-under';}
+    else if(diff===0){prog.className='prog-fill st-exact';}
+    else{prog.className='prog-fill st-over';}
+    document.getElementById('tray').classList.toggle('tray-over',diff>0&&total>0);
+    if(!total){h.textContent=s('hS_buyer');h.className='hint';}
+    else if(diff<0){h.textContent=s('hN')(Math.abs(diff).toFixed(2));h.className='hint';}
+    else if(diff===0){h.textContent=s('hX_buyer');h.className='hint exact';}
+    else{h.textContent=s('hO')(diff.toFixed(2));h.className='hint over';}
+    payBtn.disabled=total<price;
+  } else {
+    const due=custPaid>0?+(custPaid-current.price).toFixed(2):0;
+    const diff=+(total-due).toFixed(2);
+    document.getElementById('tray').classList.toggle('tray-over',diff>0&&custPaid>0&&total>0);
+    if(!custPaid){h.textContent=s('hS_seller');h.className='hint';payBtn.disabled=true;}
+    else if(!total){h.textContent=s('hS_seller');h.className='hint';payBtn.disabled=true;}
+    else if(diff===0){h.textContent=s('hX_seller');h.className='hint seller-ok';payBtn.disabled=false;}
+    else if(diff>0){h.textContent=s('hOs')(diff.toFixed(2));h.className='hint seller-over';payBtn.disabled=false;}
+    else{h.textContent=s('hUs')(Math.abs(diff).toFixed(2));h.className='hint seller-under';payBtn.disabled=true;}
+  }
+}
+
+// ── PRICE & WALLET HELPERS ────────────────────────────────────────────
+function roundTo5c(v){return Math.round(v/0.05)*0.05;}
+function fluctuatePrice(base){
+  const lo=base*.80,hi=base*1.20;
+  return Math.max(0.05,+roundTo5c(lo+Math.random()*(hi-lo)).toFixed(2));
+}
+function isPriceReachable(price, avail){
+  // Greedy check: can we make `price` exactly with available denoms (unlimited qty)?
+  const cents = Math.round(price * 100);
+  if(cents <= 0) return true;
+  const denoms = ALL_MONEY
+    .filter(m => avail.has(m.id))
+    .map(m => Math.round(m.value * 100))
+    .sort((a, b) => b - a);
+  if(!denoms.length) return false;
+  // DP reachability (greedy isn't sufficient for exact-change reachability check)
+  const dp = new Array(cents + 1).fill(false);
+  dp[0] = true;
+  for(let i = 1; i <= cents; i++)
+    for(const d of denoms)
+      if(d <= i && dp[i - d]){ dp[i] = true; break; }
+  return dp[cents];
+}
+
+// ── GREEDY OPTIMAL PAYMENT ────────────────────────────────────────────
+// Given a set of available denominations (each usable unlimited times),
+// find the fewest coins/notes to make `amount` exactly, using greedy (largest first).
+// AUD denominations are "canonical" so greedy is optimal for exact change.
+// Returns {count, breakdown} or null if impossible.
+function greedyMin(amount, avail){
+  const cents = Math.round(amount * 100);
+  if(cents <= 0) return {count: 0, breakdown: []};
+
+  const denoms = ALL_MONEY
+    .filter(m => avail.has(m.id))
+    .map(m => ({...m, c: Math.round(m.value * 100)}))
+    .sort((a, b) => b.c - a.c);   // largest first
+
+  const used = {};
+  let rem = cents;
+
+  for(const d of denoms){
+    if(rem <= 0) break;
+    const n = Math.floor(rem / d.c);
+    if(n > 0){
+      used[d.id] = n;
+      rem -= n * d.c;
+    }
+  }
+
+  if(rem !== 0) return null;  // couldn't make exact change (shouldn't happen with valid AUD set)
+
+  const bd = denoms
+    .filter(d => used[d.id])
+    .map(d => ({...d, count: used[d.id]}));
+  const count = bd.reduce((s, b) => s + b.count, 0);
+  return {count, breakdown: bd};
+}
+
+// ── WALLET / TILL GENERATION ──────────────────────────────────────────
+// Each denomination gets a random quantity 1–9.
+// Then 0–4 random denominations are entirely removed (qty = 0),
+// subject to the constraint that the target price/change is still reachable.
+function randomQty(){ return 1 + Math.floor(Math.random() * 9); }  // 1–9
+
+function generateWallet(price){
+  // Assign random quantities to all denoms
+  const qty = {};
+  ALL_MONEY.forEach(m => qty[m.id] = randomQty());
+
+  // Decide how many types to block: 0–4
+  const numToBlock = Math.floor(Math.random() * 5);  // 0,1,2,3,4
+  if(numToBlock === 0) return {qty, avail: new Set(ALL_MONEY.map(m => m.id))};
+
+  // Shuffle and try blocking each; only block if price remains reachable
+  const avail = new Set(ALL_MONEY.map(m => m.id));
+  const shuffled = [...ALL_MONEY].sort(() => Math.random() - .5);
+  let blocked = 0;
+
+  for(const m of shuffled){
+    if(blocked >= numToBlock) break;
+    avail.delete(m.id);
+    if(isPriceReachable(price, avail)){
+      qty[m.id] = 0;   // mark as unavailable
+      blocked++;
+    } else {
+      avail.add(m.id); // can't block this one — price becomes unsolvable
+    }
+  }
+
+  return {qty, avail};
+}
+
+function generateTill(changeAmount){
+  // Assign random quantities to all denoms
+  const qty = {};
+  ALL_MONEY.forEach(m => qty[m.id] = randomQty());
+
+  // Block 0–4 note types, keeping change reachable
+  const numToBlock = Math.floor(Math.random() * 5);
+  if(numToBlock === 0) return {qty, avail: new Set(ALL_MONEY.map(m => m.id))};
+
+  const avail = new Set(ALL_MONEY.map(m => m.id));
+  // For till, prefer to block large notes rather than coins
+  const candidates = [...NOTES, ...COINS].sort(() => Math.random() - .5);
+  let blocked = 0;
+
+  for(const m of candidates){
+    if(blocked >= numToBlock) break;
+    avail.delete(m.id);
+    if(changeAmount <= 0 || isPriceReachable(changeAmount, avail)){
+      qty[m.id] = 0;
+      blocked++;
+    } else {
+      avail.add(m.id);
+    }
+  }
+
+  return {qty, avail};
+}
+
+// Current wallet state: qty per denomination (how many of each the player has)
+let walletQty = {};    // id -> count available to player
+let walletUsed = {};   // id -> count already placed in tray
+
+function formatBd(bd){ return bd.map(b => b.count > 1 ? `${b.label}×${b.count}` : b.label).join(' + '); }
+function showOptimalBox(bd){
+  const box = document.getElementById('r-optimal-box');
+  document.getElementById('r-optimal-label').textContent = s('fewest');
+  const chips = document.getElementById('r-optimal-chips'); chips.innerHTML = '';
+  bd.forEach(b => {
+    const sp = document.createElement('span'); sp.className = 'r-opt-chip';
+    sp.textContent = b.count > 1 ? `${b.label} ×${b.count}` : b.label;
+    chips.appendChild(sp);
+  });
+  box.style.display = 'block';
+}
+function hideOptimalBox(){ document.getElementById('r-optimal-box').style.display = 'none'; }
+function updateMissingBanner(){
+  const el = document.getElementById('wallet-missing');
+  const missing = ALL_MONEY.filter(m => !availableIds.has(m.id));
+  if(!missing.length){ el.style.display = 'none'; return; }
+  el.textContent = s(mode === 'buyer' ? 'walletMissing_b' : 'walletMissing_s') + missing.map(m => m.label).join(', ');
+  el.style.display = 'block';
+}
+function spawnConfetti(n=16){
+  const em = ['🎉','⭐','🌟','💫','🎈','🏆','✨','💰'];
+  for(let i = 0; i < n; i++){
+    const el = document.createElement('div'); el.className = 'confetti-piece';
+    el.textContent = em[Math.floor(Math.random() * em.length)];
+    el.style.left = Math.random() * 100 + 'vw'; el.style.top = '-30px';
+    el.style.animationDelay = Math.random() * .8 + 's';
+    el.style.animationDuration = (.9 + Math.random() * .6) + 's';
+    document.body.appendChild(el); el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ── SESSION MANAGEMENT ────────────────────────────────────────────────
+function updateRoundTrack(){
+  const el=document.getElementById('round-track'); el.innerHTML='';
+  for(let i=1;i<=ROUNDS_PER_SESSION;i++){
+    const d=document.createElement('div');
+    const r=sessionResults[i-1];
+    if(i<roundNum&&r){
+      d.className='rd '+(r.type==='perfect'?'d-perfect':r.type==='miss'?'d-miss':'d-good');
+      d.textContent=r.type==='perfect'?'🏆':r.type==='miss'?'✗':'✓';
+    }else if(i===roundNum){d.className='rd d-cur';d.textContent=i;}
+    else{d.className='rd';d.textContent=i;}
+    el.appendChild(d);
+  }
+}
+function startNewSession(){
+  roundNum=1; score=0; sessionResults=[]; usedProducts=[];
+  tray=[]; custPaid=0; level=1;
+  availableIds=new Set(ALL_MONEY.map(m=>m.id));
+  updateRoundTrack(); applyLang();
+  const pool=PRODUCTS.filter(p=>!usedProducts.includes(p.id));
+  const pick=pool[Math.floor(Math.random()*pool.length)];
+  loadProduct(pick);
+  document.getElementById('report-overlay').style.display="none";
+}
+function showReport(){
+  const perfect=sessionResults.filter(r=>r.type==='perfect').length;
+  const good=sessionResults.filter(r=>r.type==='good'||r.type==='notmin').length;
+  const miss=sessionResults.filter(r=>r.type==='miss').length;
+  const maxPts=ROUNDS_PER_SESSION*(15+ROUNDS_PER_SESSION);
+  const pct=Math.round(score/maxPts*100);
+  document.getElementById('rpt-title').textContent=s('rpt_title');
+  document.getElementById('rpt-sub').textContent=s('rpt_sub')(mode);
+  document.getElementById('rpt-score').textContent=score+' '+(lang==='zh'?'分':'pts');
+  document.getElementById('rpt-grade').textContent=s('rpt_grade')(pct);
+  document.getElementById('rpt-play-lbl').textContent=s('rpt_play');
+  const stats=document.getElementById('rpt-stats'); stats.innerHTML='';
+  [{n:perfect,l:s('rpt_sl_p'),c:'#FF8C00'},{n:good,l:s('rpt_sl_g'),c:'#2E7D32'},{n:miss,l:s('rpt_sl_m'),c:'#B71C1C'}]
+    .forEach(({n,l,c})=>{const b=document.createElement('div');b.className='rpt-stat';b.innerHTML=`<div class="rpt-stat-n" style="color:${c}">${n}</div><div class="rpt-stat-l">${l}</div>`;stats.appendChild(b);});
+  const rows=document.getElementById('rpt-rows'); rows.innerHTML='';
+  sessionResults.forEach(r=>{
+    const row=document.createElement('div');row.className='rpt-row';
+    const num=document.createElement('div');num.className='rpt-rnum '+(r.type==='perfect'?'rn-p':r.type==='miss'?'rn-m':'rn-g');num.textContent=r.round;
+    const info=document.createElement('div');info.className='rpt-rinfo';info.textContent=`${r.name}  $${r.price.toFixed(2)}`;
+    const badge=document.createElement('div');badge.className='rpt-rbadge';badge.textContent=s('rpt_'+r.type)||s('rpt_good');
+    row.appendChild(num);row.appendChild(info);row.appendChild(badge);rows.appendChild(row);
+  });
+  document.getElementById('report-overlay').style.display="flex";
+  if(perfect>=7) spawnConfetti(28);
+}
+
+// ── PRODUCT ───────────────────────────────────────────────────────────
+function loadProduct(p){
+  if(!p.basePrice) p.basePrice = p.price;
+  const floated = fluctuatePrice(p.basePrice);
+  current = {...p, price: floated};
+  usedProducts.push(p.id); if(usedProducts.length > PRODUCTS.length) usedProducts.shift();
+
+  drawToy(document.getElementById('prod-canvas'), current, 108);
+  document.getElementById('prod-name').textContent = lang === 'zh' ? current.nameZh : current.name;
+  document.getElementById('prod-price').innerHTML = `$${current.price.toFixed(2)} <small>${s('aud')}</small>`;
+  tray = []; custPaid = 0; walletUsed = {};
+  // Reset progress bar
+  const prog = document.getElementById('prog');
+  prog.style.width = '0%'; prog.className = 'prog-fill st-under';
+  document.getElementById('tray').classList.remove('tray-over');
+  document.getElementById('recv-amt').textContent = '0.00';
+  document.getElementById('change-due-amt').textContent = '0.00';
+  document.getElementById('change-due').style.display = 'none';
+
+  // Generate wallet/till with quantities
+  if(mode === 'buyer'){
+    const w = generateWallet(current.price);
+    availableIds = w.avail;
+    walletQty    = w.qty;
+  } else {
+    // For seller, we generate till after customer amount is chosen.
+    // Pre-generate with a reasonable change estimate (up to $50 change).
+    const w = generateTill(current.price);
+    availableIds = w.avail;
+    walletQty    = w.qty;
+  }
+  ALL_MONEY.forEach(m => walletUsed[m.id] = 0);
+
+  buildCoins(); buildNotes();
+  refresh(); if(mode === 'seller') buildCustNotes();
+  updateRoundTrack(); applyLang();
+}
+function nextProduct(){
+  const pool=PRODUCTS.filter(p=>!usedProducts.includes(p.id));
+  const pick=pool.length?pool[Math.floor(Math.random()*pool.length)]:PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+  loadProduct(pick);
+}
+
+// ── PAY / GIVE CHANGE ─────────────────────────────────────────────────
+function pay(){
+  const total=+tray.reduce((a,x)=>a+x.value,0).toFixed(2);
+  const price=current.price, name=lang==='zh'?current.nameZh:current.name;
+  const rcBox=document.getElementById('r-change-box');
+  hideOptimalBox();
+  let roundType='miss', roundPts=0;
+
+  if(mode==='buyer'){
+    rcBox.style.display='none';
+    const diff=+(total-price).toFixed(2);
+    if(diff===0){
+      const opt = greedyMin(price, availableIds);
+      const isMin=opt&&tray.length===opt.count;
+      if(isMin){
+        roundType='perfect'; roundPts=15+roundNum; spawnConfetti(20);
+        document.getElementById('r-emo').textContent='🏆';
+        document.getElementById('r-ttl').textContent=s('rPT_min');
+        document.getElementById('r-dsc').textContent=s('rPD_b_min')(price.toFixed(2),name);
+      } else if(opt){
+        roundType='notmin'; roundPts=7+roundNum;
+        document.getElementById('r-emo').textContent='🤔';
+        document.getElementById('r-ttl').textContent=s('rNotMin');
+        document.getElementById('r-dsc').textContent=s('rDsc_notMin')(tray.length-opt.count,formatBd(opt.breakdown));
+        showOptimalBox(opt.breakdown);
+      } else {
+        roundType='good'; roundPts=10+roundNum; spawnConfetti(12);
+        document.getElementById('r-emo').textContent='🎉';
+        document.getElementById('r-ttl').textContent=s('rPT');
+        document.getElementById('r-dsc').textContent=s('rPD_b')(price.toFixed(2),name);
+      }
+    } else { roundType='good'; roundPts=3;
+      document.getElementById('r-emo').textContent='👍';
+      document.getElementById('r-ttl').textContent=s('rOT_b');
+      document.getElementById('r-dsc').textContent=s('rOD_b')(total.toFixed(2),diff.toFixed(2),name);
+    }
+  } else {
+    const due=+(custPaid-price).toFixed(2), diff=+(total-due).toFixed(2);
+    rcBox.style.display='block';
+    document.getElementById('r-change-total').textContent=total.toFixed(2);
+    const chips=document.getElementById('r-change-chips'); chips.innerHTML='';
+    const cnt={}; tray.forEach(x=>cnt[x.label]=(cnt[x.label]||0)+1);
+    Object.entries(cnt).forEach(([lbl,n])=>{
+      const c=document.createElement('span');c.className='r-chip';c.textContent=n>1?`${lbl} ×${n}`:lbl;chips.appendChild(c);
+    });
+    if(diff===0){
+      const opt = greedyMin(due, availableIds);
+      const isMin=opt&&tray.length===opt.count;
+      if(isMin){
+        roundType='perfect'; roundPts=15+roundNum; spawnConfetti(20);
+        document.getElementById('r-emo').textContent='🏆';
+        document.getElementById('r-ttl').textContent=s('rPT_s_min');
+        document.getElementById('r-dsc').textContent=s('rPD_s_min')(due.toFixed(2));
+      } else if(opt){
+        roundType='notmin'; roundPts=8+roundNum;
+        document.getElementById('r-emo').textContent='🤔';
+        document.getElementById('r-ttl').textContent=s('rNotMin_s');
+        document.getElementById('r-dsc').textContent=s('rDsc_notMin_s')(tray.length-opt.count,formatBd(opt.breakdown));
+        showOptimalBox(opt.breakdown);
+      } else {
+        roundType='good'; roundPts=12+roundNum; spawnConfetti(12);
+        document.getElementById('r-emo').textContent='🎉';
+        document.getElementById('r-ttl').textContent=s('rPT_s');
+        document.getElementById('r-dsc').textContent=s('rPD_s')(due.toFixed(2));
+      }
+    } else if(diff>0){ roundType='miss'; roundPts=0;
+      document.getElementById('r-emo').textContent='😬';
+      document.getElementById('r-ttl').textContent=s('rOT_s');
+      document.getElementById('r-dsc').textContent=s('rOD_s')(total.toFixed(2),due.toFixed(2));
+    } else { roundType='miss'; roundPts=0;
+      document.getElementById('r-emo').textContent='😬';
+      document.getElementById('r-ttl').textContent=s('rUT_s');
+      document.getElementById('r-dsc').textContent=s('rUD_s')(total.toFixed(2),due.toFixed(2));
+    }
+  }
+
+  score+=roundPts;
+  if(score>bestScore) bestScore=score;
+  sessionResults.push({round:roundNum,type:roundType,name:lang==='zh'?current.nameZh:current.name,price:current.price});
+  document.getElementById('sc-s').textContent=score;
+  const bEl=document.getElementById('sc-best'); if(bEl) bEl.textContent=s('bestLabel')(bestScore);
+
+  const isLast=roundNum>=ROUNDS_PER_SESSION;
+  document.getElementById('l-cont').textContent=isLast?(lang==='zh'?'查看报告 📊':'See Report 📊'):s('l-cont');
+  document.getElementById('overlay').classList.add('on');
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────
+document.getElementById('next-btn').addEventListener('click',nextProduct);
+document.getElementById('clear-btn').addEventListener('click',()=>{
+  tray=[]; custPaid=0;
+  if(mode==='seller'){
+    document.getElementById('recv-amt').textContent='0.00';
+    document.getElementById('change-due-amt').textContent='0.00';
+    document.getElementById('change-due').style.display='none';
+    buildCustNotes();
+  }
+  refresh();
+});
+document.getElementById('pay-btn').addEventListener('click',pay);
+document.getElementById('retry-btn').addEventListener('click',()=>{
+  document.getElementById('overlay').classList.remove('on');
+  sessionResults.pop(); // remove last result so this round can be retried
+  tray=[]; custPaid=0;
+  if(mode==='seller'){
+    document.getElementById('recv-amt').textContent='0.00';
+    document.getElementById('change-due-amt').textContent='0.00';
+    document.getElementById('change-due').style.display='none';
+    buildCustNotes();
+  }
+  refresh();
+});
+document.getElementById('cont-btn').addEventListener('click',()=>{
+  document.getElementById('overlay').classList.remove('on');
+  if(roundNum>=ROUNDS_PER_SESSION){
+    showReport();
+  } else {
+    roundNum++;
+    const pool=PRODUCTS.filter(p=>!usedProducts.includes(p.id));
+    const pick=pool.length?pool[Math.floor(Math.random()*pool.length)]:PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+    loadProduct(pick);
+  }
+});
+document.getElementById('rpt-play-btn').addEventListener('click',startNewSession);
+
+// ── INIT ──────────────────────────────────────────────────────────────
+loadSprites().then(()=>{
+  startNewSession();
+});
+</script>
+</body>
+</html>
