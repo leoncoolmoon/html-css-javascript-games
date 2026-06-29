@@ -46,5 +46,6 @@ const gamePaths = [
     { path: "45-Sliding-Puzzle-Game/", category: "Logic" },
     { path: "46-word-square/", category: "Spelling" },
     { path: "47-Pidan-Maze/", category: "Arcade" },
-    { path: "48-Treasure-Island/", category: "Arcade" }
+    { path: "48-Treasure-Island/", category: "Arcade" },
+    { path: "49-Shopping/", category: "Logic" }
 ];
