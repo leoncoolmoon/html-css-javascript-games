@@ -76,6 +76,7 @@ The project uses a data-driven approach: / 该项目采用数据驱动的方法�
 | 46 | Word Square | 单词方块 | Spelling |
 | 47 | Pidan Maze | 皮蛋迷宫 | Arcade |
 | 48 | Treasure Island | 宝藏岛 | Arcade |
+| 49 | Aussie Money Shop | 澳币小商店 | Logic |
 
 ## Forked From
 Original project by [he-is-talha](https://github.com/he-is-talha/html-css-javascript-games).

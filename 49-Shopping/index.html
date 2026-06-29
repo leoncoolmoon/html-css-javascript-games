@@ -210,8 +210,7 @@ header::after{content:'';position:absolute;inset:0;background:linear-gradient(90
 <span class="bg-star" style="top:80%;left:8%;font-size:20px;animation-delay:.4s">🎈</span>
 <span class="bg-star" style="top:78%;right:11%;font-size:17px;animation-delay:1.3s;animation-duration:4.5s">🎉</span>
 <div id="lang-bar">
-  <button class="lbtn on" onclick="setLang('en')">🇦🇺 EN</button>
-  <button class="lbtn"    onclick="setLang('zh')">🇨🇳 中文</button>
+  <button class="lbtn" id="langToggle">EN / 中文</button>
 </div>
 <header>
   <h1 id="hdr-h">🛒 Aussie Money Shop</h1>
@@ -312,6 +311,7 @@ header::after{content:'';position:absolute;inset:0;background:linear-gradient(90
   </div>
 </div>
 
+<script src="../share.js"></script>
 <script>
 // ── SPRITE COORDINATE DATA (pixels into the 3 spritesheet images) ─────
 const COINS = [
@@ -502,7 +502,7 @@ function drawToy(canvas, prod, size) {
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────
-let lang='en', mode='buyer', tray=[], uid=0, score=0, level=1, current=null, custPaid=0;
+let lang=localStorage.getItem('lang')==='zh'?'zh':'en', mode='buyer', tray=[], uid=0, score=0, level=1, current=null, custPaid=0;
 const ROUNDS_PER_SESSION = 10;
 let roundNum=1, sessionResults=[], bestScore=0, usedProducts=[];
 let availableIds = new Set(ALL_MONEY.map(m=>m.id));
@@ -591,8 +591,7 @@ const s=k=>STR[lang][k];
 // ── LANG / MODE ───────────────────────────────────────────────────────
 function setLang(l){
   lang=l;
-  document.querySelectorAll('.lbtn').forEach(b=>
-    b.classList.toggle('on',(l==='en'&&b.textContent.includes('EN'))||(l==='zh'&&b.textContent.includes('中文'))));
+  localStorage.setItem('lang', l);
   applyLang();
 }
 function setMode(m){
@@ -1177,6 +1176,11 @@ document.getElementById('cont-btn').addEventListener('click',()=>{
 document.getElementById('rpt-play-btn').addEventListener('click',startNewSession);
 
 // ── INIT ──────────────────────────────────────────────────────────────
+document.getElementById('langToggle').addEventListener('click', () => {
+  setLang(lang === 'en' ? 'zh' : 'en');
+});
+
+applyLang();
 loadSprites().then(()=>{
   startNewSession();
 });
